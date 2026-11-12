@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,12 +65,9 @@
             overflow-wrap: anywhere;
         }
 
-        .sender-address {
-            color: #5f6368;
-        }
-
+        .sender-address,
         .email-time {
-            color: #777;
+            color: #5f6368;
         }
 
         .email-body {
@@ -90,7 +86,6 @@
             background: #168bd2;
             color: white;
             font-weight: bold;
-            text-decoration: none;
             overflow-wrap: anywhere;
         }
 
@@ -120,6 +115,95 @@
             color: #6b7280;
         }
 
+        /* Business document mockups */
+
+        .document-preview {
+            margin-top: 16px;
+            padding: 18px;
+            background: #f7f9fc;
+            border: 1px solid #d9e2ec;
+            border-radius: 10px;
+            color: #24364b;
+            font-family: Arial, sans-serif;
+        }
+
+        .document-sheet {
+            max-width: 620px;
+            margin: 10px auto 0;
+            padding: 22px;
+            background: white;
+            border: 1px solid #d6dde6;
+            box-shadow: 0 4px 14px rgba(31,55,80,.08);
+        }
+
+        .document-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            border-bottom: 2px solid #dce5ee;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .document-head strong {
+            font-size: 17px;
+        }
+
+        .document-stamp {
+            border: 2px solid #b45309;
+            color: #9a3412;
+            padding: 5px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            transform: rotate(-3deg);
+            white-space: nowrap;
+        }
+
+        .document-lines {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px 16px;
+            font-size: 12px;
+            margin: 14px 0;
+        }
+
+        .document-lines div {
+            padding: 8px;
+            background: #f5f7fa;
+            border-radius: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .document-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .document-table th,
+        .document-table td {
+            border: 1px solid #dce3eb;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .document-alert {
+            margin-top: 13px;
+            padding: 10px;
+            background: #fff4e5;
+            border-left: 4px solid #d97706;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .simulation-note {
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 11px;
+            text-align: center;
+        }
+
         .question-heading {
             margin-top: 28px;
         }
@@ -141,6 +225,10 @@
             align-items: flex-start;
             gap: 10px;
             cursor: pointer;
+        }
+
+        .options label span {
+            line-height: 1.55;
         }
 
         .options input {
@@ -186,6 +274,14 @@
             .nav button {
                 font-size: 13px;
             }
+
+            .document-lines {
+                grid-template-columns: 1fr;
+            }
+
+            .document-sheet {
+                padding: 13px;
+            }
         }
     </style>
 </head>
@@ -227,9 +323,7 @@
                 <div class="email-card">
 
                     <div class="email-top">
-                        <span class="email-brand">
-                            Mail • Message preview
-                        </span>
+                        <span>Mail • Message preview</span>
 
                         <span class="email-time">
                             {{ q.timestamp|default('Today, 9:41 AM') }}
@@ -298,6 +392,182 @@
                     {% endif %}
 
                 </div>
+
+                {% if q.category == 'OFFICE FRAUD INVESTIGATION' %}
+
+                <div class="document-preview">
+
+                    <p class="evidence-label">
+                        ATTACHED BUSINESS DOCUMENT PREVIEW
+                    </p>
+
+                    <div class="document-sheet">
+
+                        <div class="document-head">
+                            <div>
+                                <strong>
+                                    {% if 'Vendor Bank' in q.title %}
+                                        SUPPLIER BANK DETAIL NOTICE
+                                    {% elif 'Duplicate Invoice' in q.title %}
+                                        SUPPLIER INVOICE
+                                    {% elif 'Purchase Order' in q.title %}
+                                        PURCHASE ORDER APPROVAL
+                                    {% else %}
+                                        EMPLOYEE PAYROLL CHANGE REQUEST
+                                    {% endif %}
+                                </strong>
+
+                                <div style="font-size:11px;color:#64748b;margin-top:5px;">
+                                    Fuji Silvertech • Training evidence preview
+                                </div>
+                            </div>
+
+                            <span class="document-stamp">SIMULATION</span>
+                        </div>
+
+                        <div class="document-lines">
+
+                            <div>
+                                <strong>Document:</strong><br>
+                                {{ q.attachment|default('Internal_Request.pdf') }}
+                            </div>
+
+                            <div>
+                                <strong>Reference:</strong><br>
+                                {% if 'Duplicate Invoice' in q.title %}
+                                    INV-2481
+                                {% elif 'Purchase Order' in q.title %}
+                                    PO-URGENT-APPROVAL
+                                {% elif 'Vendor Bank' in q.title %}
+                                    SUPPLIER-CHANGE
+                                {% else %}
+                                    PAYROLL-CHANGE
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <strong>Requested action:</strong><br>
+                                {% if 'Vendor Bank' in q.title %}
+                                    Replace beneficiary bank details
+                                {% elif 'Duplicate Invoice' in q.title %}
+                                    Release another payment
+                                {% elif 'Purchase Order' in q.title %}
+                                    Release order before workflow approval
+                                {% else %}
+                                    Change employee salary account
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <strong>Processing status:</strong><br>
+                                Awaiting independent verification
+                            </div>
+
+                        </div>
+
+                        <table class="document-table">
+                            <thead>
+                                <tr>
+                                    <th>Control item</th>
+                                    <th>Evidence shown</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% if 'Vendor Bank' in q.title %}
+                                <tr>
+                                    <td>Bank detail change</td>
+                                    <td>New beneficiary details attached</td>
+                                </tr>
+                                <tr>
+                                    <td>Prior verification</td>
+                                    <td>Not recorded in this request</td>
+                                </tr>
+
+                                {% elif 'Duplicate Invoice' in q.title %}
+                                <tr>
+                                    <td>Invoice reference</td>
+                                    <td>INV-2481 — second copy</td>
+                                </tr>
+                                <tr>
+                                    <td>Previous payment reconciliation</td>
+                                    <td>Not yet confirmed</td>
+                                </tr>
+
+                                {% elif 'Purchase Order' in q.title %}
+                                <tr>
+                                    <td>Approval evidence</td>
+                                    <td>Verbal approval claimed</td>
+                                </tr>
+                                <tr>
+                                    <td>Workflow record</td>
+                                    <td>Formal approval pending</td>
+                                </tr>
+
+                                {% else %}
+                                <tr>
+                                    <td>Employee confirmation</td>
+                                    <td>Not available</td>
+                                </tr>
+                                <tr>
+                                    <td>Payroll verification</td>
+                                    <td>Pending</td>
+                                </tr>
+                                {% endif %}
+
+                            </tbody>
+                        </table>
+
+                        <div class="document-alert">
+                            <strong>Review point:</strong>
+                            This is a fictional training document. Do not treat the
+                            presence of a document, reference number or familiar
+                            branding as proof of authorization.
+                        </div>
+
+                    </div>
+
+                    <p class="simulation-note">
+                        Illustrative document preview • No real payment or employee data
+                    </p>
+
+                </div>
+
+                {% elif q.attachment|default('') %}
+
+                <div class="document-preview">
+
+                    <p class="evidence-label">ATTACHMENT PREVIEW</p>
+
+                    <div class="document-sheet">
+
+                        <div class="document-head">
+                            <strong>{{ q.attachment }}</strong>
+                            <span class="document-stamp">UNVERIFIED</span>
+                        </div>
+
+                        <p style="font-size:13px;line-height:1.6;">
+                            This simulated attachment has not been opened.
+                            Assess its source, file type and business context
+                            before deciding whether it is safe.
+                        </p>
+
+                        <div class="document-alert">
+                            Never enable macros, scan unexpected QR codes or enter
+                            credentials just because an email includes an attachment.
+                        </div>
+
+                    </div>
+
+                    <p class="simulation-note">
+                        Illustrative attachment preview • Training simulation
+                    </p>
+
+                </div>
+
+                {% endif %}
+
             </div>
 
             <h2 class="question-heading">
@@ -372,7 +642,7 @@
     const bar = document.getElementById('bar');
     const total = sections.length;
 
-    // Show correct or incorrect feedback immediately
+    // Display feedback immediately after an answer is selected.
     sections.forEach(section => {
 
         const radios = section.querySelectorAll('input[type="radio"]');
@@ -423,6 +693,7 @@
 
     });
 
+
     function updateProgress() {
 
         counter.textContent =
@@ -431,6 +702,7 @@
         bar.style.width =
             ((current + 1) / total * 100) + '%';
     }
+
 
     function move(direction) {
 
@@ -441,8 +713,10 @@
 
         error.textContent = '';
 
-        if (direction === 1 &&
-            !currentSection.querySelector('input[type="radio"]:checked')) {
+        if (
+            direction === 1 &&
+            !currentSection.querySelector('input[type="radio"]:checked')
+        ) {
 
             error.textContent =
                 'Please select an answer before continuing.';
@@ -466,6 +740,7 @@
 
         updateProgress();
     }
+
 
     async function send() {
 
