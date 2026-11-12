@@ -1,99 +1,279 @@
 
-import os,sqlite3,secrets,hashlib,smtplib,json,io,csv
-from datetime import datetime,timezone,timedelta
-from email.message import EmailMessage
+import os
+import sqlite3
+import secrets
+import json
+import io
+import csv
+from datetime import datetime, timezone
 from functools import wraps
-from flask import Flask,request,session,redirect,url_for,render_template,abort,Response,jsonify
-app=Flask(__name__); app.secret_key=os.environ.get('SECRET_KEY','CHANGE_ME_LONG_RANDOM_SECRET')
-DB=os.environ.get('DATABASE_PATH','responses.sqlite3'); CORP='fujisilvertech.com'
-OWNER=os.environ.get('INITIAL_ADMIN_EMAIL','Akshay.Korukonda@smartims.com').lower()
-ADMINS={OWNER}|{x.strip().lower() for x in os.environ.get('ADMIN_EMAILS','').split(',') if x.strip()}
-Q=json.load(open('questions.json'))
+from flask import Flask, request, session, redirect, render_template, abort, Response, jsonify
+
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "CHANGE_ME_LONG_RANDOM_SECRET")
+
+DB = os.environ.get("DATABASE_PATH", "responses.sqlite3")
+CORP = "fujisilvertech.com"
+
+OWNER = os.environ.get(
+    "INITIAL_ADMIN_EMAIL",
+    "Akshay.Korukonda@smartims.com"
+).lower()
+
+ADMINS = {OWNER} | {
+    x.strip().lower()
+    for x in os.environ.get("ADMIN_EMAILS", "").split(",")
+    if x.strip()
+}
+
+ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
+
+with open("questions.json", encoding="utf-8") as f:
+    Q = json.load(f)
+
+
 def conn():
- c=sqlite3.connect(DB); c.row_factory=sqlite3.Row; return c
+    c = sqlite3.connect(DB)
+    c.row_factory = sqlite3.Row
+    return c
+
+
 with conn() as c:
- c.execute('CREATE TABLE IF NOT EXISTS codes(email text,hash text,expires text,used integer default 0)')
- c.execute('CREATE TABLE IF NOT EXISTS attempts(id integer primary key,email text,started text,completed text,duration integer,score integer,answers text)')
-def corp(e): return e.count('@')==1 and e.rsplit('@',1)[1].lower()==CORP
-def mail_code(email,code):
- host=os.environ.get('SMTP_HOST'); user=os.environ.get('SMTP_USER'); pw=os.environ.get('SMTP_PASS')
- if not all([host,user,pw]): raise RuntimeError('Email delivery is not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS.')
- m=EmailMessage(); m['Subject']='Fuji Silvertech awareness sign-in code'; m['From']=os.environ.get('FROM_EMAIL',user); m['To']=email
- m.set_content('Your sign-in code is '+code+'. It expires in ten minutes.')
- with smtplib.SMTP(host,int(os.environ.get('SMTP_PORT','587'))) as s: s.starttls(); s.login(user,pw); s.send_message(m)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS attempts (
+            id INTEGER PRIMARY KEY,
+            email TEXT,
+            started TEXT,
+            completed TEXT,
+            duration INTEGER,
+            score INTEGER,
+            answers TEXT
+        )
+    """)
+
+
+def corp(email):
+    return (
+        email.count("@") == 1
+        and email.rsplit("@", 1)[1].lower() == CORP
+    )
+
+
 def signed(fn):
- @wraps(fn)
- def w(*a,**k):
-  if not session.get('email'): return redirect('/')
-  return fn(*a,**k)
- return w
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not session.get("email"):
+            return redirect("/")
+        return fn(*args, **kwargs)
+    return wrapper
+
+
 def admin(fn):
- @wraps(fn)
- def w(*a,**k):
-  if session.get('email','').lower() not in ADMINS: abort(403)
-  return fn(*a,**k)
- return w
-@app.route('/',methods=['GET','POST'])
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if (
+            session.get("email", "").lower() not in ADMINS
+            or not session.get("is_admin")
+        ):
+            abort(403)
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+@app.route("/", methods=["GET", "POST"])
 def home():
- msg=''
- if request.method=='POST':
-  e=request.form['email'].strip().lower()
-  if not corp(e) and e not in ADMINS: msg='Only verified @fujisilvertech.com employees or explicitly allowlisted administrators may sign in.'
-  else:
-   code=f'{secrets.randbelow(1000000):06d}'
-   with conn() as c: c.execute('insert into codes values(?,?,?,0)',(e,hashlib.sha256(code.encode()).hexdigest(),(datetime.now(timezone.utc)+timedelta(minutes=10)).isoformat()))
-   try: mail_code(e,code); session['pending']=e; return redirect('/verify')
-   except Exception as ex: msg=str(ex)
- return render_template('home.html',msg=msg)
-@app.route('/verify',methods=['GET','POST'])
-def verify():
- if not session.get('pending'): return redirect('/')
- msg=''
- if request.method=='POST':
-  e=session['pending']; code=request.form['code']
-  with conn() as c:
-   r=c.execute('select rowid,* from codes where email=? and used=0 order by rowid desc limit 1',(e,)).fetchone()
-   if r and r['expires']>datetime.now(timezone.utc).isoformat() and secrets.compare_digest(r['hash'],hashlib.sha256(code.encode()).hexdigest()):
-    c.execute('update codes set used=1 where rowid=?',(r['rowid'],)); session['email']=e; session.pop('pending'); return redirect('/admin' if e in ADMINS else '/quiz')
-  msg='Invalid or expired code.'
- return render_template('verify.html',msg=msg)
-@app.route('/quiz')
+    msg = ""
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        if not email or email.count("@") != 1:
+            msg = "Please enter a valid email address."
+
+        elif email in ADMINS:
+            admin_key = request.form.get("admin_key", "")
+
+            if not ADMIN_ACCESS_KEY or not secrets.compare_digest(
+                admin_key, ADMIN_ACCESS_KEY
+            ):
+                msg = "Invalid administrator access key."
+            else:
+                session.clear()
+                session["email"] = email
+                session["is_admin"] = True
+                return redirect("/admin")
+
+        elif corp(email):
+            session.clear()
+            session["email"] = email
+            session["is_admin"] = False
+            return redirect("/quiz")
+
+        else:
+            msg = "Only @fujisilvertech.com employee emails are accepted."
+
+    return render_template("home.html", msg=msg)
+
+
+@app.route("/quiz")
 @signed
 def quiz():
- if not corp(session['email']): abort(403)
- with conn() as c:
-  c.execute('insert into attempts(email,started) values(?,?)',(session['email'],datetime.now(timezone.utc).isoformat()))
-  session['attempt']=c.execute('select last_insert_rowid()').fetchone()[0]
- return render_template('quiz.html',questions=Q,email=session['email'])
-@app.route('/submit',methods=['POST'])
+    if not corp(session["email"]):
+        abort(403)
+
+    with conn() as c:
+        c.execute(
+            "INSERT INTO attempts(email, started) VALUES (?, ?)",
+            (session["email"], datetime.now(timezone.utc).isoformat())
+        )
+        session["attempt"] = c.execute(
+            "SELECT last_insert_rowid()"
+        ).fetchone()[0]
+
+    return render_template(
+        "quiz.html",
+        questions=Q,
+        email=session["email"]
+    )
+
+
+@app.route("/submit", methods=["POST"])
 @signed
 def submit():
- a=request.json.get('answers',[])
- if len(a)!=10 or any(not isinstance(x,int) or x not in range(4) for x in a): return jsonify(error='Answer all ten questions.'),400
- score=sum(a[i]==Q[i]['correct'] for i in range(10)); aid=session.get('attempt')
- with conn() as c:
-  r=c.execute('select started from attempts where id=? and email=?',(aid,session['email'])).fetchone()
-  if not r: abort(403)
-  now=datetime.now(timezone.utc); duration=int((now-datetime.fromisoformat(r['started'])).total_seconds())
-  c.execute('update attempts set completed=?,duration=?,score=?,answers=? where id=?',(now.isoformat(),duration,score*10,json.dumps(a),aid))
- return jsonify(url='/result/'+str(aid))
-@app.route('/result/<int:aid>')
+    if not corp(session["email"]):
+        abort(403)
+
+    data = request.get_json(silent=True) or {}
+    answers = data.get("answers", [])
+
+    if (
+        not isinstance(answers, list)
+        or len(answers) != len(Q)
+        or any(type(x) is not int or x not in range(4) for x in answers)
+    ):
+        return jsonify(error="Answer all questions."), 400
+
+    score = sum(
+        answers[i] == Q[i]["correct"]
+        for i in range(len(Q))
+    )
+
+    attempt_id = session.get("attempt")
+
+    with conn() as c:
+        row = c.execute(
+            "SELECT started FROM attempts WHERE id=? AND email=?",
+            (attempt_id, session["email"])
+        ).fetchone()
+
+        if not row:
+            abort(403)
+
+        now = datetime.now(timezone.utc)
+        duration = int(
+            (now - datetime.fromisoformat(row["started"])).total_seconds()
+        )
+
+        c.execute("""
+            UPDATE attempts
+            SET completed=?, duration=?, score=?, answers=?
+            WHERE id=?
+        """, (
+            now.isoformat(),
+            duration,
+            score * 100 // len(Q),
+            json.dumps(answers),
+            attempt_id
+        ))
+
+    return jsonify(url="/result/" + str(attempt_id))
+
+
+@app.route("/result/<int:attempt_id>")
 @signed
-def result(aid):
- with conn() as c: r=c.execute('select * from attempts where id=? and email=?',(aid,session['email'])).fetchone()
- if not r: abort(404)
- return render_template('result.html',r=r,q=Q,a=json.loads(r['answers']))
-@app.route('/admin')
+def result(attempt_id):
+    with conn() as c:
+        row = c.execute(
+            "SELECT * FROM attempts WHERE id=? AND email=?",
+            (attempt_id, session["email"])
+        ).fetchone()
+
+    if not row:
+        abort(404)
+
+    return render_template(
+        "result.html",
+        r=row,
+        q=Q,
+        a=json.loads(row["answers"])
+    )
+
+
+@app.route("/admin")
 @admin
 def dashboard():
- with conn() as c: rows=c.execute('select * from attempts where completed is not null order by completed desc').fetchall()
- return render_template('admin.html',rows=rows,avg=round(sum(x['score'] for x in rows)/len(rows),1) if rows else 0)
-@app.route('/admin/export')
+    with conn() as c:
+        rows = c.execute("""
+            SELECT * FROM attempts
+            WHERE completed IS NOT NULL
+            ORDER BY completed DESC
+        """).fetchall()
+
+    average = (
+        round(sum(row["score"] for row in rows) / len(rows), 1)
+        if rows else 0
+    )
+
+    return render_template(
+        "admin.html",
+        rows=rows,
+        avg=average
+    )
+
+
+@app.route("/admin/export")
 @admin
 def export():
- out=io.StringIO(); w=csv.writer(out); w.writerow(['Email','Attempt','Started','Completed','Duration','Score']+['Q'+str(i) for i in range(1,11)])
- with conn() as c: rows=c.execute('select * from attempts where completed is not null').fetchall()
- for r in rows: w.writerow([r['email'],r['id'],r['started'],r['completed'],r['duration'],r['score']]+json.loads(r['answers']))
- return Response(out.getvalue(),mimetype='text/csv',headers={'Content-Disposition':'attachment; filename=fuji-awareness.csv'})
-@app.route('/logout')
-def logout(): session.clear(); return redirect('/')
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow(
+        ["Email", "Attempt", "Started", "Completed", "Duration", "Score"]
+        + ["Q" + str(i) for i in range(1, len(Q) + 1)]
+    )
+
+    with conn() as c:
+        rows = c.execute("""
+            SELECT * FROM attempts
+            WHERE completed IS NOT NULL
+            ORDER BY completed DESC
+        """).fetchall()
+
+    for row in rows:
+        writer.writerow([
+            row["email"],
+            row["id"],
+            row["started"],
+            row["completed"],
+            row["duration"],
+            row["score"]
+        ] + json.loads(row["answers"]))
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition":
+            "attachment; filename=fuji-awareness.csv"
+        }
+    )
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
