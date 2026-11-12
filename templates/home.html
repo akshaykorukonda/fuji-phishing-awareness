@@ -1,1 +1,47 @@
-<!doctype html><html><head><meta name=viewport content='width=device-width,initial-scale=1'><link rel=stylesheet href=/static/style.css></head><body><header><img src=/static/img/fuji-logo.png></header><main class=hero><p class=tag>FUJI SILVERTECH • EMPLOYEE LEARNING</p><h1>Phishing Awareness <em>Assessment</em></h1><p>Ten realistic workplace scenarios to help identify suspicious requests and protect company information.</p><form class=card method=post><h2>Employee sign in</h2><p>Enter your company email. A verification code will be sent to your inbox.</p><input type=email name=email placeholder='name@fujisilvertech.com' required><button>Send verification code</button><p class=error>{{msg}}</p><small>Individual answers are available only to authorized administrators.</small></form></main><footer>For any queries, contact support.soc@fujisilvertech.com</footer></body></html>
+
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Fuji Silvertech | Phishing Awareness</title>
+</head>
+<body>
+    <header>
+        <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+    </header>
+
+    <main class="hero">
+        <p class="tag">FUJI SILVERTECH • EMPLOYEE LEARNING</p>
+        <h1>Phishing Awareness <em>Assessment</em></h1>
+
+        <p>
+            Ten realistic workplace scenarios to help identify suspicious
+            requests and protect company information.
+        </p>
+
+        <form class="card" method="post">
+            <h2>Employee sign in</h2>
+            <p>Enter your company email to begin the assessment.</p>
+
+            <input type="email" name="email"
+                   placeholder="name@fujisilvertech.com" required>
+
+            <input type="password" name="admin_key"
+                   placeholder="Admin access key (administrators only)">
+
+            <button type="submit">Start assessment</button>
+
+            <p class="error">{{ msg }}</p>
+
+            <small>
+                Individual answers are available only to authorized administrators.
+            </small>
+        </form>
+    </main>
+
+    <footer>
+        For any queries, contact support.soc@fujisilvertech.com
+    </footer>
+</body>
+</html>
