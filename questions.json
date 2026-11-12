@@ -1,103 +1,18 @@
-
-[
-  {
-    "category": "PHISHING INVESTIGATION",
-    "title": "The Payroll Verification Trap",
-    "sender": "Human Resources Department",
-    "sender_initial": "H",
-    "sender_email": "hr-support@fujisilvertech-payroll.example",
-    "timestamp": "Today, 9:14 AM",
-    "subject": "URGENT: Verify Your Payroll Details Before 5 PM",
-    "scenario": "Dear Employee,\n\nAs part of our monthly payroll audit, all employees must verify their bank account information before 5 PM today. Failure to complete this verification may result in a delay to your upcoming salary.\n\nPlease use the secure verification portal below. Do not reply to this email as this mailbox is not monitored.\n\nRegards,\nHuman Resources",
-    "display_link": "https://fujisilvertech.com/payroll-verification",
-    "actual_link": "https://fujisilvertech-payroll.example/verify",
-    "email_note": "Investigate the sender domain, the difference between the displayed link and its destination, and the pressure created by the deadline.",
-    "options": [
-      "The email uses a non-company sender domain, redirects to a different domain, and threatens salary delays to create urgency.",
-      "The email is suspicious only because it was sent before normal office hours.",
-      "The sender uses a payroll-related address, which proves the request is genuine.",
-      "The email is safe because it does not ask employees to reply with their bank details."
-    ],
-    "correct": 0,
-    "explanation": "Three warning signs appear together: the sender domain is not the official company domain, the actual link destination differs from the displayed company address, and the salary-delay threat pressures employees into acting quickly. Verify payroll requests through an independently known HR contact."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "title": "The Microsoft Sign-in Warning",
-    "sender": "IT Service Desk",
-    "sender_initial": "I",
-    "sender_email": "it-helpdesk@account-security.example",
-    "timestamp": "Today, 10:32 AM",
-    "subject": "Your Microsoft 365 Account Will Be Suspended",
-    "scenario": "Dear User,\n\nOur security system has detected unusual activity on your Microsoft 365 account. Your account will be suspended within 30 minutes unless you complete the security confirmation process.\n\nPlease sign in immediately using the link below to prevent loss of access to company email and files.\n\nIT Support Team",
-    "display_link": "https://login.microsoftonline.com",
-    "actual_link": "https://microsoft-security-check.example/login",
-    "email_note": "The sender claims to be IT, but inspect the actual sender address and destination of the sign-in link.",
-    "options": [
-      "The email is suspicious because it uses an external sender domain, creates a 30-minute deadline, and sends users to a non-Microsoft sign-in page.",
-      "The email is legitimate because Microsoft accounts can sometimes be suspended.",
-      "The only concern is that the email does not include the employee's full name.",
-      "The email is safe because it mentions unusual account activity and security."
-    ],
-    "correct": 0,
-    "explanation": "Attackers frequently impersonate IT teams and Microsoft security alerts. The external sender, artificial deadline, and fake sign-in destination are multiple warning signs. Never enter company credentials through an unverified link."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "title": "The Unexpected QR Code",
-    "sender": "Corporate IT Support",
-    "sender_initial": "C",
-    "sender_email": "it-support@fujisilvertech.com",
-    "timestamp": "Today, 11:05 AM",
-    "subject": "Mandatory MFA Re-registration Required",
-    "scenario": "Dear Employee,\n\nWe are updating our multi-factor authentication system. All employees must scan the attached QR code to reconnect their company accounts.\n\nPlease complete this process today. If the QR code does not work, reply to this email with your current authentication code so that our team can activate your account manually.\n\nRegards,\nIT Support",
-    "attachment": "MFA_Reactivation_QR.png",
-    "email_note": "Even a familiar-looking sender address does not automatically make an unusual security request safe.",
-    "options": [
-      "The request asks employees to scan an unexpected QR code and disclose an authentication code, which could allow an attacker to access their account.",
-      "The message is suspicious only because it contains an image attachment.",
-      "The request is safe because the sender uses the company's email domain.",
-      "The only issue is that employees are asked to complete the process on the same day."
-    ],
-    "correct": 0,
-    "explanation": "Unexpected QR codes can redirect users to fake sign-in pages. Authentication codes must never be shared with anyone, including someone claiming to be IT. Confirm unexpected MFA changes through the official IT support channel. A familiar sender address alone is not proof of authenticity."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "title": "The Courier Delivery Document",
-    "sender": "Express Delivery Notifications",
-    "sender_initial": "E",
-    "sender_email": "delivery-alert@parcel-tracking.example",
-    "timestamp": "Today, 12:48 PM",
-    "subject": "Failed Office Delivery – Action Required",
-    "scenario": "Dear Recipient,\n\nA package addressed to your office could not be delivered because the delivery details were incomplete.\n\nPlease open the attached delivery document to confirm your address and reschedule the shipment. The document contains the required instructions.\n\nFailure to respond within 24 hours may result in the package being returned.\n\nDelivery Operations",
-    "attachment": "Delivery_Reschedule_Confirmation.xlsm",
-    "options": [
-      "The sender is unverified, the delivery claim is unexpected, and the spreadsheet contains macro-enabled content that should not be opened without verification.",
-      "The email is safe because delivery companies commonly send tracking documents.",
-      "The only concern is the 24-hour response deadline.",
-      "The attachment is safe because Excel files are standard office documents."
-    ],
-    "correct": 0,
-    "explanation": "An unexpected delivery notification, an unverified sender, and a macro-enabled spreadsheet create a suspicious combination. Macro-enabled files can execute malicious code. Verify the shipment independently before opening attachments."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "title": "The CEO's Confidential Request",
-    "sender": "Office of the Managing Director",
-    "sender_initial": "M",
     "sender_email": "managing.director.office@executive-mail.example",
     "timestamp": "Today, 2:16 PM",
     "subject": "Confidential – Immediate Assistance Required",
-    "scenario": "Hello,\n\nI am currently attending an important external meeting and cannot take calls. I need you to purchase gift cards for a client appreciation activity immediately.\n\nPurchase the cards using your personal payment method and send me the redemption codes by email. I will arrange reimbursement later.\n\nPlease keep this confidential until the client announcement is made.\n\nRegards,\nManaging Director",
+    "scenario": "Hello,\n\nI am in an external meeting and cannot take calls. Please purchase gift cards for a client appreciation activity using your personal payment method. Email me the redemption codes and I will arrange reimbursement.\n\nKeep this confidential until the client announcement.\n\nRegards,\nManaging Director",
+    "email_note": "Consider the payment method, the request for redemption codes, the secrecy instruction and the sender's identity.",
     "options": [
-      "The sender uses an unverified executive identity, requests personal spending, asks for gift card redemption codes, and demands secrecy.",
-      "The email is legitimate because senior management sometimes makes urgent requests.",
-      "The only suspicious detail is that the sender cannot take calls.",
-      "The request is safe because reimbursement has been promised."
+      "The employee should buy the cards only after receiving a written reimbursement promise, because the financial risk is then documented even if the sender cannot be reached.",
+      "The request can be processed if the gift-card value stays below the employee's normal expense limit and the receipt is submitted through the expense system.",
+      "The request combines an unverified executive identity, personal payment, transfer of redeemable codes and secrecy; independently contact the executive through a known number and follow the company's purchasing process.",
+      "The employee should reply asking for the client's name and event details; a convincing business explanation would provide enough context to proceed."
     ],
-    "correct": 0,
-    "explanation": "This is a common executive impersonation and gift-card scam. Requests for personal payments, redemption codes, secrecy, and urgent action should be independently verified through a known management contact."
+    "correct": 2,
+    "explanation": "This is a classic executive impersonation and gift-card scam. Never send redemption codes or make personal payments based on an unverified urgent request.",
+    "evidence_type": "email",
+    "evidence_caption": "Training simulation — fictional example. Do not use real credentials, payment details or links."
   },
   {
     "category": "PHISHING INVESTIGATION",
@@ -107,18 +22,20 @@
     "sender_email": "project-documents@fileshare-access.example",
     "timestamp": "Today, 3:42 PM",
     "subject": "A Document Has Been Shared With You",
-    "scenario": "Hello,\n\nA colleague has shared an updated project budget document with you. The document requires your review before the project meeting.\n\nTo view the document, sign in using your company email and password through the access portal below.\n\nThe document will be removed automatically if you do not access it today.",
+    "scenario": "Hello,\n\nA colleague has shared the revised project budget. The document must be reviewed before tomorrow's meeting. Sign in with your company credentials using the access portal below.\n\nThe share will expire at the end of today.\n\nProject Collaboration Team",
     "display_link": "https://office.com/shared-document",
     "actual_link": "https://office-document-access.example/signin",
-    "email_note": "Check whether the sender is a known colleague, whether the destination matches the displayed address, and whether the deadline is genuine.",
+    "email_note": "Check the sender, link destination and whether the share can be confirmed from the collaboration platform directly.",
     "options": [
-      "The sender is an unfamiliar external address, the displayed and actual link domains differ, and the removal deadline pressures the recipient.",
-      "The email is safe because employees regularly share project documents.",
-      "The only warning sign is that the document is related to a project budget.",
-      "The email is genuine because it displays an Office-related link."
+      "The sender is an unfamiliar external address, the real destination differs from the displayed Office URL, and the expiry warning pressures the recipient; check the document directly in the approved collaboration service.",
+      "A document-sharing alert is expected in most workplaces, so the employee should sign in if the page uses the same colours and logo as the company's normal collaboration portal.",
+      "The employee can safely open the link on a mobile device instead of a work computer, because credential theft is less likely when the device is not connected to the office network.",
+      "The correct response is to reply to the sender requesting access permissions; replying does not expose credentials, so there is no need to verify the sender first."
     ],
     "correct": 0,
-    "explanation": "Fake shared-document notifications often steal company credentials. An unfamiliar sender, mismatched link destination, and artificial deadline make this suspicious. Confirm with the colleague through a trusted communication channel."
+    "explanation": "Fake sharing notifications commonly steal credentials. The sender and actual destination are untrusted, and the expiry message adds pressure. Open the approved platform independently and check there.",
+    "evidence_type": "email",
+    "evidence_caption": "Training simulation — fictional example. Do not use real credentials, payment details or links."
   },
   {
     "category": "OFFICE FRAUD INVESTIGATION",
@@ -128,16 +45,19 @@
     "sender_email": "accounts@abc-industrial.example",
     "timestamp": "Today, 9:52 AM",
     "subject": "Important: Updated Bank Details for Future Payments",
-    "scenario": "Dear Accounts Team,\n\nWe have recently changed our banking partner. Please update our payment details before processing the pending invoice.\n\nThe new account details are mentioned in the attached document. Kindly ensure all future payments are transferred to the new account immediately.\n\nPlease do not use the old bank details after today.\n\nRegards,\nABC Industrial Supplies",
+    "scenario": "Dear Accounts Team,\n\nWe have changed our banking partner. Please update the beneficiary details in the attached document before processing invoice INV-7316. Do not use the previous account after today, as the old account is being closed.\n\nRegards,\nABC Industrial Supplies",
     "attachment": "Updated_Bank_Details.pdf",
+    "email_note": "A genuine supplier can change bank accounts. The control question is how the change is authenticated before money is transferred.",
     "options": [
-      "The email changes payment instructions, provides new bank details through an attachment, and requests immediate use without independent verification.",
-      "The email is safe because vendors are allowed to change their banking partners.",
-      "The only concern is that the new bank details are attached as a PDF.",
-      "The request can be accepted if the invoice amount matches the purchase order."
+      "Compare the beneficiary name and invoice amount with the purchase order; if both match, the bank-account change is sufficiently supported for payment.",
+      "Treat the request as a potential business-email-compromise attempt: freeze the change and verify it using a previously registered supplier contact number, then follow the required dual-approval process.",
+      "Ask the sender to provide a cancelled cheque or bank letter by replying to the same email thread, then update the details if the document appears consistent.",
+      "Make a small test transfer to the new account and wait for the supplier to acknowledge it before sending the remaining invoice amount."
     ],
-    "correct": 0,
-    "explanation": "Business email compromise often involves fraudulent bank-account changes. Even if the vendor name and invoice appear genuine, independently verify the change using a previously registered phone number or trusted contact before transferring money."
+    "correct": 1,
+    "explanation": "A compromised supplier mailbox or impersonator can submit convincing bank-change documents. Verify through a previously trusted contact route and retain the required approval evidence before changing payment details.",
+    "evidence_type": "business_document",
+    "evidence_caption": "Training simulation — fictional example. Do not use real credentials, payment details or links."
   },
   {
     "category": "OFFICE FRAUD INVESTIGATION",
@@ -147,16 +67,19 @@
     "sender_email": "finance.coordination@fujisilvertech.com",
     "timestamp": "Today, 1:24 PM",
     "subject": "Urgent: Pending Invoice – Second Payment Required",
-    "scenario": "Dear Accounts Team,\n\nThe supplier has informed us that payment for invoice INV-2481 has not been received. They have requested another transfer today to avoid suspension of material delivery.\n\nPlease process the payment again using the attached invoice. We will reconcile the earlier transaction later.\n\nRegards,\nFinance Coordination",
+    "scenario": "Dear Accounts Team,\n\nThe supplier says payment for invoice INV-2481 has not arrived. They have requested another transfer today to prevent a delivery suspension. Please process the attached copy now; Finance will reconcile the earlier transaction later.\n\nRegards,\nFinance Coordination",
     "attachment": "INV-2481-SECOND-COPY.pdf",
+    "email_note": "The sender appears internal. Focus on the transaction history, invoice controls and request to defer reconciliation.",
     "options": [
-      "The email requests a second payment without confirming the first transaction, uses delivery pressure, and skips reconciliation.",
-      "The request is safe because the supplier has sent an invoice copy.",
-      "The only suspicious point is the use of the word urgent in the subject.",
-      "The payment should be repeated because delivery delays can affect business operations."
+      "Ask the supplier to confirm the outstanding amount by replying to the existing thread, then pay if the supplier repeats the request and the delivery deadline is documented.",
+      "Process the second payment but flag both transactions for month-end review, because a temporary duplicate payment can be reversed after the supplier confirms receipt.",
+      "Check whether the PDF has a new issue date and approval stamp; if the document is current, the duplicate payment can proceed while the earlier transfer is investigated.",
+      "Do not release a second payment until the first transaction is traced and reconciled against bank confirmation, ledger entries and supplier records; escalate any mismatch through the approved finance workflow."
     ],
-    "correct": 0,
-    "explanation": "Duplicate-payment fraud can exploit pressure from suppliers or impersonated finance staff. Check payment records, invoice numbers, and supplier confirmations before processing another transfer. Never bypass normal reconciliation."
+    "correct": 3,
+    "explanation": "A second payment should never be released simply because of urgency. Reconcile the first payment and verify the supplier's claim before taking action.",
+    "evidence_type": "business_document",
+    "evidence_caption": "Training simulation — fictional example. Do not use real credentials, payment details or links."
   },
   {
     "category": "OFFICE FRAUD INVESTIGATION",
@@ -166,16 +89,19 @@
     "sender_email": "procurement-ops@fujisilvertech.com",
     "timestamp": "Today, 2:37 PM",
     "subject": "Management Approved – Release Purchase Order Immediately",
-    "scenario": "Hello Team,\n\nManagement has verbally approved the attached purchase order for an urgent equipment requirement.\n\nThe usual approval workflow is taking too long, so please release the order directly to the supplier. The formal approval document can be added to the system next week.\n\nPlease proceed without waiting for the usual system confirmation.\n\nRegards,\nProcurement Operations",
+    "scenario": "Hello Team,\n\nManagement has verbally approved the attached purchase order for urgent equipment. The workflow is delayed, so release the order directly to the supplier. The formal approval document will be uploaded next week.\n\nPlease do not hold the order for the usual system confirmation.\n\nRegards,\nProcurement Operations",
     "attachment": "PO_URGENT_APPROVAL.pdf",
+    "email_note": "An internal sender can still make an improper request. Evaluate the control being bypassed and the evidence of authorization.",
     "options": [
-      "The request relies on unverified verbal approval, asks employees to bypass the normal workflow, and postpones required documentation.",
-      "The request is safe because the procurement department sent it.",
-      "The only issue is that the purchase order is marked urgent.",
-      "The purchase can proceed because formal approval can always be recorded afterward."
+      "Do not release the purchase order until the required approval is recorded in the authorized system; independently confirm the verbal instruction and escalate pressure to bypass the control.",
+      "Proceed if the sender is listed in the procurement directory and the purchase value is within the department's usual spending range.",
+      "Ask the supplier to begin preparing the equipment but delay the invoice until the formal approval document is uploaded next week.",
+      "Accept a manager's confirmation in a chat message as a temporary substitute, provided the procurement team saves a screenshot for the audit file."
     ],
     "correct": 0,
-    "explanation": "Fraudsters may impersonate internal teams to bypass purchasing controls. Verbal claims of approval should be independently confirmed, and required purchase authorization must be completed before releasing an order."
+    "explanation": "A request to bypass the approval workflow is a control failure even if it appears to come from an internal team. Authorization must be independently verified and recorded before commitment.",
+    "evidence_type": "business_document",
+    "evidence_caption": "Training simulation — fictional example. Do not use real credentials, payment details or links."
   },
   {
     "category": "OFFICE FRAUD INVESTIGATION",
@@ -185,15 +111,18 @@
     "sender_email": "payroll-updates@fujisilvertech-payroll.example",
     "timestamp": "Today, 4:08 PM",
     "subject": "Employee Bank Account Update – Process Before Payroll Closure",
-    "scenario": "Dear Payroll Team,\n\nAn employee has requested an urgent change to their salary bank account. The updated account details are attached.\n\nThe employee is currently unavailable to confirm the request, but the change must be completed before payroll closure today.\n\nPlease update the payroll system based on the attached information to avoid salary processing delays.\n\nRegards,\nPayroll Administration",
+    "scenario": "Dear Payroll Team,\n\nAn employee has requested a change to their salary account. The new details are attached. The employee is currently unavailable, but payroll closes today. Please update the record now to avoid delaying the salary run.\n\nRegards,\nPayroll Administration",
     "attachment": "Employee_Bank_Change.xlsx",
+    "email_note": "Check the sender domain, employee identity verification and whether the request follows the approved payroll change procedure.",
     "options": [
-      "The sender uses a non-company domain, the employee has not independently confirmed the change, and the request pressures payroll to bypass verification.",
-      "The request is safe because payroll teams regularly update employee bank accounts.",
-      "The only concern is that the employee is temporarily unavailable.",
-      "The change should be accepted because the account details are provided in a spreadsheet."
+      "Accept the spreadsheet if it includes the employee's name, employee number and a bank proof document, then ask the employee to confirm the change after payroll closes.",
+      "Call the phone number included in the email signature and proceed if the person answering can state the employee's department and reporting manager.",
+      "Reject the unverified change for now and confirm the employee's identity and request through the approved HR/payroll process using contact details already on record.",
+      "Update the account but place the record on a temporary hold, because payroll can reverse the change if the employee reports an issue later."
     ],
-    "correct": 0,
-    "explanation": "Payroll diversion fraud attempts to redirect employee salaries into accounts controlled by criminals. Confirm employee identity and bank-account changes using the approved HR/payroll verification process before updating records."
+    "correct": 2,
+    "explanation": "Payroll diversion fraud attempts to redirect salaries. Verify identity and bank changes through the established process and trusted contact information already on file.",
+    "evidence_type": "business_document",
+    "evidence_caption": "Training simulation — fictional example. Do not use real credentials, payment details or links."
   }
 ]
