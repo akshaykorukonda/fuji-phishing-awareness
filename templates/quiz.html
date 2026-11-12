@@ -1,1 +1,396 @@
-<!doctype html><html><head><meta name=viewport content='width=device-width,initial-scale=1'><link rel=stylesheet href=/static/style.css></head><body><header><img src=/static/img/fuji-logo.png><span>{{email}}</span></header><main><div class=progress><span id=counter>Question 1 of 10</span><div><i id=bar></i></div></div><form id=quiz>{% for q in questions %}<section class=q style='display:{% if loop.first %}block{% else %}none{% endif %}'><p class=tag>{{q.category}} • {{loop.index}}/10</p><h1>{{q.title}}</h1><div class=evidence><b>SCENARIO EVIDENCE</b><div class=mail><p><b>From:</b> {{['Accounts Payable <accounts@vendor-example.com>','Microsoft 365 Security <notice@verify365.co>','HR Benefits <benefits@fujisilvertech.com>','Office Facilities <facilities@notice-example.net>','IT Helpdesk <helpdesk@support-example.net>','Executive Office <director@fujisilvertech-mail.net>'][loop.index0] if loop.index<=6 else 'Workplace request / document'}}</p><p><b>Subject:</b> {{q.title}}</p><hr>{{q.scenario}}</div>{% if loop.index==3 %}<p class=linkinspect>Visible link: benefits.fujisilvertech.com/renew <button type=button onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden">Inspect destination</button><code hidden>Actual destination: fujisilvertech.com.attacker-example.net/renew</code></p>{% endif %}<video controls preload=none width=100%><source src=/static/videos/seg{{loop.index}}.mp4 type=video/mp4></video></div><h2>If you received this, what would you do?</h2><div class=options>{% for o in q.options %}<label><input type=radio name=q{{loop.index0}} value={{loop.index0}}><span>{{'ABCD'[loop.index0]}}. {{o}}</span></label>{% endfor %}</div><div class=nav><button type=button class=secondary onclick=move(-1) {% if loop.first %}disabled{% endif %}>Previous</button><button type=button onclick=move(1)>{{'Submit assessment' if loop.last else 'Next question'}}</button></div></section>{% endfor %}</form></main><footer>For any queries, contact support.soc@fujisilvertech.com</footer><script>let n=0,S=[...document.querySelectorAll('.q')];function move(d){if(d===1&&!S[n].querySelector(':checked'))return alert('Select an answer first.');if(n===9&&d===1)return send();S[n].style.display='none';n=Math.max(0,Math.min(9,n+d));S[n].style.display='block';counter.textContent='Question '+(n+1)+' of 10';bar.style.width=(n+1)*10+'%'}async function send(){let answers=S.map(s=>{let x=s.querySelector(':checked');return x?+x.value:-1});if(answers.includes(-1))return alert('Answer all questions.');let r=await fetch('/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answers})});let d=await r.json();if(r.ok)location.href=d.url;else alert(d.error)}</script></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phishing Awareness Assessment | Fuji Silvertech</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        .email-card {
+            background: #fff;
+            color: #202124;
+            border: 1px solid #dadce0;
+            border-radius: 12px;
+            margin: 22px 0;
+            padding: 22px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.06);
+            font-family: Arial, sans-serif;
+        }
+
+        .email-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .email-brand {
+            font-size: 14px;
+            color: #5f6368;
+            font-weight: bold;
+        }
+
+        .email-subject {
+            font-size: 21px;
+            margin: 14px 0 22px;
+            color: #202124;
+            overflow-wrap: anywhere;
+        }
+
+        .sender-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .sender-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #dbe7ff;
+            color: #2455a4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .sender-details {
+            min-width: 0;
+            font-size: 14px;
+        }
+
+        .sender-details p {
+            margin: 3px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .sender-address {
+            color: #5f6368;
+        }
+
+        .email-time {
+            color: #777;
+            font-size: 12px;
+        }
+
+        .email-body {
+            line-height: 1.65;
+            font-size: 15px;
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+            margin-top: 18px;
+        }
+
+        .email-link {
+            display: inline-block;
+            margin: 12px 0;
+            padding: 10px 17px;
+            border-radius: 5px;
+            background: #168bd2;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .email-attachment {
+            margin-top: 20px;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-size: 13px;
+        }
+
+        .email-warning {
+            margin-top: 16px;
+            padding: 12px;
+            border-left: 4px solid #e2a03f;
+            background: #fff8e8;
+            color: #654b1d;
+            font-size: 13px;
+        }
+
+        .evidence-label {
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: #6b7280;
+        }
+
+        .question-heading {
+            margin-top: 28px;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .nav button {
+            cursor: pointer;
+        }
+
+        @media(max-width:600px) {
+            .email-card {
+                padding: 15px;
+            }
+
+            .email-subject {
+                font-size: 18px;
+            }
+
+            .nav button {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+    <span>{{ email }}</span>
+</header>
+
+<main>
+
+    <div class="progress">
+        <span id="counter">Question 1 of {{ questions|length }}</span>
+        <div><i id="bar"></i></div>
+    </div>
+
+    <form id="quiz">
+
+        {% for q in questions %}
+
+        <section class="q"
+            style="display:{% if loop.first %}block{% else %}none{% endif %}">
+
+            <p class="tag">
+                {{ q.category }} • {{ loop.index }}/{{ questions|length }}
+            </p>
+
+            <h1>{{ q.title }}</h1>
+
+            <div class="evidence">
+
+                <p class="evidence-label">EMAIL EVIDENCE</p>
+
+                <div class="email-card">
+
+                    <div class="email-top">
+                        <span class="email-brand">Mail • Message preview</span>
+                        <span class="email-time">
+                            {{ q.timestamp|default('Today, 9:41 AM') }}
+                        </span>
+                    </div>
+
+                    <h2 class="email-subject">
+                        {{ q.subject|default(q.title) }}
+                    </h2>
+
+                    <div class="sender-row">
+                        <div class="sender-avatar">
+                            {{ q.sender_initial|default('M') }}
+                        </div>
+
+                        <div class="sender-details">
+                            <p>
+                                <strong>
+                                    {{ q.sender|default('Workplace Support') }}
+                                </strong>
+                            </p>
+
+                            <p class="sender-address">
+                                {{ q.sender_email|default('support@example.com') }}
+                            </p>
+
+                            <p class="sender-address">
+                                To: {{ email }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="email-body">{{ q.scenario }}</div>
+
+                    {% if q.display_link|default('') %}
+                    <div>
+                        <a class="email-link" href="javascript:void(0)">
+                            {{ q.display_link }}
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if q.actual_link|default('') %}
+                    <div class="email-warning">
+                        <strong>Link inspection:</strong><br>
+                        Displayed link: {{ q.display_link }}<br>
+                        Actual destination: {{ q.actual_link }}
+                    </div>
+                    {% endif %}
+
+                    {% if q.attachment|default('') %}
+                    <div class="email-attachment">
+                        <strong>Attachment</strong><br>
+                        <span>📎 {{ q.attachment }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if q.email_note|default('') %}
+                    <div class="email-warning">
+                        {{ q.email_note }}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <h2 class="question-heading">
+                If you received this message, what would you do?
+            </h2>
+
+            <div class="options">
+
+                {% for option in q.options %}
+                <label>
+                    <input
+                        type="radio"
+                        name="q{{ loop.index0 }}"
+                        value="{{ loop.index0 }}"
+                    >
+                    <span>
+                        {{ 'ABCD'[loop.index0] }}. {{ option }}
+                    </span>
+                </label>
+                {% endfor %}
+
+            </div>
+
+            <div class="nav">
+
+                <button
+                    type="button"
+                    class="secondary"
+                    onclick="move(-1)"
+                    {% if loop.first %}disabled{% endif %}
+                >
+                    Previous
+                </button>
+
+                <button type="button" onclick="move(1)">
+                    {% if loop.last %}
+                        Submit assessment
+                    {% else %}
+                        Next question
+                    {% endif %}
+                </button>
+
+            </div>
+
+        </section>
+
+        {% endfor %}
+
+    </form>
+
+</main>
+
+<footer>
+    For any queries, contact support.soc@fujisilvertech.com
+</footer>
+
+<script>
+    let current = 0;
+
+    const sections = [...document.querySelectorAll('.q')];
+    const counter = document.getElementById('counter');
+    const bar = document.getElementById('bar');
+    const total = sections.length;
+
+    function updateProgress() {
+        counter.textContent =
+            'Question ' + (current + 1) + ' of ' + total;
+
+        bar.style.width =
+            ((current + 1) / total * 100) + '%';
+    }
+
+    function move(direction) {
+        if (direction === 1 &&
+            !sections[current].querySelector(':checked')) {
+            alert('Please select an answer before continuing.');
+            return;
+        }
+
+        if (direction === 1 && current === total - 1) {
+            send();
+            return;
+        }
+
+        sections[current].style.display = 'none';
+
+        current = Math.max(
+            0,
+            Math.min(total - 1, current + direction)
+        );
+
+        sections[current].style.display = 'block';
+        updateProgress();
+    }
+
+    async function send() {
+        const answers = sections.map(section => {
+            const selected = section.querySelector(':checked');
+            return selected ? Number(selected.value) : -1;
+        });
+
+        if (answers.includes(-1)) {
+            alert('Please answer all questions.');
+            return;
+        }
+
+        const buttons = document.querySelectorAll('.nav button');
+        buttons.forEach(button => button.disabled = true);
+
+        try {
+            const response = await fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answers })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                window.location.href = data.url;
+            } else {
+                alert(data.error || 'Submission failed.');
+                buttons.forEach(button => button.disabled = false);
+            }
+
+        } catch (error) {
+            alert('Unable to submit. Please try again.');
+            buttons.forEach(button => button.disabled = false);
+        }
+    }
+
+    updateProgress();
+</script>
+
+</body>
+</html>
