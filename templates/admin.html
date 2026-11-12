@@ -8,9 +8,7 @@
     <link rel="stylesheet" href="/static/style.css">
 
     <style>
-        .dashboard-heading {
-            margin-bottom: 25px;
-        }
+        .dashboard-heading { margin-bottom: 25px; }
 
         .stats {
             display: grid;
@@ -57,6 +55,7 @@
             border-radius: 8px;
             margin: 8px 0;
             line-height: 1.6;
+            overflow-wrap: anywhere;
         }
 
         .correct {
@@ -84,14 +83,37 @@
             margin: 20px 0;
         }
 
-        .search {
-            max-width: 400px;
-        }
+        .search { max-width: 400px; }
 
         .empty {
             padding: 25px;
             background: #f4f8fb;
             border-radius: 10px;
+        }
+
+        .attempt-count {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .question-category {
+            color: #347cae;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .correct-option {
+            border-left: 4px solid #198754;
+        }
+
+        .selected-option {
+            border-left: 4px solid #398bd0;
+        }
+
+        @media(max-width:600px) {
+            .attempt { padding: 13px; }
+            .attempt summary { font-size: 14px; }
         }
     </style>
 </head>
@@ -126,6 +148,7 @@
     </div>
 
     <div class="admin-actions">
+
         <a class="button" href="/admin/export">
             Export CSV
         </a>
@@ -133,6 +156,7 @@
         <a class="button secondary" href="/logout">
             Sign Out
         </a>
+
     </div>
 
     <input
@@ -156,24 +180,44 @@
                     {{ r.email }}
                     — Score: {{ r.score }}%
                     — Attempt #{{ r.id }}
+
                     <br>
+
                     <small>
                         Completed: {{ r.completed }}
                         | Duration: {{ r.duration }} seconds
                     </small>
                 </summary>
 
-                <p><strong>Started:</strong> {{ r.started }}</p>
+                <p>
+                    <strong>Started:</strong>
+                    {{ r.started }}
+                </p>
 
-                <p><strong>Completed:</strong> {{ r.completed }}</p>
+                <p>
+                    <strong>Completed:</strong>
+                    {{ r.completed }}
+                </p>
 
-                <p><strong>Score:</strong> {{ r.score }}%</p>
+                <p>
+                    <strong>Duration:</strong>
+                    {{ r.duration }} seconds
+                </p>
+
+                <p>
+                    <strong>Final score:</strong>
+                    {{ r.score }}%
+                </p>
 
                 <hr>
 
                 <h3>Individual answer review</h3>
 
-                {% for question in questions %}
+                <p class="attempt-count">
+                    Showing the exact question and answer order used in this attempt.
+                </p>
+
+                {% for question in r.question_list %}
 
                     {% set i = loop.index0 %}
                     {% set selected = r.answer_list[i] if i < r.answer_list|length else -1 %}
@@ -181,32 +225,50 @@
 
                     <div class="attempt-question">
 
+                        <p class="question-category">
+                            {{ question.category }}
+                        </p>
+
                         <h4>
-                            Question {{ loop.index }}: {{ question.title }}
+                            Question {{ loop.index }}:
+                            {{ question.title }}
                         </h4>
 
                         {% if selected >= 0 and selected < question.options|length %}
 
                             {% if is_correct %}
-                                <p class="correct">✓ Correct answer</p>
+
+                                <p class="correct">
+                                    ✓ Correct answer
+                                </p>
+
                             {% else %}
-                                <p class="incorrect">✗ Incorrect answer</p>
+
+                                <p class="incorrect">
+                                    ✗ Incorrect answer
+                                </p>
+
                             {% endif %}
 
-                            <div class="answer-box">
-                                <strong>Employee selected:</strong><br>
+                            <div class="answer-box selected-option">
+                                <strong>Employee selected:</strong>
+                                <br>
                                 {{ 'ABCD'[selected] }}.
                                 {{ question.options[selected] }}
                             </div>
 
                         {% else %}
 
-                            <p class="incorrect">No valid answer recorded</p>
+                            <p class="incorrect">
+                                No valid answer recorded
+                            </p>
 
                         {% endif %}
 
-                        <div class="answer-box">
-                            <strong>Correct answer:</strong><br>
+                        <div class="answer-box correct-option">
+                            <strong>Correct answer:</strong>
+                            <br>
+
                             <span class="correct">
                                 {{ 'ABCD'[question.correct] }}.
                                 {{ question.options[question.correct] }}
@@ -214,7 +276,8 @@
                         </div>
 
                         <div class="explanation">
-                            <strong>Explanation:</strong><br>
+                            <strong>Explanation:</strong>
+                            <br>
                             {{ question.explanation }}
                         </div>
 
@@ -254,7 +317,8 @@
             const email = item.querySelector('summary')
                 .innerText.toLowerCase();
 
-            item.style.display = email.includes(value) ? '' : 'none';
+            item.style.display =
+                email.includes(value) ? '' : 'none';
 
         });
 
