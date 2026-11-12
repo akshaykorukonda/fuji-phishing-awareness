@@ -1,5 +1,95 @@
-        return fn(*args, **kwargs)
+import os
+import sqlite3
+import secrets
+import json
+import io
+import csv
+import random
 
+from datetime import datetime, timezone
+from functools import wraps
+
+from flask import (
+    Flask, request, session, redirect,
+    render_template, abort, Response, jsonify
+)
+
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "CHANGE_ME_LONG_RANDOM_SECRET")
+
+DB = os.environ.get("DATABASE_PATH", "responses.sqlite3")
+CORP = "fujisilvertech.com"
+
+OWNER = os.environ.get(
+    "INITIAL_ADMIN_EMAIL",
+    "Akshay.Korukonda@smartims.com"
+).lower()
+
+ADMINS = {OWNER} | {
+    x.strip().lower()
+    for x in os.environ.get("ADMIN_EMAILS", "").split(",")
+    if x.strip()
+}
+
+ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
+
+with open("questions.json", encoding="utf-8") as f:
+    Q = json.load(f)
+
+
+def conn():
+    c = sqlite3.connect(DB)
+    c.row_factory = sqlite3.Row
+    return c
+
+
+with conn() as c:
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS attempts (
+            id INTEGER PRIMARY KEY,
+            email TEXT,
+            started TEXT,
+            completed TEXT,
+            duration INTEGER,
+            score INTEGER,
+            answers TEXT
+        )
+    """)
+
+    columns = {
+        row["name"]
+        for row in c.execute("PRAGMA table_info(attempts)").fetchall()
+    }
+
+    if "questions_snapshot" not in columns:
+        c.execute("ALTER TABLE attempts ADD COLUMN questions_snapshot TEXT")
+
+
+def corp(email):
+    return (
+        email.count("@") == 1
+        and email.rsplit("@", 1)[1].lower() == CORP
+    )
+
+
+def signed(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not session.get("email"):
+            return redirect("/")
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+def admin(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if (
+            session.get("email", "").lower() not in ADMINS
+            or not session.get("is_admin")
+        ):
+            abort(403)
+        return fn(*args, **kwargs)
     return wrapper
 
 
@@ -14,8 +104,8 @@ def make_attempt_questions():
     for question, new_position in zip(attempt_questions, positions):
         old_position = question["correct"]
         options = list(question["options"])
-
         correct_option = options.pop(old_position)
+
         random.shuffle(options)
         options.insert(new_position, correct_option)
 
@@ -95,8 +185,11 @@ def quiz():
 def submit():
     email = session.get("email")
 
-    if not email or not corp(email):
-        return jsonify(error="Please sign in again."), 401
+    if not email:
+        return jsonify(error="Your session has expired. Please sign in again."), 401
+
+    if not corp(email):
+        return jsonify(error="You are not authorized."), 403
 
     data = request.get_json(silent=True) or {}
     answers = data.get("answers", [])
@@ -118,14 +211,14 @@ def submit():
         if not row:
             return jsonify(error="Assessment attempt not found."), 403
 
-        attempt_questions = json.loads(row["questions_snapshot"])
+        attempt_questions = json.loads(row["questions_snapshot"] or "[]")
 
         if (
             not isinstance(answers, list)
             or len(answers) != len(attempt_questions)
             or any(type(x) is not int or x not in range(4) for x in answers)
         ):
-            return jsonify(error="Please answer all questions."), 400
+            return jsonify(error="Please answer every question."), 400
 
         score = sum(
             answers[i] == attempt_questions[i]["correct"]
@@ -137,25 +230,19 @@ def submit():
             (now - datetime.fromisoformat(row["started"])).total_seconds()
         )
 
-        c.execute(
-            """
+        c.execute("""
             UPDATE attempts
             SET completed=?, duration=?, score=?, answers=?
             WHERE id=?
-            """,
-            (
-                now.isoformat(),
-                duration,
-                score * 100 // len(attempt_questions),
-                json.dumps(answers),
-                attempt_id
-            )
-        )
+        """, (
+            now.isoformat(),
+            duration,
+            score * 100 // len(attempt_questions),
+            json.dumps(answers),
+            attempt_id
+        ))
 
-    return jsonify(
-        success=True,
-        url="/result/" + str(attempt_id)
-    )
+    return jsonify(success=True, url="/result/" + str(attempt_id))
 
 
 @app.route("/result/<int:attempt_id>")
@@ -190,14 +277,12 @@ def result(attempt_id):
 @admin
 def dashboard():
     with conn() as c:
-        db_rows = c.execute(
-            """
+        db_rows = c.execute("""
             SELECT *
             FROM attempts
             WHERE completed IS NOT NULL
             ORDER BY completed DESC
-            """
-        ).fetchall()
+        """).fetchall()
 
     rows = []
 
@@ -229,19 +314,17 @@ def export():
     writer = csv.writer(output)
 
     writer.writerow([
-        "Email", "Attempt", "Started", "Completed",
-        "Duration", "Score"
+        "Email", "Attempt", "Started",
+        "Completed", "Duration", "Score"
     ])
 
     with conn() as c:
-        rows = c.execute(
-            """
+        rows = c.execute("""
             SELECT *
             FROM attempts
             WHERE completed IS NOT NULL
             ORDER BY completed DESC
-            """
-        ).fetchall()
+        """).fetchall()
 
     for row in rows:
         writer.writerow([
