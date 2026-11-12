@@ -1,1 +1,161 @@
-<!doctype html><html><head><meta name=viewport content='width=device-width,initial-scale=1'><link rel=stylesheet href=/static/style.css></head><body><header><img src=/static/img/fuji-logo.png></header><main class=card><p class=tag>ASSESSMENT COMPLETE</p><h1>Your score: {{r.score}} / 100</h1>{% for x in q %}<article><h3>{{loop.index}}. {{x.title}}</h3><p><b>Your answer:</b> {{x.options[a[loop.index0]]}}</p><p><b>Best response:</b> {{x.options[x.correct]}}</p><p>{{x.explanation}}</p></article>{% endfor %}<a href=/logout>Sign out</a></main><footer>For any queries, contact support.soc@fujisilvertech.com</footer></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Assessment Results | Fuji Silvertech</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        .result-header {
+            text-align: center;
+            padding: 25px 10px;
+        }
+
+        .score {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .question-result {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 18px 0;
+        }
+
+        .question-result.correct {
+            border-left: 5px solid #198754;
+        }
+
+        .question-result.incorrect {
+            border-left: 5px solid #dc3545;
+        }
+
+        .status {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .correct-text {
+            color: #198754;
+        }
+
+        .incorrect-text {
+            color: #dc3545;
+        }
+
+        .answer {
+            padding: 12px;
+            background: #f5f6f8;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .explanation {
+            background: #fff8e8;
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .result-actions {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .result-actions a {
+            display: inline-block;
+            padding: 12px 22px;
+            background: #075b78;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+</header>
+
+<main class="card">
+
+    <div class="result-header">
+        <p class="tag">ASSESSMENT COMPLETE</p>
+
+        <h1>Your Assessment Results</h1>
+
+        <div class="score">{{ r.score }} / 100</div>
+
+        <p>
+            You answered
+            {{ a|length }}
+            questions.
+        </p>
+    </div>
+
+    <hr>
+
+    {% for x in q %}
+
+        {% set selected = a[loop.index0] %}
+        {% set is_correct = selected == x.correct %}
+
+        <article class="question-result
+            {% if is_correct %}correct{% else %}incorrect{% endif %}">
+
+            <h3>
+                Question {{ loop.index }}: {{ x.title }}
+            </h3>
+
+            {% if is_correct %}
+                <p class="status correct-text">
+                    ✓ CORRECT ANSWER
+                </p>
+            {% else %}
+                <p class="status incorrect-text">
+                    ✗ INCORRECT ANSWER
+                </p>
+            {% endif %}
+
+            <div class="answer">
+                <strong>Your answer:</strong><br>
+                {{ 'ABCD'[selected] }}.
+                {{ x.options[selected] }}
+            </div>
+
+            <div class="answer">
+                <strong>Correct answer:</strong><br>
+                <span class="correct-text">
+                    {{ 'ABCD'[x.correct] }}.
+                    {{ x.options[x.correct] }}
+                </span>
+            </div>
+
+            <div class="explanation">
+                <strong>Why is this correct?</strong><br>
+                {{ x.explanation }}
+            </div>
+
+        </article>
+
+    {% endfor %}
+
+    <div class="result-actions">
+        <a href="/logout">Finish and Sign Out</a>
+    </div>
+
+</main>
+
+<footer>
+    For any queries, contact support.soc@fujisilvertech.com
+</footer>
+
+</body>
+</html>
