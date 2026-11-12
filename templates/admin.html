@@ -1,29 +1,265 @@
 
-@app.route("/admin")
-@admin
-def dashboard():
-    with conn() as c:
-        db_rows = c.execute("""
-            SELECT * FROM attempts
-            WHERE completed IS NOT NULL
-            ORDER BY completed DESC
-        """).fetchall()
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard | Fuji Silvertech</title>
+    <link rel="stylesheet" href="/static/style.css">
 
-    rows = []
+    <style>
+        .dashboard-heading {
+            margin-bottom: 25px;
+        }
 
-    for row in db_rows:
-        item = dict(row)
-        item["answer_list"] = json.loads(item["answers"])
-        rows.append(item)
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
 
-    average = (
-        round(sum(row["score"] for row in rows) / len(rows), 1)
-        if rows else 0
-    )
+        .stat {
+            background: #edf7ff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #d5e9f8;
+        }
 
-    return render_template(
-        "admin.html",
-        rows=rows,
-        avg=average,
-        questions=Q
-    )
+        .stat strong {
+            display: block;
+            font-size: 28px;
+            margin-top: 8px;
+        }
+
+        .attempt {
+            background: white;
+            border: 1px solid #d9e8f5;
+            border-radius: 13px;
+            padding: 18px;
+            margin: 18px 0;
+        }
+
+        .attempt summary {
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 1.8;
+        }
+
+        .attempt-question {
+            border-top: 1px solid #e1ebf3;
+            padding: 14px 0;
+        }
+
+        .answer-box {
+            background: #f4f8fb;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .correct {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .incorrect {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .explanation {
+            background: #fff8e8;
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .search {
+            max-width: 400px;
+        }
+
+        .empty {
+            padding: 25px;
+            background: #f4f8fb;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+    <span>ADMIN DASHBOARD</span>
+</header>
+
+<main>
+
+    <div class="dashboard-heading">
+        <p class="tag">FUJI SILVERTECH • ADMINISTRATION</p>
+        <h1>Assessment Reports</h1>
+        <p>Employee phishing awareness assessment results.</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            Total completed attempts
+            <strong>{{ rows|length }}</strong>
+        </div>
+
+        <div class="stat">
+            Average score
+            <strong>{{ avg }}%</strong>
+        </div>
+
+    </div>
+
+    <div class="admin-actions">
+        <a class="button" href="/admin/export">
+            Export CSV
+        </a>
+
+        <a class="button secondary" href="/logout">
+            Sign Out
+        </a>
+    </div>
+
+    <input
+        class="search"
+        id="search"
+        type="text"
+        placeholder="Search employee email..."
+    >
+
+    <h2>Employee submissions</h2>
+
+    {% if rows %}
+
+        <div id="attempt-list">
+
+        {% for r in rows %}
+
+            <details class="attempt">
+
+                <summary>
+                    {{ r.email }}
+                    — Score: {{ r.score }}%
+                    — Attempt #{{ r.id }}
+                    <br>
+                    <small>
+                        Completed: {{ r.completed }}
+                        | Duration: {{ r.duration }} seconds
+                    </small>
+                </summary>
+
+                <p><strong>Started:</strong> {{ r.started }}</p>
+
+                <p><strong>Completed:</strong> {{ r.completed }}</p>
+
+                <p><strong>Score:</strong> {{ r.score }}%</p>
+
+                <hr>
+
+                <h3>Individual answer review</h3>
+
+                {% for question in questions %}
+
+                    {% set i = loop.index0 %}
+                    {% set selected = r.answer_list[i] if i < r.answer_list|length else -1 %}
+                    {% set is_correct = selected == question.correct %}
+
+                    <div class="attempt-question">
+
+                        <h4>
+                            Question {{ loop.index }}: {{ question.title }}
+                        </h4>
+
+                        {% if selected >= 0 and selected < question.options|length %}
+
+                            {% if is_correct %}
+                                <p class="correct">✓ Correct answer</p>
+                            {% else %}
+                                <p class="incorrect">✗ Incorrect answer</p>
+                            {% endif %}
+
+                            <div class="answer-box">
+                                <strong>Employee selected:</strong><br>
+                                {{ 'ABCD'[selected] }}.
+                                {{ question.options[selected] }}
+                            </div>
+
+                        {% else %}
+
+                            <p class="incorrect">No valid answer recorded</p>
+
+                        {% endif %}
+
+                        <div class="answer-box">
+                            <strong>Correct answer:</strong><br>
+                            <span class="correct">
+                                {{ 'ABCD'[question.correct] }}.
+                                {{ question.options[question.correct] }}
+                            </span>
+                        </div>
+
+                        <div class="explanation">
+                            <strong>Explanation:</strong><br>
+                            {{ question.explanation }}
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </details>
+
+        {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty">
+            No completed employee assessments found yet.
+        </div>
+
+    {% endif %}
+
+</main>
+
+<footer>
+    Fuji Silvertech • Phishing Awareness Administration
+</footer>
+
+<script>
+    const search = document.getElementById('search');
+
+    search.addEventListener('input', function () {
+
+        const value = this.value.toLowerCase();
+
+        document.querySelectorAll('.attempt').forEach(item => {
+
+            const email = item.querySelector('summary')
+                .innerText.toLowerCase();
+
+            item.style.display = email.includes(value) ? '' : 'none';
+
+        });
+
+    });
+</script>
+
+</body>
+</html>
