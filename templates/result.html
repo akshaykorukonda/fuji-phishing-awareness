@@ -1,5 +1,5 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,10 +14,202 @@
         }
 
         .score {
-            font-size: 42px;
+            font-size: 52px;
             font-weight: bold;
-            margin: 15px 0;
+            color: #176db2;
+            margin: 18px 0;
         }
 
         .question-result {
-            background
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 18px 0;
+        }
+
+        .question-result.correct {
+            border-left: 5px solid #198754;
+        }
+
+        .question-result.incorrect {
+            border-left: 5px solid #dc3545;
+        }
+
+        .status {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .correct-text {
+            color: #198754;
+        }
+
+        .incorrect-text {
+            color: #dc3545;
+        }
+
+        .answer {
+            padding: 14px;
+            background: #f5f6f8;
+            border-radius: 8px;
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        .explanation {
+            background: #fff8e8;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.7;
+            margin-top: 12px;
+        }
+
+        .result-actions {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .result-actions a {
+            display: inline-block;
+            padding: 14px 25px;
+            background: #075b78;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .result-actions a:hover {
+            background: #06465c;
+        }
+
+        .result-summary {
+            background: #edf7ff;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media(max-width:600px) {
+            .score {
+                font-size: 40px;
+            }
+
+            .question-result {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+</header>
+
+<main class="card">
+
+    <div class="result-header">
+
+        <p class="tag">ASSESSMENT COMPLETE</p>
+
+        <h1>Your Assessment Results</h1>
+
+        <div class="score">
+            {{ r.score }} / 100
+        </div>
+
+        <p>
+            You have completed all {{ a|length }} questions.
+        </p>
+
+    </div>
+
+    <div class="result-summary">
+        <h3>Assessment Review</h3>
+        <p>
+            Review your answers below to understand
+            which workplace messages were suspicious
+            and how to respond safely.
+        </p>
+    </div>
+
+    <hr>
+
+    {% for x in q %}
+
+        {% set selected = a[loop.index0] %}
+        {% set is_correct = selected == x.correct %}
+
+        <article class="question-result
+            {% if is_correct %}correct{% else %}incorrect{% endif %}">
+
+            <h3>
+                Question {{ loop.index }}: {{ x.title }}
+            </h3>
+
+            {% if is_correct %}
+
+                <p class="status correct-text">
+                    ✓ CORRECT ANSWER
+                </p>
+
+            {% else %}
+
+                <p class="status incorrect-text">
+                    ✗ INCORRECT ANSWER
+                </p>
+
+            {% endif %}
+
+            <div class="answer">
+
+                <strong>Your answer:</strong><br>
+
+                {% if selected >= 0 and selected < x.options|length %}
+                    {{ 'ABCD'[selected] }}.
+                    {{ x.options[selected] }}
+                {% else %}
+                    No valid answer recorded.
+                {% endif %}
+
+            </div>
+
+            <div class="answer">
+
+                <strong>Correct answer:</strong><br>
+
+                <span class="correct-text">
+                    {{ 'ABCD'[x.correct] }}.
+                    {{ x.options[x.correct] }}
+                </span>
+
+            </div>
+
+            <div class="explanation">
+
+                <strong>Why is this correct?</strong><br>
+
+                {{ x.explanation }}
+
+            </div>
+
+        </article>
+
+    {% endfor %}
+
+    <div class="result-actions">
+        <a href="/logout">Finish and Sign Out</a>
+    </div>
+
+</main>
+
+<footer>
+    For any queries, contact support.soc@fujisilvertech.com
+</footer>
+
+</body>
+</html>
