@@ -1,0 +1,132 @@
+[
+  {
+    "category": "PHISHING",
+    "title": "Vendor thread hijack",
+    "scenario": "A familiar supplier email thread requests payment to a new bank account. The reply-to address differs slightly and the attached invoice has changed bank details.",
+    "options": [
+      "Update the bank details because the thread is familiar.",
+      "Reply to the same email for confirmation.",
+      "Pause payment and call the supplier using a previously verified number; follow the bank-change approval process.",
+      "Ask another colleague to choose."
+    ],
+    "correct": 2,
+    "explanation": "A compromised mailbox can continue a genuine thread. Independently verify payment changes using trusted contact details."
+  },
+  {
+    "category": "PHISHING",
+    "title": "Microsoft 365 sign-in lure",
+    "scenario": "An urgent email links to a Microsoft-looking page. The actual host is login.microsoftonline.com.verify365.co, not microsoftonline.com.",
+    "options": [
+      "Open it in private browsing to check.",
+      "Do not open it; report it and navigate through a known company bookmark.",
+      "Reply to ask if it is genuine.",
+      "Open it but do not type your password."
+    ],
+    "correct": 1,
+    "explanation": "The registered domain is verify365.co. A copied login design and HTTPS do not prove legitimacy."
+  },
+  {
+    "category": "PHISHING",
+    "title": "Inspect the actual URL",
+    "scenario": "HR displays benefits.fujisilvertech.com/renew, but inspection reveals https://fujisilvertech.com.attacker-example.net/renew.",
+    "options": [
+      "Trust the visible text.",
+      "Click once and inspect the address bar.",
+      "Paste it into a search engine.",
+      "Do not follow it; inspect the destination, report the mismatch and use the known HR portal."
+    ],
+    "correct": 3,
+    "explanation": "The true domain is attacker-example.net. Visible link text can differ from the underlying destination."
+  },
+  {
+    "category": "PHISHING",
+    "title": "QR-code office poster",
+    "scenario": "An unapproved poster asks staff to scan a QR code to refresh Wi-Fi access and sign in with company credentials.",
+    "options": [
+      "Scan using a personal phone.",
+      "Verify with IT through a known channel, report the poster and use official Wi-Fi instructions.",
+      "Enter only your email.",
+      "Ask a colleague to scan first."
+    ],
+    "correct": 1,
+    "explanation": "QR codes conceal destinations and physical placement does not establish legitimacy."
+  },
+  {
+    "category": "PHISHING",
+    "title": "MFA fatigue and fake helpdesk",
+    "scenario": "You receive repeated unexpected MFA prompts. A caller claiming to be IT asks you to approve one prompt to stop them.",
+    "options": [
+      "Approve one while on the call.",
+      "Read the caller the code.",
+      "Deny prompts, end the call and contact IT through the published service-desk channel.",
+      "Disable MFA temporarily."
+    ],
+    "correct": 2,
+    "explanation": "Unexpected prompts may indicate password compromise. Never approve an uninitiated request or share codes."
+  },
+  {
+    "category": "PHISHING",
+    "title": "Targeted spear-phishing",
+    "scenario": "A leader asks for a confidential project spreadsheet before a board meeting and says not to involve the project owner. The sender uses an external lookalike address.",
+    "options": [
+      "Send a password-protected copy.",
+      "Verify through a known internal channel and report the suspicious sender.",
+      "Ask the sender to confirm the project code by email.",
+      "Upload it to a personal cloud drive."
+    ],
+    "correct": 1,
+    "explanation": "Public company details make spear-phishing convincing. Secrecy, urgency and sensitive data require independent verification."
+  },
+  {
+    "category": "OFFICE FRAUD",
+    "title": "Supplier bank-detail change",
+    "scenario": "A formal supplier letter requests a new bank account. Invoice and purchase order details match, and payment is due today.",
+    "options": [
+      "Update the supplier record.",
+      "Reply to the same email for confirmation.",
+      "Hold the change and verify with an authorized supplier contact already on file, using dual approval.",
+      "Send a small test payment."
+    ],
+    "correct": 2,
+    "explanation": "Matching invoice details and a signature image are not proof. Verify bank changes independently."
+  },
+  {
+    "category": "OFFICE FRAUD",
+    "title": "Executive gift-card request",
+    "scenario": "A senior executive's display name asks you to buy gift cards and send redemption codes, claiming they cannot take calls.",
+    "options": [
+      "Buy them and keep receipts.",
+      "Ask a coworker to buy them.",
+      "Send one code first.",
+      "Do not purchase or share codes; verify through a known executive channel and report the impersonation."
+    ],
+    "correct": 3,
+    "explanation": "Gift-card codes are cash-equivalent. Urgency and inability to verify are common impersonation signals."
+  },
+  {
+    "category": "OFFICE FRAUD",
+    "title": "Tailgating and visitor pretext",
+    "scenario": "A person carrying equipment says their badge is being reprinted and asks you to hold a secure door. They know a manager's name.",
+    "options": [
+      "Let them in because they know a manager.",
+      "Direct them to reception/security; do not allow piggybacking.",
+      "Escort them into the office first.",
+      "Photograph their ID and let them enter."
+    ],
+    "correct": 1,
+    "explanation": "Knowledge of staff names is easy to obtain. Visitors must follow check-in and escort procedures."
+  },
+  {
+    "category": "OFFICE FRAUD",
+    "title": "Payroll direct-deposit change",
+    "scenario": "An email appearing to come from HR requests bank details and identity documents through an attached form before payroll closes.",
+    "options": [
+      "Complete it because the deadline is close.",
+      "Reply with only the account number.",
+      "Ask a teammate if they received it.",
+      "Do not use the attachment; verify with HR through the official portal and report the email."
+    ],
+    "correct": 3,
+    "explanation": "Payroll changes involve sensitive data. Use the established HR portal and verify unexpected requests independently."
+  }
+]
