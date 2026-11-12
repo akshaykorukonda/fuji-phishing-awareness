@@ -1,8 +1,16 @@
+
 [
   {
     "category": "PHISHING",
     "title": "Vendor thread hijack",
-    "scenario": "A familiar supplier email thread requests payment to a new bank account. The reply-to address differs slightly and the attached invoice has changed bank details.",
+    "sender": "Accounts Payable - Vendor Services",
+    "sender_email": "accounts@vendor-example.com",
+    "sender_initial": "A",
+    "timestamp": "Today, 9:18 AM",
+    "subject": "RE: Outstanding Invoice - Updated Bank Details",
+    "scenario": "Hello Accounts Team,\n\nFollowing our previous discussion, please find the revised invoice attached. We have recently updated our banking arrangements. Kindly use the new account details for today's payment.\n\nPlease process this urgently to avoid any delay.\n\nRegards,\nVendor Accounts Department",
+    "attachment": "Revised_Invoice_Bank_Details.pdf",
+    "email_note": "The reply-to address differs slightly from the supplier's usual address. The invoice contains changed bank details.",
     "options": [
       "Update the bank details because the thread is familiar.",
       "Reply to the same email for confirmation.",
@@ -15,7 +23,15 @@
   {
     "category": "PHISHING",
     "title": "Microsoft 365 sign-in lure",
-    "scenario": "An urgent email links to a Microsoft-looking page. The actual host is login.microsoftonline.com.verify365.co, not microsoftonline.com.",
+    "sender": "Microsoft 365 Security",
+    "sender_email": "security-alert@verify365.co",
+    "sender_initial": "M",
+    "timestamp": "Today, 8:42 AM",
+    "subject": "URGENT: Your Microsoft 365 Session Will Expire",
+    "scenario": "Dear Employee,\n\nYour Microsoft 365 account requires immediate verification. Our system has detected unusual sign-in activity.\n\nYour mailbox access may be suspended within 24 hours if you do not confirm your account.\n\nPlease use the button below to restore access.\n\nMicrosoft 365 Security Team",
+    "display_link": "Confirm Microsoft 365 Account",
+    "actual_link": "https://login.microsoftonline.com.verify365.co/session",
+    "email_note": "The page imitates Microsoft's sign-in screen, but the actual website domain is verify365.co.",
     "options": [
       "Open it in private browsing to check.",
       "Do not open it; report it and navigate through a known company bookmark.",
@@ -28,7 +44,15 @@
   {
     "category": "PHISHING",
     "title": "Inspect the actual URL",
-    "scenario": "HR displays benefits.fujisilvertech.com/renew, but inspection reveals https://fujisilvertech.com.attacker-example.net/renew.",
+    "sender": "HR Benefits Team",
+    "sender_email": "benefits@fujisilvertech.com",
+    "sender_initial": "H",
+    "timestamp": "Today, 10:05 AM",
+    "subject": "Action Required: Employee Benefits Renewal",
+    "scenario": "Dear Employee,\n\nThe annual employee benefits renewal process is now open.\n\nPlease review your details and complete the renewal before the deadline. Use the link below to access the renewal page.\n\nRegards,\nHR Benefits Team",
+    "display_link": "https://benefits.fujisilvertech.com/renew",
+    "actual_link": "https://fujisilvertech.com.attacker-example.net/renew",
+    "email_note": "The visible link looks like a company website, but the actual destination belongs to attacker-example.net.",
     "options": [
       "Trust the visible text.",
       "Click once and inspect the address bar.",
@@ -41,7 +65,14 @@
   {
     "category": "PHISHING",
     "title": "QR-code office poster",
-    "scenario": "An unapproved poster asks staff to scan a QR code to refresh Wi-Fi access and sign in with company credentials.",
+    "sender": "Office Administration",
+    "sender_email": "office-notice@notice-example.net",
+    "sender_initial": "O",
+    "timestamp": "Today, 11:30 AM",
+    "subject": "Important: Scan QR Code to Renew Office Wi-Fi Access",
+    "scenario": "Dear Team,\n\nWe are updating the office Wi-Fi access system.\n\nAll employees must scan the QR code displayed in the attached notice and sign in using their company credentials to maintain uninterrupted connectivity.\n\nPlease complete this immediately.\n\nOffice Administration",
+    "attachment": "Office_WiFi_QR_Notice.png",
+    "email_note": "The poster has not been approved by IT. The QR code hides its destination until scanned.",
     "options": [
       "Scan using a personal phone.",
       "Verify with IT through a known channel, report the poster and use official Wi-Fi instructions.",
@@ -54,7 +85,13 @@
   {
     "category": "PHISHING",
     "title": "MFA fatigue and fake helpdesk",
-    "scenario": "You receive repeated unexpected MFA prompts. A caller claiming to be IT asks you to approve one prompt to stop them.",
+    "sender": "IT Security Notifications",
+    "sender_email": "security@support-example.net",
+    "sender_initial": "I",
+    "timestamp": "Today, 2:14 PM",
+    "subject": "Multiple Authentication Requests Detected",
+    "scenario": "Dear Employee,\n\nOur security monitoring system has detected repeated authentication attempts on your account.\n\nA person claiming to be from the IT Helpdesk then calls you and says:\n\n\"We are trying to stop these login attempts. Please approve the next authentication request so we can secure your account.\"\n\nYou did not initiate any sign-in.",
+    "email_note": "Unexpected MFA prompts followed by a caller asking you to approve one are a serious warning sign.",
     "options": [
       "Approve one while on the call.",
       "Read the caller the code.",
@@ -67,7 +104,14 @@
   {
     "category": "PHISHING",
     "title": "Targeted spear-phishing",
-    "scenario": "A leader asks for a confidential project spreadsheet before a board meeting and says not to involve the project owner. The sender uses an external lookalike address.",
+    "sender": "Managing Director's Office",
+    "sender_email": "director@fujisilvertech-mail.net",
+    "sender_initial": "D",
+    "timestamp": "Today, 7:56 AM",
+    "subject": "Confidential - Project Spreadsheet Required Before Board Meeting",
+    "scenario": "Hello,\n\nI need the latest confidential project spreadsheet before today's board meeting.\n\nPlease send it directly to this email address. Do not involve the project owner, as this is a confidential management request.\n\nI am currently unavailable for calls. Please handle this immediately.\n\nRegards,\nDirector's Office",
+    "attachment": "Board_Meeting_Requirements.pdf",
+    "email_note": "The sender uses an external lookalike domain and requests confidential information while discouraging verification.",
     "options": [
       "Send a password-protected copy.",
       "Verify through a known internal channel and report the suspicious sender.",
@@ -80,7 +124,14 @@
   {
     "category": "OFFICE FRAUD",
     "title": "Supplier bank-detail change",
-    "scenario": "A formal supplier letter requests a new bank account. Invoice and purchase order details match, and payment is due today.",
+    "sender": "Supplier Finance Department",
+    "sender_email": "finance@supplier-example.com",
+    "sender_initial": "S",
+    "timestamp": "Today, 9:05 AM",
+    "subject": "Official Notice: Change in Supplier Bank Account",
+    "scenario": "Dear Finance Team,\n\nPlease note that our company has changed its banking arrangements.\n\nKindly update the account details provided in the attached official letter before processing the pending invoice. Payment is due today.\n\nThank you,\nSupplier Finance Department",
+    "attachment": "Official_Bank_Change_Letter.pdf",
+    "email_note": "The letter looks formal and invoice details match, but the new bank account has not been independently verified.",
     "options": [
       "Update the supplier record.",
       "Reply to the same email for confirmation.",
@@ -93,7 +144,13 @@
   {
     "category": "OFFICE FRAUD",
     "title": "Executive gift-card request",
-    "scenario": "A senior executive's display name asks you to buy gift cards and send redemption codes, claiming they cannot take calls.",
+    "sender": "Senior Executive",
+    "sender_email": "executive.office@fujisilvertech-mail.net",
+    "sender_initial": "E",
+    "timestamp": "Today, 8:12 AM",
+    "subject": "Urgent - Confidential Employee Appreciation Gift",
+    "scenario": "Hello,\n\nI need you to purchase gift cards for an important employee appreciation activity.\n\nPlease purchase the requested cards and send me the redemption codes by email. I am currently in meetings and cannot take calls.\n\nPlease keep this confidential until the announcement.\n\nThanks,\nSenior Executive",
+    "email_note": "The sender's display name looks familiar, but the email address uses an external lookalike domain.",
     "options": [
       "Buy them and keep receipts.",
       "Ask a coworker to buy them.",
@@ -106,7 +163,14 @@
   {
     "category": "OFFICE FRAUD",
     "title": "Tailgating and visitor pretext",
-    "scenario": "A person carrying equipment says their badge is being reprinted and asks you to hold a secure door. They know a manager's name.",
+    "sender": "Facilities and Security",
+    "sender_email": "facilities@fujisilvertech.com",
+    "sender_initial": "F",
+    "timestamp": "Today, 10:45 AM",
+    "subject": "Reminder: Office Visitor Access and Security",
+    "scenario": "Dear Team,\n\nA visitor carrying equipment approaches the secure office entrance.\n\nThey explain that their employee badge is being reprinted and ask you to hold the door open. They also mention the name of a senior manager to make their request sound genuine.\n\nYou have not seen them before.",
+    "attachment": "Office_Visitor_Access_Policy.pdf",
+    "email_note": "Knowing an employee's or manager's name does not establish authorization to enter a secure area.",
     "options": [
       "Let them in because they know a manager.",
       "Direct them to reception/security; do not allow piggybacking.",
@@ -119,7 +183,14 @@
   {
     "category": "OFFICE FRAUD",
     "title": "Payroll direct-deposit change",
-    "scenario": "An email appearing to come from HR requests bank details and identity documents through an attached form before payroll closes.",
+    "sender": "Human Resources Payroll",
+    "sender_email": "payroll@hr-fujisilvertech.net",
+    "sender_initial": "H",
+    "timestamp": "Today, 3:20 PM",
+    "subject": "Final Reminder: Payroll Details Must Be Updated Today",
+    "scenario": "Dear Employee,\n\nPayroll processing is approaching its deadline.\n\nPlease complete the attached direct-deposit form with your bank account details and identity documents. Return the completed form immediately to avoid a delay in your next salary payment.\n\nRegards,\nPayroll Department",
+    "attachment": "Employee_Direct_Deposit_Update.docx",
+    "email_note": "The email uses an external lookalike domain and requests sensitive banking and identity information through an attachment.",
     "options": [
       "Complete it because the deadline is close.",
       "Reply with only the account number.",
