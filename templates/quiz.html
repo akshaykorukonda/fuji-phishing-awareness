@@ -115,8 +115,6 @@
             color: #6b7280;
         }
 
-        /* Business document mockups */
-
         .document-preview {
             margin-top: 16px;
             padding: 18px;
@@ -608,10 +606,7 @@
                     Previous
                 </button>
 
-                <button
-                    type="button"
-                    onclick="move(1)"
-                >
+                <button type="button" onclick="move(1)">
                     {% if loop.last %}
                         Submit assessment
                     {% else %}
@@ -642,9 +637,7 @@
     const bar = document.getElementById('bar');
     const total = sections.length;
 
-    // Display feedback immediately after an answer is selected.
     sections.forEach(section => {
-
         const radios = section.querySelectorAll('input[type="radio"]');
         const feedback = section.querySelector('.answer-feedback');
 
@@ -652,9 +645,7 @@
         const explanation = section.dataset.explanation;
 
         radios.forEach(radio => {
-
             radio.addEventListener('change', () => {
-
                 const selectedIndex = Number(radio.value);
 
                 const correctRadio = [...radios].find(
@@ -670,15 +661,12 @@
                 feedback.hidden = false;
 
                 if (selectedIndex === correctIndex) {
-
                     feedback.textContent =
                         '✓ Correct! ' + explanation;
 
                     feedback.className =
                         'answer-feedback correct';
-
                 } else {
-
                     feedback.textContent =
                         '✗ Incorrect. Correct answer: ' +
                         correctAnswer + '. ' + explanation;
@@ -686,16 +674,11 @@
                     feedback.className =
                         'answer-feedback incorrect';
                 }
-
             });
-
         });
-
     });
 
-
     function updateProgress() {
-
         counter.textContent =
             'Question ' + (current + 1) + ' of ' + total;
 
@@ -703,9 +686,7 @@
             ((current + 1) / total * 100) + '%';
     }
 
-
     function move(direction) {
-
         if (submitting) return;
 
         const currentSection = sections[current];
@@ -717,10 +698,8 @@
             direction === 1 &&
             !currentSection.querySelector('input[type="radio"]:checked')
         ) {
-
             error.textContent =
                 'Please select an answer before continuing.';
-
             return;
         }
 
@@ -741,13 +720,10 @@
         updateProgress();
     }
 
-
     async function send() {
-
         if (submitting) return;
 
         const answers = sections.map(section => {
-
             const selected = section.querySelector(
                 'input[type="radio"]:checked'
             );
@@ -755,7 +731,7 @@
             return selected ? Number(selected.value) : -1;
         });
 
-        if (answers.length !== total || answers.includes(-1)) {
+        if (answers.includes(-1)) {
             alert('Please answer all questions.');
             return;
         }
@@ -766,13 +742,15 @@
         buttons.forEach(button => button.disabled = true);
 
         try {
-
             const response = await fetch('/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ answers })
+                body: JSON.stringify({
+                    answers: answers,
+                    attempt_id: Number("{{ attempt_id }}")
+                })
             });
 
             const data = await response.json();
@@ -782,13 +760,14 @@
             }
 
             if (!data.url) {
-                throw new Error('The server did not return a results page.');
+                throw new Error(
+                    'The server did not return a results page.'
+                );
             }
 
             window.location.href = data.url;
 
         } catch (error) {
-
             submitting = false;
             buttons.forEach(button => button.disabled = false);
             alert(error.message);
