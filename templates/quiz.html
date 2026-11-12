@@ -154,6 +154,26 @@
             margin-top: 12px;
         }
 
+        .answer-feedback {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .answer-feedback.correct {
+            background: #e8f7ed;
+            color: #176b37;
+            border: 1px solid #8bd3a2;
+        }
+
+        .answer-feedback.incorrect {
+            background: #fff0f0;
+            color: #a32626;
+            border: 1px solid #e6a0a0;
+        }
+
         @media(max-width:600px) {
             .email-card {
                 padding: 15px;
@@ -190,6 +210,8 @@
         {% set question_index = loop.index0 %}
 
         <section class="q"
+            data-correct="{{ q.correct }}"
+            data-explanation="{{ q.explanation }}"
             style="display:{% if loop.first %}block{% else %}none{% endif %}">
 
             <p class="tag">
@@ -301,6 +323,8 @@
 
             </div>
 
+            <div class="answer-feedback" hidden aria-live="polite"></div>
+
             <p class="submit-error" aria-live="polite"></p>
 
             <div class="nav">
@@ -348,7 +372,59 @@
     const bar = document.getElementById('bar');
     const total = sections.length;
 
+    // Show correct or incorrect feedback immediately
+    sections.forEach(section => {
+
+        const radios = section.querySelectorAll('input[type="radio"]');
+        const feedback = section.querySelector('.answer-feedback');
+
+        const correctIndex = Number(section.dataset.correct);
+        const explanation = section.dataset.explanation;
+
+        radios.forEach(radio => {
+
+            radio.addEventListener('change', () => {
+
+                const selectedIndex = Number(radio.value);
+
+                const correctRadio = [...radios].find(
+                    item => Number(item.value) === correctIndex
+                );
+
+                if (!correctRadio) return;
+
+                const correctAnswer = correctRadio
+                    .closest('label')
+                    .innerText.trim();
+
+                feedback.hidden = false;
+
+                if (selectedIndex === correctIndex) {
+
+                    feedback.textContent =
+                        '✓ Correct! ' + explanation;
+
+                    feedback.className =
+                        'answer-feedback correct';
+
+                } else {
+
+                    feedback.textContent =
+                        '✗ Incorrect. Correct answer: ' +
+                        correctAnswer + '. ' + explanation;
+
+                    feedback.className =
+                        'answer-feedback incorrect';
+                }
+
+            });
+
+        });
+
+    });
+
     function updateProgress() {
+
         counter.textContent =
             'Question ' + (current + 1) + ' of ' + total;
 
@@ -357,6 +433,7 @@
     }
 
     function move(direction) {
+
         if (submitting) return;
 
         const currentSection = sections[current];
@@ -367,7 +444,9 @@
         if (direction === 1 &&
             !currentSection.querySelector('input[type="radio"]:checked')) {
 
-            error.textContent = 'Please select an answer before continuing.';
+            error.textContent =
+                'Please select an answer before continuing.';
+
             return;
         }
 
@@ -389,9 +468,11 @@
     }
 
     async function send() {
+
         if (submitting) return;
 
         const answers = sections.map(section => {
+
             const selected = section.querySelector(
                 'input[type="radio"]:checked'
             );
@@ -410,6 +491,7 @@
         buttons.forEach(button => button.disabled = true);
 
         try {
+
             const response = await fetch('/submit', {
                 method: 'POST',
                 headers: {
@@ -431,6 +513,7 @@
             window.location.href = data.url;
 
         } catch (error) {
+
             submitting = false;
             buttons.forEach(button => button.disabled = false);
             alert(error.message);
