@@ -82,8 +82,80 @@ with conn() as c:
 # QUESTION HELPERS
 # --------------------------------------------------
 
-def is_mistake_question(question):
-    return question.get("mode") == "find_mistakes"
+def is_multi_select_question(question):
+    return question.get("mode") in (
+        "find_mistakes",
+        "click_errors"
+    )
+
+
+def get_candidate_ids(question):
+    """
+    Return every selectable ID for a multi-select question.
+    Includes decoy options so incorrect selections can be scored.
+    """
+
+    mode = question.get("mode")
+    candidate_ids = set()
+
+    if mode == "find_mistakes":
+
+        for item in question.get("mistakes", []):
+            if isinstance(item, dict) and item.get("id"):
+                candidate_ids.add(str(item["id"]))
+
+    elif mode == "click_errors":
+
+        # Clickable sender-address parts
+        for item in question.get("sender_parts", []):
+            if (
+                isinstance(item, dict)
+                and item.get("clickable")
+                and item.get("id")
+            ):
+                candidate_ids.add(str(item["id"]))
+
+        # Clickable email-body parts
+        for item in question.get("email_parts", []):
+            if (
+                isinstance(item, dict)
+                and item.get("clickable")
+                and item.get("id")
+            ):
+                candidate_ids.add(str(item["id"]))
+
+    return candidate_ids
+
+
+def get_correct_ids(question):
+    """
+    Return the actual correct IDs for multi-select questions.
+    """
+
+    mode = question.get("mode")
+
+    if mode == "find_mistakes":
+
+        correct = question.get("correct_mistakes")
+
+        if correct is not None:
+            return {str(item) for item in correct}
+
+        # Backward compatibility
+        return {
+            str(item["id"])
+            for item in question.get("mistakes", [])
+            if isinstance(item, dict) and item.get("id")
+        }
+
+    if mode == "click_errors":
+
+        return {
+            str(item)
+            for item in question.get("correct_errors", [])
+        }
+
+    return set()
 
 
 def make_attempt_questions():
@@ -91,8 +163,7 @@ def make_attempt_questions():
     Copy the question bank and randomize only
     multiple-choice answer positions.
 
-    Find-the-mistakes questions retain their
-    original mistake IDs.
+    Multi-select questions retain their original IDs.
     """
 
     attempt_questions = json.loads(json.dumps(Q))
@@ -100,7 +171,7 @@ def make_attempt_questions():
     mc_questions = [
         question
         for question in attempt_questions
-        if not is_mistake_question(question)
+        if not is_multi_select_question(question)
     ]
 
     positions = [0, 1, 2, 3] * (
@@ -120,6 +191,7 @@ def make_attempt_questions():
         mc_questions,
         positions
     ):
+
         options = question.get("options", [])
         old_position = question.get("correct")
 
@@ -167,8 +239,10 @@ def validate_and_score(answers, questions):
     Find-the-mistakes:
         Answer is a list of selected mistake IDs.
 
-    Returns:
-        Validated answers and total percentage score.
+    Click-errors:
+        Answer is a list of selected clickable email IDs.
+
+    Incorrect selections reduce the multi-select score.
     """
 
     if not isinstance(answers, list):
@@ -181,30 +255,28 @@ def validate_and_score(answers, questions):
     question_scores = []
 
     for index, question in enumerate(questions):
+
         answer = answers[index]
 
         # ------------------------------------------
-        # FIND THE MISTAKES QUESTION
+        # MULTI-SELECT QUESTIONS
         # ------------------------------------------
 
-        if is_mistake_question(question):
+        if is_multi_select_question(question):
 
-            mistakes = question.get("mistakes", [])
+            candidate_ids = get_candidate_ids(question)
+            correct_ids = get_correct_ids(question)
 
-            if not isinstance(mistakes, list) or not mistakes:
+            if not candidate_ids or not correct_ids:
                 raise ValueError(
-                    "A phishing question has no mistake list."
+                    "Invalid multi-select question configuration: "
+                    + question.get("title", "Unknown question")
                 )
 
-            correct_ids = {
-                str(item["id"])
-                for item in mistakes
-                if isinstance(item, dict) and "id" in item
-            }
-
-            if not correct_ids:
+            if not correct_ids.issubset(candidate_ids):
                 raise ValueError(
-                    "Invalid mistake IDs in question data."
+                    "Correct answer IDs are missing from selectable items: "
+                    + question.get("title", "Unknown question")
                 )
 
             if (
@@ -214,14 +286,15 @@ def validate_and_score(answers, questions):
                 or len(answer) != len(set(answer))
             ):
                 raise ValueError(
-                    "Please select suspicious details for every phishing question."
+                    "Please select at least one detail for every investigation question."
                 )
 
             selected_ids = set(answer)
 
-            if not selected_ids.issubset(correct_ids):
+            if not selected_ids.issubset(candidate_ids):
                 raise ValueError(
-                    "Invalid mistake selection."
+                    "Invalid selection in question: "
+                    + question.get("title", "Unknown question")
                 )
 
             correct_selections = len(
@@ -232,8 +305,6 @@ def validate_and_score(answers, questions):
                 selected_ids - correct_ids
             )
 
-            # Correct selections earn credit.
-            # Incorrect selections reduce credit.
             raw_score = max(
                 0,
                 correct_selections - incorrect_selections
@@ -251,7 +322,7 @@ def validate_and_score(answers, questions):
             question_scores.append(question_score)
 
         # ------------------------------------------
-        # MULTIPLE-CHOICE QUESTION
+        # MULTIPLE-CHOICE QUESTIONS
         # ------------------------------------------
 
         else:
@@ -309,6 +380,7 @@ def signed(fn):
 def admin(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
+
         if (
             session.get("email", "").lower() not in ADMINS
             or not session.get("is_admin")
