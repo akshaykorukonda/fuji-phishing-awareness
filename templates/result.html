@@ -168,6 +168,7 @@
     </div>
 
     <div class="result-summary">
+
         <h3>Assessment Review</h3>
 
         <p>
@@ -181,6 +182,7 @@
             <span class="incorrect-text">✗ Missed detail</span>
             <span class="partial-text">! Incorrect selection</span>
         </div>
+
     </div>
 
     <hr>
@@ -188,27 +190,54 @@
     {% for x in q %}
 
         {% set selected = a[loop.index0] %}
+        {% set mode = x.mode|default('multiple_choice') %}
 
-        {% if x.mode|default('multiple_choice') == 'find_mistakes' %}
+        {% if mode in ['find_mistakes', 'click_errors'] %}
 
-            {% set correct_ids = x.mistakes | map(attribute='id') | map('string') | list %}
+            {# ------------------------------------------
+               MULTI-SELECT QUESTION REVIEW
+               ------------------------------------------ #}
+
+            {% if mode == 'find_mistakes' %}
+
+                {% set candidates = x.mistakes|default([]) %}
+                {% set correct_ids = x.correct_mistakes|default(candidates|map(attribute='id')|list)|map('string')|list %}
+
+            {% else %}
+
+                {% set candidates = [] %}
+                {% set correct_ids = x.correct_errors|default([])|map('string')|list %}
+
+            {% endif %}
+
             {% set selected_ids = selected if selected is iterable and selected is not string else [] %}
+
             {% set found_count = namespace(value=0) %}
             {% set missed_count = namespace(value=0) %}
             {% set wrong_count = namespace(value=0) %}
 
-            {% for mistake in x.mistakes %}
-                {% if mistake.id|string in selected_ids %}
+            {% for correct_id in correct_ids %}
+
+                {% if correct_id in selected_ids %}
+
                     {% set found_count.value = found_count.value + 1 %}
+
                 {% else %}
+
                     {% set missed_count.value = missed_count.value + 1 %}
+
                 {% endif %}
+
             {% endfor %}
 
             {% for selected_id in selected_ids %}
-                {% if selected_id not in correct_ids %}
+
+                {% if selected_id|string not in correct_ids %}
+
                     {% set wrong_count.value = wrong_count.value + 1 %}
+
                 {% endif %}
+
             {% endfor %}
 
             <article class="question-result
@@ -245,67 +274,253 @@
                 {% endif %}
 
                 <div class="answer">
-                    <strong>Your identification:</strong>
+
+                    <strong>Your investigation summary:</strong>
+
+                    <p class="correct-text">
+                        ✓ Correct findings: {{ found_count.value }}
+                    </p>
+
+                    <p class="incorrect-text">
+                        ✗ Missed findings: {{ missed_count.value }}
+                    </p>
+
+                    <p class="partial-text">
+                        ! Incorrect selections: {{ wrong_count.value }}
+                    </p>
 
                     <p>
-                        {{ found_count.value }} out of
-                        {{ correct_ids|length }} suspicious details identified.
+                        You identified {{ found_count.value }}
+                        out of {{ correct_ids|length }}
+                        suspicious details.
                     </p>
+
                 </div>
 
-                <h4>Review the email details</h4>
+                {# ------------------------------------------
+                   FIND MISTAKES: Q3
+                   ------------------------------------------ #}
 
-                {% for mistake in x.mistakes %}
+                {% if mode == 'find_mistakes' %}
 
-                    {% if mistake.id|string in selected_ids %}
+                    <h4>Review the suspicious details</h4>
 
-                        <div class="mistake-item found">
-                            <strong class="correct-text">
-                                ✓ You identified this
-                            </strong>
-                            <br>
-                            {{ mistake.text }}
-                        </div>
+                    {% for mistake in candidates %}
 
-                    {% else %}
+                        {% if mistake.id|string in selected_ids %}
 
-                        <div class="mistake-item missed">
-                            <strong class="incorrect-text">
-                                ✗ You missed this
-                            </strong>
-                            <br>
-                            {{ mistake.text }}
-                        </div>
+                            {% if mistake.id|string in correct_ids %}
 
-                    {% endif %}
+                                <div class="mistake-item found">
 
-                {% endfor %}
+                                    <strong class="correct-text">
+                                        ✓ Correctly identified
+                                    </strong>
 
-                {% if wrong_count.value > 0 %}
+                                    <br>
 
-                    <div class="answer">
-                        <strong class="partial-text">
-                            Incorrect selections:
-                        </strong>
+                                    {{ mistake.text }}
 
-                        <p>
-                            You selected {{ wrong_count.value }}
-                            detail(s) that were not marked as suspicious
-                            in this question.
-                        </p>
-                    </div>
+                                </div>
+
+                            {% else %}
+
+                                <div class="mistake-item wrong">
+
+                                    <strong class="partial-text">
+                                        ! Incorrect selection
+                                    </strong>
+
+                                    <br>
+
+                                    {{ mistake.text }}
+
+                                </div>
+
+                            {% endif %}
+
+                        {% elif mistake.id|string in correct_ids %}
+
+                            <div class="mistake-item missed">
+
+                                <strong class="incorrect-text">
+                                    ✗ You missed this
+                                </strong>
+
+                                <br>
+
+                                {{ mistake.text }}
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="mistake-item">
+
+                                <strong>
+                                    Not selected
+                                </strong>
+
+                                <br>
+
+                                {{ mistake.text }}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
 
                 {% endif %}
 
+
+                {# ------------------------------------------
+                   CLICK ERRORS: Q2, Q4 AND Q8
+                   ------------------------------------------ #}
+
+                {% if mode == 'click_errors' %}
+
+                    <h4>Review the email investigation</h4>
+
+                    <p>
+                        Below are the sender-address and email-body
+                        details that you could investigate.
+                    </p>
+
+                    {% for part in x.sender_parts|default([]) %}
+
+                        {% if part.clickable %}
+
+                            {% if part.id|string in selected_ids %}
+
+                                {% if part.id|string in correct_ids %}
+
+                                    <div class="mistake-item found">
+
+                                        <strong class="correct-text">
+                                            ✓ Correctly identified
+                                        </strong>
+
+                                        <br>
+
+                                        {{ part.text|default(part.value|default(part.id)) }}
+
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="mistake-item wrong">
+
+                                        <strong class="partial-text">
+                                            ! Incorrect selection
+                                        </strong>
+
+                                        <br>
+
+                                        {{ part.text|default(part.value|default(part.id)) }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% elif part.id|string in correct_ids %}
+
+                                <div class="mistake-item missed">
+
+                                    <strong class="incorrect-text">
+                                        ✗ You missed this
+                                    </strong>
+
+                                    <br>
+
+                                    {{ part.text|default(part.value|default(part.id)) }}
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+
+                    {% for part in x.email_parts|default([]) %}
+
+                        {% if part.clickable %}
+
+                            {% if part.id|string in selected_ids %}
+
+                                {% if part.id|string in correct_ids %}
+
+                                    <div class="mistake-item found">
+
+                                        <strong class="correct-text">
+                                            ✓ Correctly identified
+                                        </strong>
+
+                                        <br>
+
+                                        {{ part.text|default(part.value|default(part.id)) }}
+
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="mistake-item wrong">
+
+                                        <strong class="partial-text">
+                                            ! Incorrect selection
+                                        </strong>
+
+                                        <br>
+
+                                        {{ part.text|default(part.value|default(part.id)) }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% elif part.id|string in correct_ids %}
+
+                                <div class="mistake-item missed">
+
+                                    <strong class="incorrect-text">
+                                        ✗ You missed this
+                                    </strong>
+
+                                    <br>
+
+                                    {{ part.text|default(part.value|default(part.id)) }}
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                {% endif %}
+
+
                 <div class="explanation">
+
                     <strong>Why is this email suspicious?</strong>
+
                     <br>
+
                     {{ x.explanation }}
+
                 </div>
 
             </article>
 
+
         {% else %}
+
+            {# ------------------------------------------
+               MULTIPLE-CHOICE QUESTION REVIEW
+               ------------------------------------------ #}
 
             {% set is_correct = selected == x.correct %}
 
@@ -333,6 +548,7 @@
                 <div class="answer">
 
                     <strong>Your answer:</strong>
+
                     <br>
 
                     {% if selected is integer and selected >= 0 and selected < x.options|length %}
@@ -351,11 +567,14 @@
                 <div class="answer">
 
                     <strong>Correct answer:</strong>
+
                     <br>
 
                     <span class="correct-text">
+
                         {{ 'ABCD'[x.correct] }}.
                         {{ x.options[x.correct] }}
+
                     </span>
 
                 </div>
@@ -363,6 +582,7 @@
                 <div class="explanation">
 
                     <strong>Why is this correct?</strong>
+
                     <br>
 
                     {{ x.explanation }}
@@ -376,7 +596,9 @@
     {% endfor %}
 
     <div class="result-actions">
+
         <a href="/logout">Finish and Sign Out</a>
+
     </div>
 
 </main>
