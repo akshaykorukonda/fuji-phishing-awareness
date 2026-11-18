@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -260,6 +261,64 @@
             border: 1px solid #e6a0a0;
         }
 
+        /* Find the mistakes */
+
+        .mistake-instructions {
+            background: #eaf3ff;
+            color: #174477;
+            padding: 15px;
+            border-radius: 9px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .mistake-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .mistake-item {
+            background: #fff;
+            color: #26364a;
+            border: 2px solid #d5dfeb;
+            border-radius: 9px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: .2s;
+        }
+
+        .mistake-item:hover {
+            border-color: #168bd2;
+            background: #f1f8ff;
+        }
+
+        .mistake-item.selected {
+            border-color: #dc3545;
+            background: #fff0f0;
+            color: #a32626;
+        }
+
+        .mistake-item.selected::before {
+            content: "✓ ";
+            font-weight: bold;
+        }
+
+        .mistake-item:focus-visible {
+            outline: 3px solid #168bd2;
+            outline-offset: 2px;
+        }
+
+        .mistake-count {
+            margin-top: 13px;
+            font-weight: bold;
+            color: #174477;
+        }
+
         @media(max-width:600px) {
             .email-card {
                 padding: 15px;
@@ -304,8 +363,9 @@
         {% set question_index = loop.index0 %}
 
         <section class="q"
-            data-correct="{{ q.correct }}"
-            data-explanation="{{ q.explanation }}"
+            data-correct="{{ q.correct|default(-1) }}"
+            data-explanation="{{ q.explanation|default('') }}"
+            data-mode="{{ q.mode|default('multiple_choice') }}"
             style="display:{% if loop.first %}block{% else %}none{% endif %}">
 
             <p class="tag">
@@ -322,7 +382,6 @@
 
                     <div class="email-top">
                         <span>Mail • Message preview</span>
-
                         <span class="email-time">
                             {{ q.timestamp|default('Today, 9:41 AM') }}
                         </span>
@@ -394,7 +453,6 @@
                 {% if q.category == 'OFFICE FRAUD INVESTIGATION' %}
 
                 <div class="document-preview">
-
                     <p class="evidence-label">
                         ATTACHED BUSINESS DOCUMENT PREVIEW
                     </p>
@@ -472,7 +530,6 @@
                             </thead>
 
                             <tbody>
-
                                 {% if 'Vendor Bank' in q.title %}
                                 <tr>
                                     <td>Bank detail change</td>
@@ -513,7 +570,6 @@
                                     <td>Pending</td>
                                 </tr>
                                 {% endif %}
-
                             </tbody>
                         </table>
 
@@ -529,17 +585,14 @@
                     <p class="simulation-note">
                         Illustrative document preview • No real payment or employee data
                     </p>
-
                 </div>
 
                 {% elif q.attachment|default('') %}
 
                 <div class="document-preview">
-
                     <p class="evidence-label">ATTACHMENT PREVIEW</p>
 
                     <div class="document-sheet">
-
                         <div class="document-head">
                             <strong>{{ q.attachment }}</strong>
                             <span class="document-stamp">UNVERIFIED</span>
@@ -555,32 +608,59 @@
                             Never enable macros, scan unexpected QR codes or enter
                             credentials just because an email includes an attachment.
                         </div>
-
                     </div>
 
                     <p class="simulation-note">
                         Illustrative attachment preview • Training simulation
                     </p>
-
                 </div>
 
                 {% endif %}
 
             </div>
 
+            {% if q.mode|default('multiple_choice') == 'find_mistakes' %}
+
+            <h2 class="question-heading">
+                Find the mistakes in this email
+            </h2>
+
+            <div class="mistake-instructions">
+                <strong>Investigation task:</strong>
+                Carefully inspect the email. Select every suspicious detail
+                you identify. There are no multiple-choice answers.
+            </div>
+
+            <div class="mistake-list">
+                {% for mistake in q.mistakes %}
+                <button
+                    type="button"
+                    class="mistake-item"
+                    data-mistake-id="{{ mistake.id }}"
+                    aria-pressed="false"
+                >
+                    {{ mistake.text }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <p class="mistake-count">
+                Selected: <span class="selected-count">0</span>
+            </p>
+
+            {% else %}
+
             <h2 class="question-heading">
                 If you received this message, what would you do?
             </h2>
 
             <div class="options">
-
                 {% for option in q.options %}
                 <label>
                     <input
                         type="radio"
                         name="q{{ question_index }}"
                         value="{{ loop.index0 }}"
-                        required
                     >
 
                     <span>
@@ -588,8 +668,9 @@
                     </span>
                 </label>
                 {% endfor %}
-
             </div>
+
+            {% endif %}
 
             <div class="answer-feedback" hidden aria-live="polite"></div>
 
@@ -637,10 +718,33 @@
     const bar = document.getElementById('bar');
     const total = sections.length;
 
+    // Identify question type from the question data.
     sections.forEach(section => {
-        const radios = section.querySelectorAll('input[type="radio"]');
-        const feedback = section.querySelector('.answer-feedback');
+        section.querySelectorAll('.mistake-item').forEach(button => {
+            button.addEventListener('click', () => {
+                if (submitting) return;
 
+                button.classList.toggle('selected');
+
+                const selected =
+                    button.classList.contains('selected');
+
+                button.setAttribute('aria-pressed', String(selected));
+
+                const count = section.querySelectorAll(
+                    '.mistake-item.selected'
+                ).length;
+
+                section.querySelector('.selected-count').textContent =
+                    count;
+            });
+        });
+
+        const radios = section.querySelectorAll(
+            'input[type="radio"]'
+        );
+
+        const feedback = section.querySelector('.answer-feedback');
         const correctIndex = Number(section.dataset.correct);
         const explanation = section.dataset.explanation;
 
@@ -652,7 +756,7 @@
                     item => Number(item.value) === correctIndex
                 );
 
-                if (!correctRadio) return;
+                if (!correctRadio || !feedback) return;
 
                 const correctAnswer = correctRadio
                     .closest('label')
@@ -686,6 +790,18 @@
             ((current + 1) / total * 100) + '%';
     }
 
+    function hasAnswer(section) {
+        if (section.dataset.mode === 'find_mistakes') {
+            return section.querySelectorAll(
+                '.mistake-item.selected'
+            ).length > 0;
+        }
+
+        return !!section.querySelector(
+            'input[type="radio"]:checked'
+        );
+    }
+
     function move(direction) {
         if (submitting) return;
 
@@ -694,12 +810,9 @@
 
         error.textContent = '';
 
-        if (
-            direction === 1 &&
-            !currentSection.querySelector('input[type="radio"]:checked')
-        ) {
+        if (direction === 1 && !hasAnswer(currentSection)) {
             error.textContent =
-                'Please select an answer before continuing.';
+                'Please identify at least one suspicious detail or select an answer.';
             return;
         }
 
@@ -718,12 +831,19 @@
         sections[current].style.display = 'block';
 
         updateProgress();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function send() {
         if (submitting) return;
 
         const answers = sections.map(section => {
+            if (section.dataset.mode === 'find_mistakes') {
+                return [...section.querySelectorAll(
+                    '.mistake-item.selected'
+                )].map(button => button.dataset.mistakeId);
+            }
+
             const selected = section.querySelector(
                 'input[type="radio"]:checked'
             );
@@ -731,8 +851,14 @@
             return selected ? Number(selected.value) : -1;
         });
 
-        if (answers.includes(-1)) {
-            alert('Please answer all questions.');
+        const incomplete = answers.some(answer =>
+            Array.isArray(answer)
+                ? answer.length === 0
+                : answer === -1
+        );
+
+        if (incomplete) {
+            alert('Please answer all questions before submitting.');
             return;
         }
 
@@ -769,7 +895,11 @@
 
         } catch (error) {
             submitting = false;
-            buttons.forEach(button => button.disabled = false);
+
+            buttons.forEach(button => {
+                button.disabled = false;
+            });
+
             alert(error.message);
         }
     }
