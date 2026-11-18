@@ -8,137 +8,38 @@
     <link rel="stylesheet" href="/static/style.css">
 
     <style>
-        .result-header {
-            text-align: center;
-            padding: 25px 10px;
-        }
-
-        .score {
-            font-size: 52px;
-            font-weight: bold;
-            color: #176db2;
-            margin: 18px 0;
-        }
-
-        .question-result {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 18px 0;
-        }
-
-        .question-result.correct {
-            border-left: 5px solid #198754;
-        }
-
-        .question-result.incorrect {
-            border-left: 5px solid #dc3545;
-        }
-
-        .question-result.partial {
-            border-left: 5px solid #e0a800;
-        }
-
-        .status {
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-
-        .correct-text {
-            color: #198754;
-        }
-
-        .incorrect-text {
-            color: #dc3545;
-        }
-
-        .partial-text {
-            color: #a87500;
-        }
-
-        .answer {
-            padding: 14px;
-            background: #f5f6f8;
-            border-radius: 8px;
-            margin: 12px 0;
-            line-height: 1.7;
-        }
-
-        .mistake-item {
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            line-height: 1.5;
-            background: #f5f6f8;
-        }
-
-        .mistake-item.found {
-            background: #e8f6ee;
-            border-left: 4px solid #198754;
-        }
-
-        .mistake-item.missed {
-            background: #fff0f0;
-            border-left: 4px solid #dc3545;
-        }
-
-        .mistake-item.wrong {
-            background: #fff4df;
-            border-left: 4px solid #e0a800;
-        }
-
-        .explanation {
-            background: #fff8e8;
-            padding: 15px;
-            border-radius: 8px;
-            line-height: 1.7;
-            margin-top: 12px;
-        }
-
-        .result-actions {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        .result-actions a {
-            display: inline-block;
-            padding: 14px 25px;
-            background: #075b78;
-            color: white;
-            text-decoration: none;
-            border-radius: 7px;
-            font-weight: bold;
-        }
-
-        .result-actions a:hover {
-            background: #06465c;
-        }
-
-        .result-summary {
-            background: #edf7ff;
-            border-radius: 12px;
-            padding: 18px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 12px;
-            font-size: 13px;
-        }
-
+        .result-header { text-align:center; padding:25px 10px; }
+        .score { font-size:52px; font-weight:bold; color:#176db2; margin:18px 0; }
+        .question-result { background:#fff; border:1px solid #ddd; border-radius:12px; padding:20px; margin:18px 0; }
+        .question-result.correct { border-left:5px solid #198754; }
+        .question-result.incorrect { border-left:5px solid #dc3545; }
+        .question-result.partial { border-left:5px solid #e0a800; }
+        .status { font-weight:bold; margin-bottom:12px; }
+        .correct-text { color:#198754; }
+        .incorrect-text { color:#dc3545; }
+        .partial-text { color:#a87500; }
+        .answer { padding:14px; background:#f5f6f8; border-radius:8px; margin:12px 0; line-height:1.7; }
+        .mistake-item { padding:12px; border-radius:8px; margin:8px 0; line-height:1.5; background:#f5f6f8; }
+        .mistake-item.found { background:#e8f6ee; border-left:4px solid #198754; }
+        .mistake-item.missed { background:#fff0f0; border-left:4px solid #dc3545; }
+        .mistake-item.wrong { background:#fff4df; border-left:4px solid #e0a800; }
+        .explanation { background:#fff8e8; padding:15px; border-radius:8px; line-height:1.7; margin-top:12px; }
+        .result-actions { text-align:center; margin:30px 0; }
+        .result-actions a { display:inline-block; padding:14px 25px; background:#075b78; color:white; text-decoration:none; border-radius:7px; font-weight:bold; }
+        .result-actions a:hover { background:#06465c; }
+        .result-summary { background:#edf7ff; border-radius:12px; padding:18px; text-align:center; margin:20px 0; }
+        .legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:13px; }
+        .email-review { border:1px solid #ddd; border-radius:10px; padding:15px; margin:12px 0; background:#fafafa; }
+        .email-review h4 { margin-top:0; }
+        .email-review p { line-height:1.6; overflow-wrap:anywhere; }
+        .email-review.correct-email { border-left:4px solid #198754; }
+        .email-review.wrong-email { border-left:4px solid #dc3545; }
+        .option-review { padding:11px; margin:8px 0; border-radius:7px; background:#f5f6f8; }
+        .option-review.selected-correct { background:#e8f6ee; border-left:4px solid #198754; }
+        .option-review.selected-wrong { background:#fff0f0; border-left:4px solid #dc3545; }
         @media(max-width:600px) {
-            .score {
-                font-size: 40px;
-            }
-
-            .question-result {
-                padding: 15px;
-            }
+            .score { font-size:40px; }
+            .question-result { padding:15px; }
         }
     </style>
 </head>
@@ -152,453 +53,192 @@
 <main class="card">
 
     <div class="result-header">
-
         <p class="tag">ASSESSMENT COMPLETE</p>
-
         <h1>Your Assessment Results</h1>
 
-        <div class="score">
-            {{ r.score }} / 100
-        </div>
+        <div class="score">{{ r.score }} / 100</div>
 
-        <p>
-            You have completed all {{ a|length }} questions.
-        </p>
-
+        <p>You have completed all {{ a|length }} questions.</p>
     </div>
 
     <div class="result-summary">
-
         <h3>Assessment Review</h3>
-
-        <p>
-            Review your answers below to understand
-            which workplace messages were suspicious
-            and how to respond safely.
-        </p>
+        <p>Review your answers below to understand which workplace messages were suspicious and how to respond safely.</p>
 
         <div class="legend">
             <span class="correct-text">✓ Correctly identified</span>
-            <span class="incorrect-text">✗ Missed detail</span>
-            <span class="partial-text">! Incorrect selection</span>
+            <span class="incorrect-text">✗ Incorrect answer</span>
         </div>
-
     </div>
 
     <hr>
 
     {% for x in q %}
 
-        {% set selected = a[loop.index0] %}
+        {% set selected = a[loop.index0] if loop.index0 < a|length else none %}
         {% set mode = x.mode|default('multiple_choice') %}
 
-        {% if mode in ['find_mistakes', 'click_errors'] %}
+        <article class="question-result
+            {% if mode in ['find_mistakes', 'click_errors'] %}
+                partial
+            {% elif selected == x.correct %}
+                correct
+            {% else %}
+                incorrect
+            {% endif %}">
 
-            {# ------------------------------------------
-               MULTI-SELECT QUESTION REVIEW
-               ------------------------------------------ #}
+            <h3>Question {{ loop.index }}: {{ x.title }}</h3>
 
-            {% if mode == 'find_mistakes' %}
+            {% if mode in ['find_mistakes', 'click_errors'] %}
 
-                {% set candidates = x.mistakes|default([]) %}
-                {% set correct_ids = x.correct_mistakes|default(candidates|map(attribute='id')|list)|map('string')|list %}
+                {% set selected_ids = selected if selected is iterable and selected is not string else [] %}
+
+                {% if mode == 'find_mistakes' %}
+                    {% set candidates = x.mistakes|default([]) %}
+                    {% set correct_ids = x.correct_mistakes|default(candidates|map(attribute='id')|list)|map('string')|list %}
+                {% else %}
+                    {% set candidates = [] %}
+                    {% set correct_ids = x.correct_errors|default([])|map('string')|list %}
+                {% endif %}
+
+                {% set found = namespace(value=0) %}
+                {% set missed = namespace(value=0) %}
+                {% set wrong = namespace(value=0) %}
+
+                {% for item in correct_ids %}
+                    {% if item in selected_ids %}
+                        {% set found.value = found.value + 1 %}
+                    {% else %}
+                        {% set missed.value = missed.value + 1 %}
+                    {% endif %}
+                {% endfor %}
+
+                {% for item in selected_ids %}
+                    {% if item|string not in correct_ids %}
+                        {% set wrong.value = wrong.value + 1 %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if found.value == correct_ids|length and wrong.value == 0 %}
+                    <p class="status correct-text">✓ ALL SUSPICIOUS DETAILS IDENTIFIED</p>
+                {% elif found.value > 0 %}
+                    <p class="status partial-text">! PARTIALLY IDENTIFIED</p>
+                {% else %}
+                    <p class="status incorrect-text">✗ INVESTIGATION INCOMPLETE</p>
+                {% endif %}
+
+                <div class="answer">
+                    <strong>Your investigation summary</strong>
+                    <p class="correct-text">✓ Correct findings: {{ found.value }}</p>
+                    <p class="incorrect-text">✗ Missed findings: {{ missed.value }}</p>
+                    <p class="partial-text">! Incorrect selections: {{ wrong.value }}</p>
+                </div>
+
+                {% if mode == 'find_mistakes' %}
+                    {% for mistake in candidates %}
+                        {% if mistake.id|string in selected_ids and mistake.id|string in correct_ids %}
+                            <div class="mistake-item found">✓ Correctly identified<br>{{ mistake.text }}</div>
+                        {% elif mistake.id|string in selected_ids %}
+                            <div class="mistake-item wrong">! Incorrect selection<br>{{ mistake.text }}</div>
+                        {% elif mistake.id|string in correct_ids %}
+                            <div class="mistake-item missed">✗ You missed this<br>{{ mistake.text }}</div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {% for part in x.sender_parts|default([]) + x.email_parts|default([]) %}
+                        {% if part.clickable %}
+                            {% if part.id|string in selected_ids and part.id|string in correct_ids %}
+                                <div class="mistake-item found">✓ Correctly identified<br>{{ part.text|default(part.value|default(part.id)) }}</div>
+                            {% elif part.id|string in selected_ids %}
+                                <div class="mistake-item wrong">! Incorrect selection<br>{{ part.text|default(part.value|default(part.id)) }}</div>
+                            {% elif part.id|string in correct_ids %}
+                                <div class="mistake-item missed">✗ You missed this<br>{{ part.text|default(part.value|default(part.id)) }}</div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
 
             {% else %}
 
-                {% set candidates = [] %}
-                {% set correct_ids = x.correct_errors|default([])|map('string')|list %}
+                {% set is_correct = selected == x.correct %}
+
+                {% if is_correct %}
+                    <p class="status correct-text">✓ CORRECT ANSWER</p>
+                {% else %}
+                    <p class="status incorrect-text">✗ INCORRECT ANSWER</p>
+                {% endif %}
+
+                {% if x.comparison and x.emails %}
+                    <h4>Email comparison</h4>
+
+                    {% for email in x.emails %}
+                        <div class="email-review
+                            {% if loop.index0 == x.correct %}
+                                correct-email
+                            {% else %}
+                                wrong-email
+                            {% endif %}">
+
+                            <h4>{{ email.label|default('Email ' ~ loop.index) }}</h4>
+                            <p><strong>From:</strong> {{ email.sender|default('') }}</p>
+                            <p><strong>Address:</strong> {{ email.sender_email|default('') }}</p>
+                            <p><strong>Time:</strong> {{ email.timestamp|default('') }}</p>
+                            <p><strong>Subject:</strong> {{ email.subject|default('') }}</p>
+                            <p>{{ email.body|default('') }}</p>
+
+                            {% if email.link %}
+                                <p><strong>Link:</strong> {{ email.link }}</p>
+                            {% endif %}
+
+                            {% if email.attachment %}
+                                <p><strong>Attachment:</strong> {{ email.attachment }}</p>
+                            {% endif %}
+
+                            {% if loop.index0 == x.correct %}
+                                <strong class="correct-text">✓ Legitimate email</strong>
+                            {% else %}
+                                <strong class="incorrect-text">✗ Suspicious email</strong>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="answer">
+                    <strong>Your answer:</strong><br>
+
+                    {% if selected is integer and selected >= 0 and selected < x.options|length %}
+                        {{ 'ABCD'[selected] }}. {{ x.options[selected] }}
+                    {% else %}
+                        No valid answer recorded.
+                    {% endif %}
+                </div>
+
+                <div class="answer">
+                    <strong>Correct answer:</strong><br>
+                    {% if x.correct is integer and x.correct >= 0 and x.correct < x.options|length %}
+                        <span class="correct-text">
+                            {{ 'ABCD'[x.correct] }}. {{ x.options[x.correct] }}
+                        </span>
+                    {% else %}
+                        Correct answer unavailable.
+                    {% endif %}
+                </div>
+
+                {% if x.explanation %}
+                    <div class="explanation">
+                        <strong>Why is this correct?</strong><br>
+                        {{ x.explanation }}
+                    </div>
+                {% endif %}
 
             {% endif %}
 
-            {% set selected_ids = selected if selected is iterable and selected is not string else [] %}
-
-            {% set found_count = namespace(value=0) %}
-            {% set missed_count = namespace(value=0) %}
-            {% set wrong_count = namespace(value=0) %}
-
-            {% for correct_id in correct_ids %}
-
-                {% if correct_id in selected_ids %}
-
-                    {% set found_count.value = found_count.value + 1 %}
-
-                {% else %}
-
-                    {% set missed_count.value = missed_count.value + 1 %}
-
-                {% endif %}
-
-            {% endfor %}
-
-            {% for selected_id in selected_ids %}
-
-                {% if selected_id|string not in correct_ids %}
-
-                    {% set wrong_count.value = wrong_count.value + 1 %}
-
-                {% endif %}
-
-            {% endfor %}
-
-            <article class="question-result
-                {% if found_count.value == correct_ids|length and wrong_count.value == 0 %}
-                    correct
-                {% elif found_count.value > 0 %}
-                    partial
-                {% else %}
-                    incorrect
-                {% endif %}">
-
-                <h3>
-                    Question {{ loop.index }}: {{ x.title }}
-                </h3>
-
-                {% if found_count.value == correct_ids|length and wrong_count.value == 0 %}
-
-                    <p class="status correct-text">
-                        ✓ ALL SUSPICIOUS DETAILS IDENTIFIED
-                    </p>
-
-                {% elif found_count.value > 0 %}
-
-                    <p class="status partial-text">
-                        ! PARTIALLY IDENTIFIED
-                    </p>
-
-                {% else %}
-
-                    <p class="status incorrect-text">
-                        ✗ NO SUSPICIOUS DETAILS IDENTIFIED
-                    </p>
-
-                {% endif %}
-
-                <div class="answer">
-
-                    <strong>Your investigation summary:</strong>
-
-                    <p class="correct-text">
-                        ✓ Correct findings: {{ found_count.value }}
-                    </p>
-
-                    <p class="incorrect-text">
-                        ✗ Missed findings: {{ missed_count.value }}
-                    </p>
-
-                    <p class="partial-text">
-                        ! Incorrect selections: {{ wrong_count.value }}
-                    </p>
-
-                    <p>
-                        You identified {{ found_count.value }}
-                        out of {{ correct_ids|length }}
-                        suspicious details.
-                    </p>
-
-                </div>
-
-                {# ------------------------------------------
-                   FIND MISTAKES: Q3
-                   ------------------------------------------ #}
-
-                {% if mode == 'find_mistakes' %}
-
-                    <h4>Review the suspicious details</h4>
-
-                    {% for mistake in candidates %}
-
-                        {% if mistake.id|string in selected_ids %}
-
-                            {% if mistake.id|string in correct_ids %}
-
-                                <div class="mistake-item found">
-
-                                    <strong class="correct-text">
-                                        ✓ Correctly identified
-                                    </strong>
-
-                                    <br>
-
-                                    {{ mistake.text }}
-
-                                </div>
-
-                            {% else %}
-
-                                <div class="mistake-item wrong">
-
-                                    <strong class="partial-text">
-                                        ! Incorrect selection
-                                    </strong>
-
-                                    <br>
-
-                                    {{ mistake.text }}
-
-                                </div>
-
-                            {% endif %}
-
-                        {% elif mistake.id|string in correct_ids %}
-
-                            <div class="mistake-item missed">
-
-                                <strong class="incorrect-text">
-                                    ✗ You missed this
-                                </strong>
-
-                                <br>
-
-                                {{ mistake.text }}
-
-                            </div>
-
-                        {% else %}
-
-                            <div class="mistake-item">
-
-                                <strong>
-                                    Not selected
-                                </strong>
-
-                                <br>
-
-                                {{ mistake.text }}
-
-                            </div>
-
-                        {% endif %}
-
-                    {% endfor %}
-
-                {% endif %}
-
-
-                {# ------------------------------------------
-                   CLICK ERRORS: Q2, Q4 AND Q8
-                   ------------------------------------------ #}
-
-                {% if mode == 'click_errors' %}
-
-                    <h4>Review the email investigation</h4>
-
-                    <p>
-                        Below are the sender-address and email-body
-                        details that you could investigate.
-                    </p>
-
-                    {% for part in x.sender_parts|default([]) %}
-
-                        {% if part.clickable %}
-
-                            {% if part.id|string in selected_ids %}
-
-                                {% if part.id|string in correct_ids %}
-
-                                    <div class="mistake-item found">
-
-                                        <strong class="correct-text">
-                                            ✓ Correctly identified
-                                        </strong>
-
-                                        <br>
-
-                                        {{ part.text|default(part.value|default(part.id)) }}
-
-                                    </div>
-
-                                {% else %}
-
-                                    <div class="mistake-item wrong">
-
-                                        <strong class="partial-text">
-                                            ! Incorrect selection
-                                        </strong>
-
-                                        <br>
-
-                                        {{ part.text|default(part.value|default(part.id)) }}
-
-                                    </div>
-
-                                {% endif %}
-
-                            {% elif part.id|string in correct_ids %}
-
-                                <div class="mistake-item missed">
-
-                                    <strong class="incorrect-text">
-                                        ✗ You missed this
-                                    </strong>
-
-                                    <br>
-
-                                    {{ part.text|default(part.value|default(part.id)) }}
-
-                                </div>
-
-                            {% endif %}
-
-                        {% endif %}
-
-                    {% endfor %}
-
-
-                    {% for part in x.email_parts|default([]) %}
-
-                        {% if part.clickable %}
-
-                            {% if part.id|string in selected_ids %}
-
-                                {% if part.id|string in correct_ids %}
-
-                                    <div class="mistake-item found">
-
-                                        <strong class="correct-text">
-                                            ✓ Correctly identified
-                                        </strong>
-
-                                        <br>
-
-                                        {{ part.text|default(part.value|default(part.id)) }}
-
-                                    </div>
-
-                                {% else %}
-
-                                    <div class="mistake-item wrong">
-
-                                        <strong class="partial-text">
-                                            ! Incorrect selection
-                                        </strong>
-
-                                        <br>
-
-                                        {{ part.text|default(part.value|default(part.id)) }}
-
-                                    </div>
-
-                                {% endif %}
-
-                            {% elif part.id|string in correct_ids %}
-
-                                <div class="mistake-item missed">
-
-                                    <strong class="incorrect-text">
-                                        ✗ You missed this
-                                    </strong>
-
-                                    <br>
-
-                                    {{ part.text|default(part.value|default(part.id)) }}
-
-                                </div>
-
-                            {% endif %}
-
-                        {% endif %}
-
-                    {% endfor %}
-
-                {% endif %}
-
-
-                <div class="explanation">
-
-                    <strong>Why is this email suspicious?</strong>
-
-                    <br>
-
-                    {{ x.explanation }}
-
-                </div>
-
-            </article>
-
-
-        {% else %}
-
-            {# ------------------------------------------
-               MULTIPLE-CHOICE QUESTION REVIEW
-               ------------------------------------------ #}
-
-            {% set is_correct = selected == x.correct %}
-
-            <article class="question-result
-                {% if is_correct %}correct{% else %}incorrect{% endif %}">
-
-                <h3>
-                    Question {{ loop.index }}: {{ x.title }}
-                </h3>
-
-                {% if is_correct %}
-
-                    <p class="status correct-text">
-                        ✓ CORRECT ANSWER
-                    </p>
-
-                {% else %}
-
-                    <p class="status incorrect-text">
-                        ✗ INCORRECT ANSWER
-                    </p>
-
-                {% endif %}
-
-                <div class="answer">
-
-                    <strong>Your answer:</strong>
-
-                    <br>
-
-                    {% if selected is integer and selected >= 0 and selected < x.options|length %}
-
-                        {{ 'ABCD'[selected] }}.
-                        {{ x.options[selected] }}
-
-                    {% else %}
-
-                        No valid answer recorded.
-
-                    {% endif %}
-
-                </div>
-
-                <div class="answer">
-
-                    <strong>Correct answer:</strong>
-
-                    <br>
-
-                    <span class="correct-text">
-
-                        {{ 'ABCD'[x.correct] }}.
-                        {{ x.options[x.correct] }}
-
-                    </span>
-
-                </div>
-
-                <div class="explanation">
-
-                    <strong>Why is this correct?</strong>
-
-                    <br>
-
-                    {{ x.explanation }}
-
-                </div>
-
-            </article>
-
-        {% endif %}
+        </article>
 
     {% endfor %}
 
     <div class="result-actions">
-
         <a href="/logout">Finish and Sign Out</a>
-
     </div>
 
 </main>
