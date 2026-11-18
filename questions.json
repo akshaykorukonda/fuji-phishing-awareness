@@ -20,86 +20,56 @@
       "Forward the email to colleagues to check whether they received it."
     ],
     "correct": 0,
-    "explanation": "The sender uses a lookalike domain with a zero replacing the letter 'o'. Attackers often imitate trusted brands and create urgency to make employees click malicious links. Report the message through the approved security reporting process."
+    "explanation": "The sender uses a lookalike domain with a zero replacing the letter 'o'. Attackers imitate trusted brands and create urgency to make employees click malicious links. Report the message through the approved security reporting process."
   },
   {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "click_errors",
-    "title": "Investigation 02: Fake Fuji Silvertech Password Reset",
-    "sender": "IT Support",
+    "category": "EMAIL COMPARISON",
+    "mode": "multiple_choice",
+    "title": "Investigation 02: Identify the Legitimate Fuji Silvertech Email",
+    "sender": "Fuji Silvertech IT Support",
     "sender_initial": "I",
-    "sender_email": "it-support@fuji-silvertec-secure.example",
-    "sender_parts": [
-      {
-        "text": "it-support@",
-        "clickable": false
-      },
-      {
-        "id": "f1",
-        "text": "fuji-silvertec-secure.example",
-        "clickable": true,
-        "correct": true
-      }
-    ],
+    "sender_email": "Compare Email A and Email B",
     "timestamp": "Today, 10:25 AM",
-    "subject": "URGENT: Your Company Account Will Be Deactivated",
-    "scenario": "",
-    "email_parts": [
+    "subject": "Company Password Maintenance Notification",
+    "scenario": "You receive two emails that appear to come from Fuji Silvertech IT Support. Both discuss company password maintenance. One is legitimate, while the other is designed to steal employee credentials.",
+    "comparison": true,
+    "emails": [
       {
-        "text": "Dear Employee,\n\nYour Fuji Silvertech account will be ",
-        "clickable": false
+        "label": "EMAIL A",
+        "sender": "IT Support",
+        "sender_email": "it-support@fujisilvertech.com",
+        "timestamp": "Today, 10:20 AM",
+        "subject": "Scheduled Password Maintenance",
+        "body": "Dear Employee,\n\nThe IT team will be conducting scheduled password maintenance this weekend.\n\nNo immediate action is required. If you need to update your password, please access the company portal using your usual bookmarked address.\n\nFor assistance, contact the IT Helpdesk through the approved internal support channel.\n\nRegards,\nIT Support Team",
+        "link": "",
+        "attachment": ""
       },
       {
-        "id": "f2",
-        "text": "deactived",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " today due to a security issue. Please ",
-        "clickable": false
-      },
-      {
-        "id": "f3",
-        "text": "complet",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " the account verification process immediately.\n\nUse the following link to verify your account:\n",
-        "clickable": false
-      },
-      {
-        "id": "f4",
-        "text": "https://fuji-silvertec-secure.example/verify",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": "\n\nYou must enter your password and MFA code to avoid account suspension.\n\nThank you,\nIT Support Team",
-        "clickable": false
-      },
-      {
-        "id": "f5",
-        "text": "account verification",
-        "clickable": true,
-        "correct": false
+        "label": "EMAIL B",
+        "sender": "IT Support",
+        "sender_email": "it-support@fuji-silvertec-secure.example",
+        "timestamp": "Today, 10:25 AM",
+        "subject": "URGENT: Your Company Account Will Be Deactivated",
+        "body": "Dear Employee,\n\nYour Fuji Silvertech account will be deactivated today due to a security issue.\n\nYou must complete the account verification process immediately.\n\nEnter your company password and MFA code using the link below to avoid account suspension.\n\nRegards,\nIT Support Team",
+        "link": "https://fuji-silvertec-secure.example/verify",
+        "attachment": ""
       }
     ],
-    "display_link": "https://fuji-silvertec-secure.example/verify",
+    "display_link": "",
     "attachment": "",
-    "email_note": "Select the suspicious words or domains directly inside the email, including the sender address.",
-    "correct_errors": [
-      "f1",
-      "f2",
-      "f3",
-      "f4"
+    "email_note": "Compare the sender addresses, domains, urgency, links and information requested.",
+    "options": [
+      "Email A is legitimate and Email B is suspicious.",
+      "Email B is legitimate and Email A is suspicious.",
+      "Both emails are legitimate.",
+      "Both emails are phishing."
     ],
-    "explanation": "The sender domain is not the official Fuji Silvertech domain. The email contains spelling errors such as 'deactived' and 'complet'. The link uses the same suspicious domain, and the message attempts to collect passwords and MFA codes. Never provide credentials through an email link."
+    "correct": 0,
+    "explanation": "Email A uses the official company domain and directs employees to access the company portal through their usual bookmarked address. Email B uses an unverified lookalike domain, creates urgency and asks for a password and MFA code. Never provide credentials through an email link."
   },
   {
     "category": "PHISHING INVESTIGATION",
-    "mode": "find_mistakes",
+    "mode": "multiple_choice",
     "title": "Investigation 03: The Shared Document Trap",
     "sender": "Document Collaboration Team",
     "sender_initial": "D",
@@ -109,103 +79,60 @@
     "scenario": "Hello,\n\nA confidential document has been shared with you. You must open it within 30 minutes or your access will be permanently removed.\n\nTo view the document, sign in using your company email, password and MFA code.\n\nIf you have any questions, do not contact IT because this is an automated sharing process.\n\nRegards,\nDocument Collaboration Team",
     "display_link": "https://share-access.example/document",
     "attachment": "Confidential_Project_Document.pdf",
-    "email_note": "Select the three suspicious findings from the list below.",
-    "mistakes": [
-      {
-        "id": "d1",
-        "text": "The sender and document link use an unverified external domain rather than an approved company collaboration service."
-      },
-      {
-        "id": "d2",
-        "text": "The message creates artificial urgency by threatening to remove document access within 30 minutes."
-      },
-      {
-        "id": "d3",
-        "text": "The message requests the employee's password and MFA code and discourages contacting IT."
-      }
+    "email_note": "The message contains an unexpected document-sharing request.",
+    "options": [
+      "Open the document immediately because it mentions a colleague.",
+      "Enter your company credentials to prevent losing access.",
+      "Verify the document-sharing request through a trusted channel and report it if suspicious.",
+      "Forward the document to your personal email account."
     ],
-    "correct_mistakes": [
-      "d1",
-      "d2",
-      "d3"
-    ],
-    "options": [],
+    "correct": 2,
     "explanation": "Unexpected document-sharing messages should be verified through a trusted channel. External domains, artificial deadlines, credential requests and instructions not to contact IT are strong warning signs."
   },
   {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "click_errors",
-    "title": "Investigation 04: Fake HR Salary Revision",
+    "category": "EMAIL COMPARISON",
+    "mode": "multiple_choice",
+    "title": "Investigation 04: Identify the Legitimate HR Salary Email",
     "sender": "Human Resources",
     "sender_initial": "H",
-    "sender_email": "hr-payroll@fujisilvertech-careers.example",
-    "sender_parts": [
-      {
-        "text": "hr-payroll@",
-        "clickable": false
-      },
-      {
-        "id": "h1",
-        "text": "fujisilvertech-careers.example",
-        "clickable": true,
-        "correct": true
-      }
-    ],
+    "sender_email": "Compare Email A and Email B",
     "timestamp": "Today, 12:05 PM",
-    "subject": "Important: Annual Salery Revision - Action Required",
-    "scenario": "",
-    "email_parts": [
+    "subject": "Annual Salary Revision Notification",
+    "scenario": "Two emails arrive announcing the annual salary revision. Both appear to come from Human Resources. One follows a normal company communication process, while the other attempts to collect sensitive employee information.",
+    "comparison": true,
+    "emails": [
       {
-        "text": "Dear Employee,\n\nYour annual ",
-        "clickable": false
+        "label": "EMAIL A",
+        "sender": "Human Resources",
+        "sender_email": "hr@fujisilvertech.com",
+        "timestamp": "Today, 12:00 PM",
+        "subject": "Annual Salary Revision Announcement",
+        "body": "Dear Employee,\n\nThe annual salary revision process has been completed.\n\nEmployees will receive their individual revision letters through the approved HR communication channel.\n\nNo password, banking credentials or additional personal information is required through email.\n\nFor questions, please contact the HR department using the official internal contact details.\n\nRegards,\nHuman Resources Team",
+        "link": "",
+        "attachment": ""
       },
       {
-        "id": "h2",
-        "text": "salery",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " revision has been approved. Please ",
-        "clickable": false
-      },
-      {
-        "id": "h3",
-        "text": "compleate",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " your employee information update using the link below.\n\n",
-        "clickable": false
-      },
-      {
-        "id": "h4",
-        "text": "https://fujisilvertech-careers.example/payroll",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": "\n\nYou must provide your bank account details and current company password to confirm your revised salary.\n\nRegards,\nHuman Resources",
-        "clickable": false
-      },
-      {
-        "id": "h5",
-        "text": "annual salary revision",
-        "clickable": true,
-        "correct": false
+        "label": "EMAIL B",
+        "sender": "Human Resources",
+        "sender_email": "hr-payroll@fujisilvertech-careers.example",
+        "timestamp": "Today, 12:05 PM",
+        "subject": "URGENT: Annual Salery Revision - Action Required",
+        "body": "Dear Employee,\n\nYour annual salery revision has been approved. Please compleate your employee information update immediately.\n\nUse the link below to confirm your revised salary.\n\nYou must provide your bank account details and current company password to receive your revised salary.\n\nRegards,\nHuman Resources",
+        "link": "https://fujisilvertech-careers.example/payroll",
+        "attachment": ""
       }
     ],
-    "display_link": "https://fujisilvertech-careers.example/payroll",
+    "display_link": "",
     "attachment": "",
-    "email_note": "Select suspicious words or domains directly inside the email, including the sender address.",
-    "correct_errors": [
-      "h1",
-      "h2",
-      "h3",
-      "h4"
+    "email_note": "Compare the sender domain, spelling, requested information and communication process.",
+    "options": [
+      "Email A is legitimate and Email B is suspicious.",
+      "Email B is legitimate and Email A is suspicious.",
+      "Both emails are legitimate.",
+      "Both emails are phishing."
     ],
-    "explanation": "The sender domain is not the official company domain. The message contains spelling errors and redirects employees to an unverified website. HR should not request an employee's company password to process a salary revision. Verify payroll-related requests directly with HR."
+    "correct": 0,
+    "explanation": "Email A uses the official company domain and directs employees to the approved HR communication channel. Email B uses an unverified domain, contains spelling mistakes and requests banking details and a company password. HR should never request company passwords through email."
   },
   {
     "category": "PHISHING INVESTIGATION",
@@ -274,90 +201,49 @@
     "explanation": "Attackers often use genuine workplace topics such as benefits enrollment to make fraudulent requests seem believable. Verify the announcement directly with HR and use only approved company systems."
   },
   {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "click_errors",
-    "title": "Investigation 08: Fake Google Storage Warning",
+    "category": "EMAIL COMPARISON",
+    "mode": "multiple_choice",
+    "title": "Investigation 08: Identify the Legitimate Google Storage Email",
     "sender": "Google Workspace Storage",
     "sender_initial": "G",
-    "sender_email": "storage-alert@google-workspace-quota.example",
-    "sender_parts": [
-      {
-        "text": "storage-alert@",
-        "clickable": false
-      },
-      {
-        "id": "g1",
-        "text": "google-workspace-quota.example",
-        "clickable": true,
-        "correct": true
-      }
-    ],
+    "sender_email": "Compare Email A and Email B",
     "timestamp": "Today, 3:45 PM",
-    "subject": "URGENT: Your Google Storage Is Almost Full",
-    "scenario": "",
-    "email_parts": [
+    "subject": "Google Storage Usage Notification",
+    "scenario": "You receive two storage notifications. Both claim that your cloud storage requires attention. Compare the sender, message and requested action to identify the legitimate notification.",
+    "comparison": true,
+    "emails": [
       {
-        "text": "Dear User,\n\nYour cloud storage is almost full. Immediate action is ",
-        "clickable": false
+        "label": "EMAIL A",
+        "sender": "Google Workspace",
+        "sender_email": "no-reply@google.com",
+        "timestamp": "Today, 3:40 PM",
+        "subject": "Google Account Storage Usage Update",
+        "body": "Hello,\n\nThis is a notification about the storage usage associated with your Google Account.\n\nYou can review your current storage usage by navigating directly to your Google Account or Google One settings.\n\nIf you need additional storage, review the available options through the official Google website.\n\nGoogle Workspace Support",
+        "link": "https://one.google.com/",
+        "attachment": ""
       },
       {
-        "id": "g2",
-        "text": "requird",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " to prevent your files from being deleted.\n\nYou are currently ",
-        "clickable": false
-      },
-      {
-        "id": "g3",
-        "text": "recieving",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " this notification because your storage limit has been exceeded.\n\nUpgrade or verify your storage immediately:\n",
-        "clickable": false
-      },
-      {
-        "id": "g4",
-        "text": "https://google-workspace-quota.example/upgrade",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": "\n\nYour files will be removed ",
-        "clickable": false
-      },
-      {
-        "id": "g5",
-        "text": "immediatly",
-        "clickable": true,
-        "correct": true
-      },
-      {
-        "text": " unless you enter your account password and payment details.\n\nGoogle Workspace Support",
-        "clickable": false
-      },
-      {
-        "id": "g6",
-        "text": "cloud storage",
-        "clickable": true,
-        "correct": false
+        "label": "EMAIL B",
+        "sender": "Google Workspace Storage",
+        "sender_email": "storage-alert@google-workspace-quota.example",
+        "timestamp": "Today, 3:45 PM",
+        "subject": "URGENT: Your Google Storage Is Almost Full",
+        "body": "Dear User,\n\nYour cloud storage is almost full. Immediate action is requird to prevent your files from being deleted.\n\nYou are recieving this notification because your storage limit has been exceeded.\n\nUpgrade or verify your storage immediately using the link below.\n\nYour files will be removed immediatly unless you enter your account password and payment details.\n\nGoogle Workspace Support",
+        "link": "https://google-workspace-quota.example/upgrade",
+        "attachment": ""
       }
     ],
-    "display_link": "https://google-workspace-quota.example/upgrade",
+    "display_link": "",
     "attachment": "",
-    "email_note": "Select suspicious words or domains directly inside the email, including the sender address.",
-    "correct_errors": [
-      "g1",
-      "g2",
-      "g3",
-      "g4",
-      "g5"
+    "email_note": "Compare the sender domain, spelling mistakes, urgency and destination links.",
+    "options": [
+      "Email A is legitimate and Email B is suspicious.",
+      "Email B is legitimate and Email A is suspicious.",
+      "Both emails are legitimate.",
+      "Both emails are phishing."
     ],
-    "explanation": "The sender domain is not an official Google domain. The email contains spelling mistakes, uses threats about immediate file deletion, and asks for account credentials and payment details through an unverified link. Do not enter information through the link."
+    "correct": 0,
+    "explanation": "Email A directs the employee to Google's official website to review storage usage. Email B uses an unverified lookalike domain, contains spelling mistakes, threatens immediate deletion and requests a password and payment details. Never provide credentials or payment details through an unverified email link."
   },
   {
     "category": "PHISHING INVESTIGATION",
