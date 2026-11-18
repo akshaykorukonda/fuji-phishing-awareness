@@ -260,8 +260,6 @@
             border: 1px solid #e6a0a0;
         }
 
-        /* Find the mistakes */
-
         .mistake-instructions {
             background: #eaf3ff;
             color: #174477;
@@ -340,7 +338,7 @@
             }
         }
 
-        /* 25-second animated training scene */
+        /* Animated training scene */
 
         .video-simulation {
             margin: 18px 0 24px;
@@ -563,3 +561,898 @@
         }
     </style>
 </head>
+
+<body>
+
+<header>
+    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+    <span>{{ email }}</span>
+</header>
+
+<main>
+
+    <div class="progress">
+        <span id="counter">Question 1 of {{ questions|length }}</span>
+        <div><i id="bar"></i></div>
+    </div>
+
+    <form id="quiz" onsubmit="return false;">
+
+        {% for q in questions %}
+        {% set question_index = loop.index0 %}
+
+        <section class="q"
+            data-correct="{{ q.correct|default(-1) }}"
+            data-explanation="{{ q.explanation|default('') }}"
+            data-mode="{{ q.mode|default('multiple_choice') }}"
+            style="display:{% if loop.first %}block{% else %}none{% endif %}">
+
+            <p class="tag">
+                {{ q.category }} • {{ loop.index }}/{{ questions|length }}
+            </p>
+
+            <h1>{{ q.title }}</h1>
+
+            <div class="video-simulation"
+                data-title="{{ q.title|e }}"
+                data-sender="{{ q.sender|default('Workplace contact')|e }}"
+                data-subject="{{ q.subject|default(q.title)|e }}"
+                data-mode="{{ q.mode|default('multiple_choice') }}">
+
+                <div class="video-topline">
+                    <strong>Animated security scenario</strong>
+                    <span class="video-duration">25-second simulation</span>
+                </div>
+
+                <div class="animation-stage">
+
+                    <div class="animation-person" aria-hidden="true">
+                        <div class="person-head"></div>
+                        <div class="person-body"></div>
+                    </div>
+
+                    <div class="animation-content">
+
+                        <small class="scene-kicker">
+                            Workplace simulation
+                        </small>
+
+                        <h3 class="scene-heading">
+                            A new message arrives
+                        </h3>
+
+                        <p class="scene-description">
+                            An employee receives a message and needs to decide how to respond.
+                        </p>
+
+                        <div class="scene-notification">
+                            <span>✉</span>
+                            <span class="scene-notification-text">
+                                New email notification
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="scene-progress" aria-label="Animation progress">
+                    <div class="scene-progress-fill"></div>
+                </div>
+
+                <p class="scene-caption" aria-live="polite">
+                    The scenario will play automatically before you answer.
+                </p>
+
+                <div class="scene-controls">
+                    <button type="button" class="scene-replay">
+                        ↻ Replay scene
+                    </button>
+
+                    <button type="button" class="scene-skip">
+                        Skip animation
+                    </button>
+
+                    <span class="scene-countdown" aria-live="off">
+                        25s
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="evidence">
+
+                <p class="evidence-label">EMAIL EVIDENCE</p>
+
+                <div class="email-card">
+
+                    <div class="email-top">
+                        <span>Mail • Message preview</span>
+
+                        <span class="email-time">
+                            {{ q.timestamp|default('Today, 9:41 AM') }}
+                        </span>
+                    </div>
+
+                    <h2 class="email-subject">
+                        {{ q.subject|default(q.title) }}
+                    </h2>
+
+                    <div class="sender-row">
+
+                        <div class="sender-avatar">
+                            {{ q.sender_initial|default('M') }}
+                        </div>
+
+                        <div class="sender-details">
+
+                            <p>
+                                <strong>
+                                    {{ q.sender|default('Workplace Support') }}
+                                </strong>
+                            </p>
+
+                            <p class="sender-address">
+                                {{ q.sender_email|default('support@example.com') }}
+                            </p>
+
+                            <p class="sender-address">
+                                To: {{ email }}
+                            </p>
+
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="email-body">{{ q.scenario }}</div>
+
+                    {% if q.display_link|default('') %}
+                    <div>
+                        <span class="email-link">
+                            {{ q.display_link }}
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    {% if q.actual_link|default('') %}
+                    <div class="email-warning">
+                        <strong>Link inspection:</strong><br>
+                        Displayed link: {{ q.display_link }}<br>
+                        Actual destination: {{ q.actual_link }}
+                    </div>
+                    {% endif %}
+
+                    {% if q.attachment|default('') %}
+                    <div class="email-attachment">
+                        <strong>Attachment</strong><br>
+                        📎 {{ q.attachment }}
+                    </div>
+                    {% endif %}
+
+                    {% if q.email_note|default('') %}
+                    <div class="email-warning">
+                        {{ q.email_note }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                {% if q.category == 'OFFICE FRAUD INVESTIGATION' %}
+
+                <div class="document-preview">
+
+                    <p class="evidence-label">
+                        ATTACHED BUSINESS DOCUMENT PREVIEW
+                    </p>
+
+                    <div class="document-sheet">
+
+                        <div class="document-head">
+
+                            <div>
+                                <strong>
+                                    {% if 'Vendor Bank' in q.title %}
+                                        SUPPLIER BANK DETAIL NOTICE
+                                    {% elif 'Duplicate Invoice' in q.title %}
+                                        SUPPLIER INVOICE
+                                    {% elif 'Purchase Order' in q.title %}
+                                        PURCHASE ORDER APPROVAL
+                                    {% else %}
+                                        EMPLOYEE PAYROLL CHANGE REQUEST
+                                    {% endif %}
+                                </strong>
+
+                                <div style="font-size:11px;color:#64748b;margin-top:5px;">
+                                    Fuji Silvertech • Training evidence preview
+                                </div>
+                            </div>
+
+                            <span class="document-stamp">
+                                SIMULATION
+                            </span>
+
+                        </div>
+
+                        <div class="document-lines">
+
+                            <div>
+                                <strong>Document:</strong><br>
+                                {{ q.attachment|default('Internal_Request.pdf') }}
+                            </div>
+
+                            <div>
+                                <strong>Reference:</strong><br>
+
+                                {% if 'Duplicate Invoice' in q.title %}
+                                    INV-2481
+                                {% elif 'Purchase Order' in q.title %}
+                                    PO-URGENT-APPROVAL
+                                {% elif 'Vendor Bank' in q.title %}
+                                    SUPPLIER-CHANGE
+                                {% else %}
+                                    PAYROLL-CHANGE
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <strong>Requested action:</strong><br>
+
+                                {% if 'Vendor Bank' in q.title %}
+                                    Replace beneficiary bank details
+                                {% elif 'Duplicate Invoice' in q.title %}
+                                    Release another payment
+                                {% elif 'Purchase Order' in q.title %}
+                                    Release order before workflow approval
+                                {% else %}
+                                    Change employee salary account
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <strong>Processing status:</strong><br>
+                                Awaiting independent verification
+                            </div>
+
+                        </div>
+
+                        <table class="document-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Control item</th>
+                                    <th>Evidence shown</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% if 'Vendor Bank' in q.title %}
+
+                                <tr>
+                                    <td>Bank detail change</td>
+                                    <td>New beneficiary details attached</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Prior verification</td>
+                                    <td>Not recorded in this request</td>
+                                </tr>
+
+                                {% elif 'Duplicate Invoice' in q.title %}
+
+                                <tr>
+                                    <td>Invoice reference</td>
+                                    <td>INV-2481 — second copy</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Previous payment reconciliation</td>
+                                    <td>Not yet confirmed</td>
+                                </tr>
+
+                                {% elif 'Purchase Order' in q.title %}
+
+                                <tr>
+                                    <td>Approval evidence</td>
+                                    <td>Verbal approval claimed</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Workflow record</td>
+                                    <td>Formal approval pending</td>
+                                </tr>
+
+                                {% else %}
+
+                                <tr>
+                                    <td>Employee confirmation</td>
+                                    <td>Not available</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Payroll verification</td>
+                                    <td>Pending</td>
+                                </tr>
+
+                                {% endif %}
+
+                            </tbody>
+                        </table>
+
+                        <div class="document-alert">
+                            <strong>Review point:</strong>
+                            This is a fictional training document. Do not treat the
+                            presence of a document, reference number or familiar
+                            branding as proof of authorization.
+                        </div>
+
+                    </div>
+
+                    <p class="simulation-note">
+                        Illustrative document preview • No real payment or employee data
+                    </p>
+
+                </div>
+
+                {% elif q.attachment|default('') %}
+
+                <div class="document-preview">
+
+                    <p class="evidence-label">ATTACHMENT PREVIEW</p>
+
+                    <div class="document-sheet">
+
+                        <div class="document-head">
+                            <strong>{{ q.attachment }}</strong>
+                            <span class="document-stamp">UNVERIFIED</span>
+                        </div>
+
+                        <p style="font-size:13px;line-height:1.6;">
+                            This simulated attachment has not been opened.
+                            Assess its source, file type and business context
+                            before deciding whether it is safe.
+                        </p>
+
+                        <div class="document-alert">
+                            Never enable macros, scan unexpected QR codes or enter
+                            credentials just because an email includes an attachment.
+                        </div>
+
+                    </div>
+
+                    <p class="simulation-note">
+                        Illustrative attachment preview • Training simulation
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            {% if q.mode|default('multiple_choice') == 'find_mistakes' %}
+
+            <h2 class="question-heading">
+                Find the mistakes in this email
+            </h2>
+
+            <div class="mistake-instructions">
+                <strong>Investigation task:</strong>
+                Carefully inspect the email. Select every suspicious detail
+                you identify. There are no multiple-choice answers.
+            </div>
+
+            <div class="mistake-list">
+                {% for mistake in q.mistakes %}
+                <button
+                    type="button"
+                    class="mistake-item"
+                    data-mistake-id="{{ mistake.id }}"
+                    aria-pressed="false"
+                >
+                    {{ mistake.text }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <p class="mistake-count">
+                Selected: <span class="selected-count">0</span>
+            </p>
+
+            {% else %}
+
+            <h2 class="question-heading">
+                If you received this message, what would you do?
+            </h2>
+
+            <div class="options">
+                {% for option in q.options %}
+                <label>
+
+                    <input
+                        type="radio"
+                        name="q{{ question_index }}"
+                        value="{{ loop.index0 }}"
+                    >
+
+                    <span>
+                        {{ 'ABCD'[loop.index0] }}. {{ option }}
+                    </span>
+
+                </label>
+                {% endfor %}
+            </div>
+
+            {% endif %}
+
+            <div class="answer-feedback" hidden aria-live="polite"></div>
+
+            <p class="submit-error" aria-live="polite"></p>
+
+            <div class="nav">
+
+                <button
+                    type="button"
+                    class="secondary"
+                    onclick="move(-1)"
+                    {% if loop.first %}disabled{% endif %}
+                >
+                    Previous
+                </button>
+
+                <button type="button" onclick="move(1)">
+                    {% if loop.last %}
+                        Submit assessment
+                    {% else %}
+                        Next question
+                    {% endif %}
+                </button>
+
+            </div>
+
+        </section>
+
+        {% endfor %}
+
+    </form>
+
+</main>
+
+<footer>
+    For any queries, contact support.soc@fujisilvertech.com
+</footer>
+
+<script>
+    let current = 0;
+    let submitting = false;
+
+    const sections = [...document.querySelectorAll('.q')];
+    const counter = document.getElementById('counter');
+    const bar = document.getElementById('bar');
+    const total = sections.length;
+
+    sections.forEach(section => {
+
+        section.querySelectorAll('.mistake-item').forEach(button => {
+
+            button.addEventListener('click', () => {
+
+                if (submitting) return;
+
+                button.classList.toggle('selected');
+
+                const selected =
+                    button.classList.contains('selected');
+
+                button.setAttribute('aria-pressed', String(selected));
+
+                const count = section.querySelectorAll(
+                    '.mistake-item.selected'
+                ).length;
+
+                section.querySelector('.selected-count').textContent =
+                    count;
+
+            });
+
+        });
+
+        const radios = section.querySelectorAll(
+            'input[type="radio"]'
+        );
+
+        const feedback = section.querySelector('.answer-feedback');
+        const correctIndex = Number(section.dataset.correct);
+        const explanation = section.dataset.explanation;
+
+        radios.forEach(radio => {
+
+            radio.addEventListener('change', () => {
+
+                const selectedIndex = Number(radio.value);
+
+                const correctRadio = [...radios].find(
+                    item => Number(item.value) === correctIndex
+                );
+
+                if (!correctRadio || !feedback) return;
+
+                const correctAnswer = correctRadio
+                    .closest('label')
+                    .innerText.trim();
+
+                feedback.hidden = false;
+
+                if (selectedIndex === correctIndex) {
+
+                    feedback.textContent =
+                        '✓ Correct! ' + explanation;
+
+                    feedback.className =
+                        'answer-feedback correct';
+
+                } else {
+
+                    feedback.textContent =
+                        '✗ Incorrect. Correct answer: ' +
+                        correctAnswer + '. ' + explanation;
+
+                    feedback.className =
+                        'answer-feedback incorrect';
+
+                }
+
+            });
+
+        });
+
+    });
+
+
+    let animationInterval = null;
+
+    function playScene(section) {
+
+        if (animationInterval) {
+            clearInterval(animationInterval);
+            animationInterval = null;
+        }
+
+        const panel = section.querySelector('.video-simulation');
+
+        if (!panel) return;
+
+        const heading = panel.querySelector('.scene-heading');
+        const description = panel.querySelector('.scene-description');
+        const kicker = panel.querySelector('.scene-kicker');
+        const notification = panel.querySelector('.scene-notification-text');
+        const caption = panel.querySelector('.scene-caption');
+        const countdown = panel.querySelector('.scene-countdown');
+        const fill = panel.querySelector('.scene-progress-fill');
+        const person = panel.querySelector('.animation-person');
+        const replay = panel.querySelector('.scene-replay');
+        const skip = panel.querySelector('.scene-skip');
+
+        const sender = panel.dataset.sender || 'Workplace contact';
+        const subject = panel.dataset.subject || 'New message';
+        const mode = panel.dataset.mode;
+
+        const stages = [
+
+            {
+                title: 'A message arrives',
+                description: 'A workplace notification appears. Before opening it, notice who sent it and why.',
+                notification: sender + ' sent a message',
+                caption: 'Scene 1 of 5 • An unexpected message arrives',
+                kicker: '00:00 — Notification',
+                mood: ''
+            },
+
+            {
+                title: 'The employee opens the message',
+                description: 'The subject and message content appear. Familiar branding alone does not prove authenticity.',
+                notification: subject,
+                caption: 'Scene 2 of 5 • Read the message carefully',
+                kicker: '00:05 — Message preview',
+                mood: ''
+            },
+
+            {
+                title: 'Check the details',
+                description: mode === 'find_mistakes'
+                    ? 'Inspect the sender, links, attachments, requests and any pressure to act quickly.'
+                    : 'Check the sender address, request, links and whether the action fits normal company process.',
+                notification: 'Inspect sender • link • request',
+                caption: 'Scene 3 of 5 • Look for warning signs',
+                kicker: '00:10 — Investigation',
+                mood: 'alert'
+            },
+
+            {
+                title: 'Pause before taking action',
+                description: 'Do not share credentials, approve unexpected MFA prompts, download unknown files or make unverified payments.',
+                notification: 'Pause and verify independently',
+                caption: 'Scene 4 of 5 • Think before you act',
+                kicker: '00:15 — Safety check',
+                mood: 'alert'
+            },
+
+            {
+                title: 'Make your decision',
+                description: 'Use the evidence in the message and choose the safest response in the question below.',
+                notification: 'Your decision matters',
+                caption: 'Scene 5 of 5 • Your turn to investigate',
+                kicker: '00:20 — Decision',
+                mood: 'safe'
+            }
+
+        ];
+
+        let elapsed = 0;
+
+        replay.disabled = true;
+
+        function renderStage() {
+
+            const stage = stages[Math.min(4, Math.floor(elapsed / 5))];
+
+            heading.textContent = stage.title;
+            description.textContent = stage.description;
+            notification.textContent = stage.notification;
+            caption.textContent = stage.caption;
+            kicker.textContent = stage.kicker;
+
+            person.classList.remove('alert', 'safe');
+
+            if (stage.mood) {
+                person.classList.add(stage.mood);
+            }
+
+            fill.style.width =
+                Math.min(100, elapsed / 25 * 100) + '%';
+
+            countdown.textContent =
+                Math.max(0, 25 - elapsed) + 's';
+
+        }
+
+        function finishScene(skipped) {
+
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+
+            fill.style.width = '100%';
+            countdown.textContent = 'Ready';
+
+            caption.textContent = skipped
+                ? 'Animation skipped • You can begin the investigation.'
+                : 'Simulation complete • You can now answer the question.';
+
+            heading.textContent = 'Your investigation starts now';
+
+            description.textContent =
+                'Review the evidence below and select your answer.';
+
+            notification.textContent = 'Choose your response below';
+            kicker.textContent = 'Scenario complete';
+
+            person.classList.remove('alert');
+            person.classList.add('safe');
+
+            replay.disabled = false;
+            skip.disabled = true;
+            skip.textContent = 'Animation completed';
+
+        }
+
+        function start() {
+
+            if (animationInterval) {
+                clearInterval(animationInterval);
+            }
+
+            elapsed = 0;
+
+            skip.disabled = false;
+            skip.textContent = 'Skip animation';
+
+            replay.disabled = true;
+
+            renderStage();
+
+            animationInterval = setInterval(() => {
+
+                elapsed += 1;
+
+                renderStage();
+
+                if (elapsed >= 25) {
+                    finishScene(false);
+                }
+
+            }, 1000);
+
+        }
+
+        skip.onclick = () => finishScene(true);
+        replay.onclick = start;
+
+        start();
+
+    }
+
+
+    function updateProgress() {
+
+        counter.textContent =
+            'Question ' + (current + 1) + ' of ' + total;
+
+        bar.style.width =
+            ((current + 1) / total * 100) + '%';
+
+    }
+
+
+    function hasAnswer(section) {
+
+        if (section.dataset.mode === 'find_mistakes') {
+
+            return section.querySelectorAll(
+                '.mistake-item.selected'
+            ).length > 0;
+
+        }
+
+        return !!section.querySelector(
+            'input[type="radio"]:checked'
+        );
+
+    }
+
+
+    function move(direction) {
+
+        if (submitting) return;
+
+        const currentSection = sections[current];
+        const error = currentSection.querySelector('.submit-error');
+
+        error.textContent = '';
+
+        if (direction === 1 && !hasAnswer(currentSection)) {
+
+            error.textContent =
+                'Please identify at least one suspicious detail or select an answer.';
+
+            return;
+        }
+
+        if (direction === 1 && current === total - 1) {
+            send();
+            return;
+        }
+
+        currentSection.style.display = 'none';
+
+        current = Math.max(
+            0,
+            Math.min(total - 1, current + direction)
+        );
+
+        sections[current].style.display = 'block';
+
+        updateProgress();
+
+        playScene(sections[current]);
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+    }
+
+
+    async function send() {
+
+        if (submitting) return;
+
+        const answers = sections.map(section => {
+
+            if (section.dataset.mode === 'find_mistakes') {
+
+                return [...section.querySelectorAll(
+                    '.mistake-item.selected'
+                )].map(button => button.dataset.mistakeId);
+
+            }
+
+            const selected = section.querySelector(
+                'input[type="radio"]:checked'
+            );
+
+            return selected ? Number(selected.value) : -1;
+
+        });
+
+        const incomplete = answers.some(answer =>
+            Array.isArray(answer)
+                ? answer.length === 0
+                : answer === -1
+        );
+
+        if (incomplete) {
+
+            alert('Please answer all questions before submitting.');
+
+            return;
+        }
+
+        submitting = true;
+
+        const buttons = document.querySelectorAll('.nav button');
+
+        buttons.forEach(button => {
+            button.disabled = true;
+        });
+
+        try {
+
+            const response = await fetch('/submit', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    answers: answers,
+
+                    attempt_id: Number("{{ attempt_id }}")
+
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Submission failed.');
+            }
+
+            if (!data.url) {
+
+                throw new Error(
+                    'The server did not return a results page.'
+                );
+
+            }
+
+            window.location.href = data.url;
+
+        } catch (error) {
+
+            submitting = false;
+
+            buttons.forEach(button => {
+                button.disabled = false;
+            });
+
+            alert(error.message);
+
+        }
+
+    }
+
+    updateProgress();
+
+    playScene(sections[current]);
+
+</script>
+
+</body>
+</html>
