@@ -2,1801 +2,1138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Phishing Awareness | Fuji Silvertech</title>
-    <link rel="stylesheet" href="/static/style.css">
-
-    <style>
-        .email-card {
-            background: #fff;
-            color: #202124;
-            border: 1px solid #dadce0;
-            border-radius: 12px;
-            margin: 22px 0;
-            padding: 22px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.06);
-            font-family: Arial, sans-serif;
-        }
-
-        .email-top {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            color: #5f6368;
-            font-size: 13px;
-        }
-
-        .email-subject {
-            font-size: 21px;
-            margin: 14px 0 22px;
-            color: #202124;
-            overflow-wrap: anywhere;
-        }
-
-        .sender-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .sender-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: #dbe7ff;
-            color: #2455a4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .sender-details {
-            min-width: 0;
-            font-size: 14px;
-        }
-
-        .sender-details p {
-            margin: 3px 0;
-            overflow-wrap: anywhere;
-        }
-
-        .sender-address, .email-time {
-            color: #5f6368;
-        }
-
-        .email-body {
-            line-height: 1.7;
-            font-size: 15px;
-            white-space: pre-line;
-            overflow-wrap: anywhere;
-            margin-top: 18px;
-        }
-
-        .email-link {
-            display: inline-block;
-            margin: 12px 0;
-            padding: 10px 17px;
-            border-radius: 5px;
-            background: #168bd2;
-            color: white;
-            font-weight: bold;
-            overflow-wrap: anywhere;
-        }
-
-        .email-attachment {
-            margin-top: 20px;
-            padding: 12px;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            background: #f8f9fa;
-            font-size: 13px;
-        }
-
-        .email-warning {
-            margin-top: 16px;
-            padding: 12px;
-            border-left: 4px solid #e2a03f;
-            background: #fff8e8;
-            color: #654b1d;
-            font-size: 13px;
-            overflow-wrap: anywhere;
-        }
-
-        .evidence-label {
-            font-size: 12px;
-            letter-spacing: 1px;
-            font-weight: bold;
-            color: #6b7280;
-        }
-
-        .question-heading {
-            margin-top: 28px;
-        }
-
-        .options label {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .options label span {
-            line-height: 1.55;
-        }
-
-        .options input {
-            flex-shrink: 0;
-            margin-top: 5px;
-        }
-
-        .answer-feedback {
-            margin-top: 18px;
-            padding: 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            line-height: 1.7;
-        }
-
-        .answer-feedback.correct {
-            background: #e8f7ed;
-            color: #176b37;
-            border: 1px solid #8bd3a2;
-        }
-
-        .answer-feedback.incorrect {
-            background: #fff0f0;
-            color: #a32626;
-            border: 1px solid #e6a0a0;
-        }
-
-        .mistake-instructions,
-        .click-instructions {
-            background: #eaf3ff;
-            color: #174477;
-            padding: 15px;
-            border-radius: 9px;
-            margin: 15px 0;
-            line-height: 1.6;
-        }
-
-        .mistake-list {
-            display: grid;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .mistake-item {
-            background: #fff;
-            color: #26364a;
-            border: 2px solid #d5dfeb;
-            border-radius: 9px;
-            padding: 14px;
-            cursor: pointer;
-            text-align: left;
-            width: 100%;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .mistake-item.selected {
-            border-color: #dc3545;
-            background: #fff0f0;
-            color: #a32626;
-        }
-
-        .mistake-item.correct-selection {
-            border-color: #198754;
-            background: #e8f7ed;
-            color: #176b37;
-        }
-
-        .mistake-item.wrong-selection {
-            border-color: #dc3545;
-            background: #fff0f0;
-            color: #a32626;
-        }
-
-        .mistake-item.missed-selection {
-            border-color: #d99b22;
-            background: #fff8e8;
-            color: #805b12;
-        }
-
-        .mistake-count,
-        .selection-summary {
-            margin-top: 13px;
-            font-weight: bold;
-            color: #174477;
-        }
-
-        .clickable-email {
-            line-height: 2.1;
-            font-size: 15px;
-            overflow-wrap: anywhere;
-        }
-
-        .email-token {
-            display: inline;
-            border: 0;
-            border-radius: 4px;
-            background: transparent;
-            color: inherit;
-            font: inherit;
-            padding: 2px 3px;
-            cursor: pointer;
-            overflow-wrap: anywhere;
-        }
-
-        .email-token:hover {
-            background: #fff0c2;
-            outline: 1px solid #e0a52b;
-        }
-
-        .email-token.selected {
-            background: #ffe0e0;
-            outline: 2px solid #d43b3b;
-            color: #a32626;
-        }
-
-        .email-token.correct-selection {
-            background: #d8f4e1;
-            outline: 2px solid #198754;
-            color: #176b37;
-        }
-
-        .email-token.wrong-selection {
-            background: #ffe0e0;
-            outline: 2px solid #dc3545;
-            color: #a32626;
-        }
-
-        .email-token.missed-selection {
-            background: #fff0c2;
-            outline: 2px solid #d99b22;
-            color: #805b12;
-        }
-
-        .email-token:disabled,
-        .mistake-item:disabled {
-            opacity: 1;
-            cursor: default;
-        }
-
-        .quiz-action {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 25px;
-        }
-
-        .quiz-action button {
-            border: 0;
-            border-radius: 8px;
-            padding: 13px 25px;
-            background: #087db4;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: .2s;
-        }
-
-        .quiz-action button:hover:not(:disabled) {
-            background: #075b78;
-            transform: translateY(-2px);
-        }
-
-        .quiz-action button:disabled {
-            opacity: .45;
-            cursor: not-allowed;
-        }
-
-        .submit-error {
-            color: #dc3545;
-            font-weight: bold;
-            margin-top: 12px;
-        }
-
-        /* ANIMATED SCENARIO */
-
-        .video-simulation {
-            margin: 18px 0 24px;
-            padding: 18px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #102b49, #164c73 60%, #087e9b);
-            color: #fff;
-            overflow: hidden;
-            box-shadow: 0 10px 28px rgba(10,42,70,.2);
-            position: relative;
-        }
-
-        .video-duration {
-            display: inline-block;
-            border: 1px solid rgba(255,255,255,.35);
-            border-radius: 30px;
-            padding: 5px 10px;
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .animation-stage {
-            min-height: 205px;
-            margin: 15px 0 12px;
-            padding: 18px;
-            border-radius: 12px;
-            background: linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.04));
-            border: 1px solid rgba(255,255,255,.2);
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            position: relative;
-        }
-
-        .animation-person {
-            width: 92px;
-            height: 120px;
-            flex: 0 0 92px;
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .person-head {
-            position: absolute;
-            top: 5px;
-            width: 43px;
-            height: 43px;
-            border-radius: 50%;
-            background: #ffd2a6;
-            border: 3px solid rgba(255,255,255,.7);
-            animation: personLook 3s ease-in-out infinite;
-        }
-
-        .person-body {
-            width: 72px;
-            height: 67px;
-            border-radius: 30px 30px 10px 10px;
-            background: #48b7d9;
-            box-shadow: inset 0 -8px rgba(0,0,0,.1);
-            transition: background .5s;
-        }
-
-        .animation-person.alert .person-body {
-            background: #e6a34c;
-        }
-
-        .animation-person.safe .person-body {
-            background: #43bd87;
-        }
-
-        .animation-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .animation-content small {
-            display: block;
-            color: #bfeaff;
-            font-size: 11px;
-            letter-spacing: 1px;
-            margin-bottom: 7px;
-        }
-
-        .animation-content h3 {
-            margin: 0 0 8px;
-            font-size: clamp(17px,3vw,23px);
-            color: #fff;
-            animation: textAppear .5s ease;
-        }
-
-        .animation-content p {
-            margin: 0;
-            color: #e5f5ff;
-            line-height: 1.5;
-            font-size: 14px;
-            animation: textAppear .6s ease;
-        }
-
-        .scene-notification {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            margin-top: 12px;
-            padding: 9px 12px;
-            border-radius: 9px;
-            background: rgba(255,255,255,.95);
-            color: #17334e;
-            font-size: 12px;
-            font-weight: 700;
-            max-width: 100%;
-            overflow-wrap: anywhere;
-            animation: notificationPulse 2s infinite;
-        }
-
-        .scene-icon {
-            font-size: 18px;
-        }
-
-        .scene-progress {
-            height: 6px;
-            border-radius: 20px;
-            background: rgba(255,255,255,.2);
-            overflow: hidden;
-        }
-
-        .scene-progress-fill {
-            width: 0;
-            height: 100%;
-            border-radius: inherit;
-            background: #75e2c0;
-            transition: width .8s linear;
-        }
-
-        .scene-caption {
-            margin: 9px 0 0;
-            color: #d7efff;
-            font-size: 12px;
-            min-height: 18px;
-        }
-
-        .scene-controls {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-
-        .scene-controls button {
-            border: 1px solid rgba(255,255,255,.45);
-            background: rgba(255,255,255,.12);
-            color: #fff;
-            border-radius: 8px;
-            padding: 8px 13px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .scene-controls button:disabled {
-            opacity: .45;
-            cursor: not-allowed;
-        }
-
-        .scene-countdown {
-            margin-left: auto;
-            font-weight: bold;
-            font-size: 14px;
-            color: #bfeaff;
-        }
-
-        .evidence {
-            opacity: .35;
-            transform: translateY(12px);
-            transition: opacity .7s ease, transform .7s ease;
-        }
-
-        .evidence.revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .video-simulation.scene-alert {
-            animation: alertGlow 1.2s ease;
-        }
-
-        .video-simulation.scene-safe {
-            animation: safeGlow 1.2s ease;
-        }
-
-        .video-simulation.scene-arrival .scene-notification {
-            animation: notificationPulse .7s ease 2;
-        }
-
-        @keyframes personLook {
-            0%,100% { transform: rotate(0); }
-            45% { transform: rotate(5deg); }
-        }
-
-        @keyframes notificationPulse {
-            0%,100% { transform: scale(1); }
-            50% { transform: scale(1.035); }
-        }
-
-        @keyframes textAppear {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes alertGlow {
-            0% { box-shadow: 0 0 0 rgba(230,163,76,0); }
-            50% { box-shadow: 0 0 25px rgba(230,163,76,.65); }
-            100% { box-shadow: 0 10px 28px rgba(10,42,70,.2); }
-        }
-
-        @keyframes safeGlow {
-            0% { box-shadow: 0 0 0 rgba(67,189,135,0); }
-            50% { box-shadow: 0 0 25px rgba(67,189,135,.65); }
-            100% { box-shadow: 0 10px 28px rgba(10,42,70,.2); }
-        }
-
-        @media(max-width:600px) {
-            .email-card { padding: 15px; }
-            .email-subject { font-size: 18px; }
-            .animation-stage { min-height: 210px; padding: 13px; gap: 10px; }
-            .animation-person { width: 60px; flex-basis: 60px; transform: scale(.78); }
-            .animation-content p { font-size: 12px; }
-            .scene-countdown { margin-left: 0; }
-        }
-
-        @media(prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: .01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: .01ms !important;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phishing Awareness Assessment | Fuji Silvertech</title>
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #eaf5ff, #f8fbff 55%, #e5f1fb);
+    color: #17334e;
+}
+
+header {
+    background: white;
+    padding: 12px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(20, 60, 100, .07);
+}
+
+.logo {
+    max-height: 52px;
+    max-width: 190px;
+    object-fit: contain;
+}
+
+.header-label {
+    color: #42627e;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 35px auto;
+    padding: 0 18px 50px;
+}
+
+.progress-card,
+.question-card,
+.email-card,
+.scenario-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 5px 24px rgba(30, 70, 110, .08);
+}
+
+.progress-card {
+    padding: 18px 22px;
+    margin-bottom: 20px;
+}
+
+.progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.progress-track {
+    height: 9px;
+    background: #e7eff7;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #1976d2, #36a3ef);
+    transition: width .4s ease;
+}
+
+.question-card {
+    padding: 28px;
+}
+
+.category {
+    display: inline-block;
+    background: #e9f3ff;
+    color: #1765a5;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    margin-bottom: 14px;
+}
+
+.question-title {
+    font-size: 23px;
+    margin: 0 0 12px;
+    line-height: 1.4;
+}
+
+.question-description {
+    color: #60768b;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-line;
+    margin-bottom: 22px;
+}
+
+.email-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 20px 0;
+}
+
+.email-card {
+    border: 1px solid #dce7f1;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.email-heading {
+    padding: 13px 17px;
+    background: #edf5fc;
+    border-bottom: 1px solid #dce7f1;
+    font-size: 13px;
+    font-weight: 800;
+    color: #24577e;
+}
+
+.email-content {
+    padding: 18px;
+}
+
+.email-field {
+    margin-bottom: 12px;
+    overflow-wrap: anywhere;
+}
+
+.email-field small {
+    display: block;
+    color: #8496a8;
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.email-field strong {
+    font-size: 13px;
+    color: #29465f;
+    overflow-wrap: anywhere;
+}
+
+.email-body {
+    border-top: 1px solid #e6edf4;
+    margin-top: 15px;
+    padding-top: 15px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #526a80;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.email-link {
+    margin-top: 14px;
+    padding: 11px;
+    border-radius: 8px;
+    background: #fff4e8;
+    color: #ad5a16;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.email-note {
+    background: #f0f7ff;
+    border-left: 4px solid #348bd1;
+    padding: 13px 15px;
+    border-radius: 7px;
+    color: #496781;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 20px 0;
+}
+
+.options-title {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 24px 0 13px;
+}
+
+.option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border: 1px solid #dce7f1;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 11px;
+    cursor: pointer;
+    transition: .2s;
+    background: white;
+}
+
+.option:hover {
+    border-color: #4b9cda;
+    background: #f5faff;
+}
+
+.option input {
+    margin-top: 4px;
+    accent-color: #1976d2;
+}
+
+.option span {
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.option.correct {
+    border-color: #2caa70;
+    background: #edfff5;
+}
+
+.option.wrong {
+    border-color: #e36b6b;
+    background: #fff2f2;
+}
+
+.answer-feedback {
+    display: none;
+    margin-top: 17px;
+    padding: 15px;
+    border-radius: 9px;
+    line-height: 1.65;
+    font-size: 13px;
+}
+
+.answer-feedback.correct {
+    display: block;
+    background: #eafff2;
+    border: 1px solid #a8e7c1;
+    color: #176a42;
+}
+
+.answer-feedback.wrong {
+    display: block;
+    background: #fff0f0;
+    border: 1px solid #f2b8b8;
+    color: #9a3030;
+}
+
+.button-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 25px;
+    gap: 12px;
+}
+
+.primary-btn,
+.secondary-btn {
+    border: 0;
+    border-radius: 9px;
+    padding: 13px 23px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.primary-btn {
+    background: #176db2;
+    color: white;
+}
+
+.primary-btn:hover {
+    background: #10578f;
+    transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+    background: #9db2c4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.secondary-btn {
+    background: #eaf2f9;
+    color: #315b7d;
+}
+
+/* Animation panel */
+
+.scenario-card {
+    display: none;
+    margin-top: 22px;
+    overflow: hidden;
+    border: 1px solid #d6e4f0;
+}
+
+.scenario-top {
+    background: #102d49;
+    color: white;
+    padding: 17px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.scenario-top strong {
+    font-size: 14px;
+}
+
+.scenario-timer {
+    font-size: 13px;
+    font-weight: 800;
+    color: #8ed5ff;
+}
+
+.scene {
+    position: relative;
+    min-height: 300px;
+    overflow: hidden;
+    padding: 32px 25px;
+    background: linear-gradient(135deg, #122c49, #174c70 65%, #16799b);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.scene::before,
+.scene::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(110, 205, 255, .10);
+    animation: floatBubble 7s infinite ease-in-out alternate;
+}
+
+.scene::before {
+    width: 220px;
+    height: 220px;
+    left: -65px;
+    top: -80px;
+}
+
+.scene::after {
+    width: 280px;
+    height: 280px;
+    right: -95px;
+    bottom: -120px;
+    animation-delay: 1.5s;
+}
+
+@keyframes floatBubble {
+    from { transform: translateY(0) scale(1); }
+    to { transform: translateY(-25px) scale(1.1); }
+}
+
+.scene-icon {
+    position: relative;
+    z-index: 1;
+    width: 83px;
+    height: 83px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.13);
+    border: 1px solid rgba(255,255,255,.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 39px;
+    margin-bottom: 18px;
+    animation: iconPulse 2s infinite ease-in-out;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+.scene-kicker {
+    position: relative;
+    z-index: 1;
+    color: #8ed5ff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.scene h2 {
+    position: relative;
+    z-index: 1;
+    font-size: 23px;
+    margin: 0 0 12px;
+}
+
+.scene p {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    color: #d4e7f5;
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.scene-notification {
+    position: relative;
+    z-index: 1;
+    margin-top: 20px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 10px;
+    padding: 13px 18px;
+    max-width: 560px;
+    width: 100%;
+    font-size: 13px;
+    color: white;
+    animation: notificationIn .5s ease;
+}
+
+@keyframes notificationIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.scene-caption {
+    padding: 15px 20px;
+    min-height: 58px;
+    background: #f0f6fb;
+    color: #3d607d;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.scene-progress {
+    height: 5px;
+    background: #dbe7f0;
+}
+
+.scene-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #32a4e8;
+    transition: width .3s linear;
+}
+
+.scenario-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.scenario-controls small {
+    color: #8294a4;
+    font-size: 12px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media(max-width: 700px) {
+    .email-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .question-card {
+        padding: 20px 16px;
+    }
+
+    .question-title {
+        font-size: 20px;
+    }
+
+    .scene {
+        min-height: 280px;
+        padding: 25px 18px;
+    }
+
+    .scene h2 {
+        font-size: 20px;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
+
+    .button-row button {
+        width: 100%;
+    }
+
+    header {
+        padding: 12px 4%;
+    }
+}
+</style>
 </head>
 
 <body>
 
 <header>
-    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
-    <span>{{ email }}</span>
+    <img src="/static/img/fuji-logo.png"
+         alt="Fuji Silvertech"
+         class="logo"
+         onerror="this.style.display='none'">
+
+    <div class="header-label">PHISHING AWARENESS ASSESSMENT</div>
 </header>
 
-<main>
+<main class="container">
 
-    <div class="progress">
-        <span id="counter">Question 1 of {{ questions|length }}</span>
-        <div><i id="bar"></i></div>
-    </div>
+    <section class="progress-card">
+        <div class="progress-top">
+            <span id="questionCounter">Question 1 of 10</span>
+            <span id="progressPercent">10%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </section>
 
-    <form id="quiz" onsubmit="return false;">
+    <section class="question-card" id="questionCard">
 
-        {% for q in questions %}
-        {% set question_index = loop.index0 %}
+        <div class="category" id="questionCategory"></div>
 
-        <section class="q"
-            data-correct="{{ q.correct|default(-1) }}"
-            data-explanation="{{ q.explanation|default('')|e }}"
-            data-mode="{{ q.mode|default('multiple_choice') }}"
-            data-title="{{ q.title|default('Workplace scenario')|e }}"
-            data-category="{{ q.category|default('Workplace security')|e }}"
-            style="display:{% if loop.first %}block{% else %}none{% endif %}">
+        <h1 class="question-title" id="questionTitle"></h1>
 
-            <p class="tag">
-                {{ q.category|default('AWARENESS ASSESSMENT') }}
-                • {{ loop.index }}/{{ questions|length }}
-            </p>
+        <div class="question-description" id="questionDescription"></div>
 
-            <h1>{{ q.title }}</h1>
+        <div id="emailArea"></div>
 
-            <!-- ANIMATED SCENARIO FOR EVERY QUESTION -->
+        <div class="email-note" id="emailNote"></div>
 
-            <div class="video-simulation"
-                data-sender="{{ q.sender|default('Workplace contact')|e }}"
-                data-subject="{{ q.subject|default(q.title)|e }}"
-                data-mode="{{ q.mode|default('multiple_choice') }}"
-                data-category="{{ q.category|default('')|e }}"
-                data-title="{{ q.title|default('')|e }}">
+        <div class="options-title">Select the best response:</div>
 
-                <span class="video-duration">25-SECOND SIMULATION</span>
+        <div id="optionsArea"></div>
 
-                <div class="animation-stage">
+        <div class="answer-feedback" id="answerFeedback"></div>
 
-                    <div class="animation-person" aria-hidden="true">
-                        <div class="person-head"></div>
-                        <div class="person-body"></div>
-                    </div>
+        <div class="button-row">
+            <button class="primary-btn" id="continueButton" disabled>
+                Continue
+            </button>
+        </div>
 
-                    <div class="animation-content">
+    </section>
 
-                        <small class="scene-kicker">WORKPLACE SIMULATION</small>
+    <!-- Animation plays after the employee answers -->
 
-                        <h3 class="scene-heading">
-                            A new message arrives
-                        </h3>
+    <section class="scenario-card" id="scenarioCard">
 
-                        <p class="scene-description">
-                            An employee receives a workplace message.
-                            Watch the scenario before making a decision.
-                        </p>
+        <div class="scenario-top">
+            <strong>SECURITY INCIDENT SIMULATION</strong>
+            <span class="scenario-timer" id="scenarioTimer">25 seconds</span>
+        </div>
 
-                        <div class="scene-notification">
-                            <span class="scene-icon">✉</span>
-                            <span class="scene-notification-text">
-                                New email notification
-                            </span>
-                        </div>
+        <div class="scene">
 
-                    </div>
-                </div>
+            <div class="scene-icon" id="sceneIcon">📧</div>
 
-                <div class="scene-progress">
-                    <div class="scene-progress-fill"></div>
-                </div>
-
-                <p class="scene-caption" aria-live="polite">
-                    The scenario will play automatically before you answer.
-                </p>
-
-                <div class="scene-controls">
-                    <button type="button" class="scene-replay">
-                        ↻ Replay scene
-                    </button>
-
-                    <button type="button" class="scene-skip">
-                        Skip animation
-                    </button>
-
-                    <span class="scene-countdown">25s</span>
-                </div>
-
+            <div class="scene-kicker" id="sceneKicker">
+                SECURITY AWARENESS
             </div>
 
-            <!-- EMAIL EVIDENCE -->
+            <h2 id="sceneTitle">Incoming Email Detected</h2>
 
-            <div class="evidence">
+            <p id="sceneDescription"></p>
 
-                <p class="evidence-label">EMAIL EVIDENCE</p>
+            <div class="scene-notification" id="sceneNotification"></div>
 
-                <div class="email-card">
+        </div>
 
-                    <div class="email-top">
-                        <span>Mail • Message preview</span>
-                        <span class="email-time">
-                            {{ q.timestamp|default('Today, 9:41 AM') }}
-                        </span>
-                    </div>
+        <div class="scene-caption" id="sceneCaption"></div>
 
-                    <h2 class="email-subject">
-                        {{ q.subject|default(q.title) }}
-                    </h2>
+        <div class="scene-progress">
+            <div class="scene-progress-fill" id="sceneProgressFill"></div>
+        </div>
 
-                    <div class="sender-row">
+        <div class="scenario-controls">
 
-                        <div class="sender-avatar">
-                            {{ q.sender_initial|default('M') }}
-                        </div>
+            <button class="secondary-btn" id="replayButton">
+                ↻ Replay
+            </button>
 
-                        <div class="sender-details">
+            <small id="scenarioStatus">Playing security scenario...</small>
 
-                            <p>
-                                <strong>
-                                    {{ q.sender|default('Workplace Support') }}
-                                </strong>
-                            </p>
+            <button class="secondary-btn" id="skipButton">
+                Skip
+            </button>
 
-                            <p class="sender-address">
+        </div>
 
-                                {% if q.mode == 'click_errors' and q.sender_parts %}
+        <div class="button-row" style="padding: 0 20px 20px; margin-top: 0;">
+            <button class="primary-btn" id="nextQuestionButton" disabled>
+                Continue to Next Question
+            </button>
+        </div>
 
-                                    {% for part in q.sender_parts %}
-
-                                        {% if part.clickable|default(false) %}
-
-                                            <button type="button"
-                                                class="email-token"
-                                                data-error-id="{{ part.id }}"
-                                                data-is-correct="{{ (part.id|string in (q.correct_errors|default([])|map('string')|list))|lower }}"
-                                                aria-pressed="false"
-                                                title="Click to flag this detail">
-                                                {{ part.text }}
-                                            </button>
-
-                                        {% else %}
-
-                                            {{ part.text }}
-
-                                        {% endif %}
-
-                                    {% endfor %}
-
-                                {% else %}
-
-                                    {{ q.sender_email|default('support@example.com') }}
-
-                                {% endif %}
-
-                            </p>
-
-                            <p class="sender-address">
-                                To: {{ email }}
-                            </p>
-
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    {% if q.mode == 'click_errors' %}
-
-                        <div class="email-body clickable-email">
-
-                            {% for part in q.email_parts %}
-
-                                {% if part.clickable|default(false) %}
-
-                                    <button type="button"
-                                        class="email-token"
-                                        data-error-id="{{ part.id }}"
-                                        data-is-correct="{{ (part.id|string in (q.correct_errors|default([])|map('string')|list))|lower }}"
-                                        aria-pressed="false"
-                                        title="Click to flag this suspicious detail">
-                                        {{ part.text }}
-                                    </button>
-
-                                {% else %}
-
-                                    {{ part.text }}
-
-                                {% endif %}
-
-                            {% endfor %}
-
-                        </div>
-
-                    {% else %}
-
-                        <div class="email-body">
-                            {{ q.scenario }}
-                        </div>
-
-                    {% endif %}
-
-                    {% if q.display_link|default('') %}
-                        <div>
-                            <span class="email-link">
-                                {{ q.display_link }}
-                            </span>
-                        </div>
-                    {% endif %}
-
-                    {% if q.actual_link|default('') %}
-                        <div class="email-warning">
-                            <strong>Link inspection:</strong><br>
-                            Displayed link: {{ q.display_link }}<br>
-                            Actual destination: {{ q.actual_link }}
-                        </div>
-                    {% endif %}
-
-                    {% if q.attachment|default('') %}
-                        <div class="email-attachment">
-                            <strong>Attachment</strong><br>
-                            📎 {{ q.attachment }}
-                        </div>
-                    {% endif %}
-
-                    {% if q.email_note|default('') %}
-                        <div class="email-warning">
-                            {{ q.email_note }}
-                        </div>
-                    {% endif %}
-
-                </div>
-            </div>
-
-            <!-- CLICK-TO-IDENTIFY QUESTIONS -->
-
-            {% if q.mode == 'click_errors' %}
-
-                <h2 class="question-heading">
-                    Identify the suspicious details
-                </h2>
-
-                <div class="click-instructions">
-                    <strong>Investigation task:</strong>
-                    Click every suspicious spelling mistake, incorrect word
-                    or email domain. Select all the errors you can identify
-                    directly inside the email.
-                </div>
-
-                <p class="selection-summary">
-                    Selected errors:
-                    <span class="selected-count">0</span>
-                </p>
-
-            <!-- FIND THE MISTAKES QUESTION -->
-
-            {% elif q.mode == 'find_mistakes' %}
-
-                <h2 class="question-heading">
-                    Find the suspicious details
-                </h2>
-
-                <div class="mistake-instructions">
-                    Select the suspicious details you identify in this email.
-                </div>
-
-                <div class="mistake-list">
-
-                    {% for mistake in q.mistakes %}
-
-                        <button type="button"
-                            class="mistake-item"
-                            data-mistake-id="{{ mistake.id }}"
-                            data-is-correct="{{ (mistake.id|string in (q.correct_mistakes|default([])|map('string')|list))|lower }}"
-                            aria-pressed="false">
-
-                            {{ mistake.text }}
-
-                        </button>
-
-                    {% endfor %}
-
-                </div>
-
-                <p class="mistake-count">
-                    Selected:
-                    <span class="selected-count">0</span>
-                </p>
-
-            <!-- MULTIPLE-CHOICE QUESTIONS -->
-
-            {% else %}
-
-                <h2 class="question-heading">
-                    If you received this message, what would you do?
-                </h2>
-
-                <div class="options">
-
-                    {% for option in q.options %}
-
-                        <label>
-
-                            <input type="radio"
-                                name="q{{ question_index }}"
-                                value="{{ loop.index0 }}">
-
-                            <span>
-                                {{ 'ABCD'[loop.index0] }}. {{ option }}
-                            </span>
-
-                        </label>
-
-                    {% endfor %}
-
-                </div>
-
-            {% endif %}
-
-            <div class="answer-feedback" hidden aria-live="polite"></div>
-
-            <p class="submit-error" aria-live="polite"></p>
-
-            <!-- ONLY SEQUENTIAL CONTINUE -->
-
-            <div class="quiz-action">
-
-                <button type="button"
-                    class="continue-button"
-                    disabled>
-
-                    {% if loop.last %}
-                        Submit assessment
-                    {% else %}
-                        Continue
-                    {% endif %}
-
-                </button>
-
-            </div>
-
-        </section>
-
-        {% endfor %}
-
-    </form>
+    </section>
 
 </main>
 
-<footer>
-    For any queries, contact support.soc@fujisilvertech.com
-</footer>
-
 <script>
-    let current = 0;
-    let submitting = false;
-    let animationInterval = null;
-
-    const sections = [...document.querySelectorAll('.q')];
-    const counter = document.getElementById('counter');
-    const bar = document.getElementById('bar');
-    const total = sections.length;
-
-    function updateProgress() {
-        counter.textContent = `Question ${current + 1} of ${total}`;
-        bar.style.width = ((current + 1) / total * 100) + '%';
-    }
-
-    function updateSelectionCount(section) {
-        const count = section.querySelectorAll(
-            '.email-token.selected, .mistake-item.selected'
-        ).length;
-
-        const output = section.querySelector('.selected-count');
-
-        if (output) {
-            output.textContent = count;
-        }
-    }
-
-    // ---------------------------------------------
-    // ANSWER INTERACTIONS
-    // ---------------------------------------------
-
-    sections.forEach(section => {
-
-        section.querySelectorAll(
-            '.email-token, .mistake-item'
-        ).forEach(button => {
-
-            button.addEventListener('click', () => {
-
-                if (
-                    submitting ||
-                    section.dataset.checked === 'true'
-                ) {
-                    return;
-                }
-
-                button.classList.toggle('selected');
-
-                button.setAttribute(
-                    'aria-pressed',
-                    String(button.classList.contains('selected'))
-                );
-
-                updateSelectionCount(section);
-            });
-
-        });
-
-        section.querySelectorAll(
-            'input[type="radio"]'
-        ).forEach(radio => {
-
-            radio.addEventListener('change', () => {
-
-                if (section.dataset.checked === 'true') {
-                    return;
-                }
-
-                const feedback = section.querySelector(
-                    '.answer-feedback'
-                );
-
-                const correctIndex = Number(
-                    section.dataset.correct
-                );
-
-                const explanation = section.dataset.explanation;
-
-                const correctRadio = [
-                    ...section.querySelectorAll('input[type="radio"]')
-                ].find(item =>
-                    Number(item.value) === correctIndex
-                );
-
-                if (!correctRadio || !feedback) {
-                    return;
-                }
-
-                const correctAnswer =
-                    correctRadio.closest('label').innerText.trim();
-
-                feedback.hidden = false;
-
-                if (Number(radio.value) === correctIndex) {
-
-                    feedback.textContent =
-                        '✓ Correct! ' + explanation;
-
-                    feedback.className =
-                        'answer-feedback correct';
-
-                } else {
-
-                    feedback.textContent =
-                        '✗ Incorrect. Correct answer: ' +
-                        correctAnswer + '. ' + explanation;
-
-                    feedback.className =
-                        'answer-feedback incorrect';
-
-                }
-
-            });
-
-        });
-
-        section.querySelector(
-            '.continue-button'
-        ).addEventListener('click', () => {
-
-            continueQuestion();
-
-        });
-
-    });
-
-    // ---------------------------------------------
-    // ANSWER VALIDATION
-    // ---------------------------------------------
-
-    function hasAnswer(section) {
-
-        const mode = section.dataset.mode;
-
-        if (mode === 'find_mistakes') {
-
-            return section.querySelectorAll(
-                '.mistake-item.selected'
-            ).length > 0;
-
-        }
-
-        if (mode === 'click_errors') {
-
-            return section.querySelectorAll(
-                '.email-token.selected'
-            ).length > 0;
-
-        }
-
-        return !!section.querySelector(
-            'input[type="radio"]:checked'
-        );
-    }
-
-    // ---------------------------------------------
-    // MULTI-SELECT FEEDBACK
-    // ---------------------------------------------
-
-    function showSelectionFeedback(section) {
-
-        const mode = section.dataset.mode;
-
-        const feedback = section.querySelector(
-            '.answer-feedback'
-        );
-
-        if (!feedback) {
-            return;
-        }
-
-        if (
-            mode === 'click_errors' ||
-            mode === 'find_mistakes'
-        ) {
-
-            const items = [
-                ...section.querySelectorAll(
-                    mode === 'click_errors'
-                        ? '.email-token'
-                        : '.mistake-item'
-                )
-            ];
-
-            let correctCount = 0;
-            let wrongCount = 0;
-            let missedCount = 0;
-
-            items.forEach(item => {
-
-                const isSelected =
-                    item.classList.contains('selected');
-
-                const isCorrect =
-                    item.dataset.isCorrect === 'true';
-
-                item.classList.remove(
-                    'correct-selection',
-                    'wrong-selection',
-                    'missed-selection'
-                );
-
-                if (isSelected && isCorrect) {
-
-                    item.classList.add('correct-selection');
-                    correctCount++;
-
-                } else if (isSelected && !isCorrect) {
-
-                    item.classList.add('wrong-selection');
-                    wrongCount++;
-
-                } else if (!isSelected && isCorrect) {
-
-                    item.classList.add('missed-selection');
-                    missedCount++;
-
-                }
-
-                item.disabled = true;
-
-            });
-
-            feedback.hidden = false;
-
-            feedback.className =
-                'answer-feedback ' +
-                (
-                    wrongCount === 0 && missedCount === 0
-                        ? 'correct'
-                        : 'incorrect'
-                );
-
-            feedback.innerHTML = `
-                <strong>Investigation Results</strong><br><br>
-
-                <span style="color:#198754">
-                    ✓ Correct findings: ${correctCount}
-                </span><br>
-
-                <span style="color:#dc3545">
-                    ✗ Incorrect selections: ${wrongCount}
-                </span><br>
-
-                <span style="color:#a87500">
-                    ! Missed findings: ${missedCount}
-                </span><br><br>
-
-                <strong>Review:</strong><br>
-                Green = correctly identified.<br>
-                Red = incorrectly selected.<br>
-                Yellow = suspicious detail you missed.
-            `;
-
-            section.dataset.checked = 'true';
-
-        }
-
-    }
-
-    // ---------------------------------------------
-    // QUESTION NAVIGATION
-    // Sequential only. No previous or jump navigation.
-    // ---------------------------------------------
-
-    function continueQuestion() {
-
-        if (submitting) {
-            return;
-        }
-
-        const section = sections[current];
-
-        const error = section.querySelector(
-            '.submit-error'
-        );
-
-        error.textContent = '';
-
-        if (!hasAnswer(section)) {
-
-            error.textContent =
-                'Please select an answer or identify at least one suspicious detail.';
-
-            return;
-        }
-
-        const mode = section.dataset.mode;
-
-        if (
-            (
-                mode === 'click_errors' ||
-                mode === 'find_mistakes'
-            ) &&
-            section.dataset.checked !== 'true'
-        ) {
-
-            showSelectionFeedback(section);
-
-            section.querySelector(
-                '.continue-button'
-            ).textContent =
-                current === total - 1
-                    ? 'Confirm and submit'
-                    : 'Continue to next question';
-
-            return;
-
-        }
-
-        if (current === total - 1) {
-
-            send();
-            return;
-
-        }
-
-        section.style.display = 'none';
-
-        current++;
-
-        sections[current].style.display = 'block';
-
-        updateProgress();
-
-        playScene(sections[current]);
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-
-    }
-
-    // ---------------------------------------------
-    // QUESTION-SPECIFIC ANIMATION SCENARIOS
-    // ---------------------------------------------
-
-    function getScenarioStages(section) {
-
-        const panel = section.querySelector(
-            '.video-simulation'
-        );
-
-        const mode = panel.dataset.mode;
-
-        const sender = panel.dataset.sender;
-        const subject = panel.dataset.subject;
-
-        const category = (
-            panel.dataset.category || ''
-        ).toLowerCase();
-
-        const title = (
-            panel.dataset.title || ''
-        ).toLowerCase();
-
-        const isLegitimate =
-            category.includes('legitimate') ||
-            title.includes('project coordination') ||
-            title.includes('accounts payable') ||
-            title.includes('confirmation');
-
-        const isHR =
-            title.includes('hr') ||
-            title.includes('salary') ||
-            title.includes('benefit');
-
-        const isGoogle =
-            title.includes('google') ||
-            title.includes('storage');
-
-        const isMicrosoft =
-            title.includes('microsoft');
-
-        let firstDescription =
-            'A new workplace email notification appears on the employee computer.';
-
-        let inspectionDescription =
-            'Inspect the sender, email address, subject, wording and destination links.';
-
-        let finalDescription =
-            'Review the evidence and decide how to respond safely.';
-
-        if (isMicrosoft) {
-
-            firstDescription =
-                'An employee receives a Microsoft account security notification.';
-
-            inspectionDescription =
-                'The sender address and account-security link need careful inspection.';
-
-        } else if (isHR) {
-
-            firstDescription =
-                'An employee receives an unexpected message appearing to come from HR.';
-
-            inspectionDescription =
-                'Check the sender domain, salary or benefits wording and any requested action.';
-
-        } else if (isGoogle) {
-
-            firstDescription =
-                'A Google Storage warning appears, asking the employee to review an account issue.';
-
-            inspectionDescription =
-                'Inspect the sender domain, unusual wording and the link destination.';
-
-        } else if (isLegitimate) {
-
-            firstDescription =
-                'A routine business email arrives from a workplace contact.';
-
-            inspectionDescription =
-                'Check whether the sender, context and requested action match normal business activity.';
-
-        } else if (mode === 'find_mistakes') {
-
-            firstDescription =
-                'A shared-document notification arrives unexpectedly.';
-
-            inspectionDescription =
-                'Look for unusual wording, unexpected access requests and suspicious document links.';
-
-        } else if (mode === 'click_errors') {
-
-            firstDescription =
-                'An email arrives that appears to come from an internal or familiar service.';
-
-            inspectionDescription =
-                'Inspect individual words, spelling, sender details and domain names.';
-
-        }
-
-        if (isLegitimate) {
-
-            return [
-                {
-                    title: 'A routine business email arrives',
-                    description: firstDescription,
-                    notification: sender + ' sent a message',
-                    caption: 'Scene 1 of 5 • Incoming business email',
-                    kicker: '00:00 — Email received',
-                    mood: '',
-                    icon: '✉'
-                },
-                {
-                    title: 'The employee reads the request',
-                    description: 'The employee reviews the subject and message context before responding.',
-                    notification: subject,
-                    caption: 'Scene 2 of 5 • Read the message',
-                    kicker: '00:05 — Message opened',
-                    mood: '',
-                    icon: '📨'
-                },
-                {
-                    title: 'Verify the business context',
-                    description: inspectionDescription,
-                    notification: 'Check sender and business context',
-                    caption: 'Scene 3 of 5 • Verification',
-                    kicker: '00:10 — Check the details',
-                    mood: '',
-                    icon: '🔎'
-                },
-                {
-                    title: 'Follow normal company procedure',
-                    description: 'A familiar-looking message should still be handled through approved workplace processes.',
-                    notification: 'Use approved business processes',
-                    caption: 'Scene 4 of 5 • Safe handling',
-                    kicker: '00:15 — Review the process',
-                    mood: 'safe',
-                    icon: '✓'
-                },
-                {
-                    title: 'Choose the safest response',
-                    description: 'Decide whether the message is legitimate and how it should be handled.',
-                    notification: 'Your decision matters',
-                    caption: 'Scene 5 of 5 • Your turn',
-                    kicker: '00:20 — Decision',
-                    mood: 'safe',
-                    icon: '🛡'
-                }
-            ];
-
-        }
-
-        return [
-            {
-                title: 'A suspicious message arrives',
-                description: firstDescription,
-                notification: sender + ' sent a message',
-                caption: 'Scene 1 of 5 • Unexpected message received',
-                kicker: '00:00 — Incoming notification',
-                mood: '',
-                icon: '✉'
-            },
-            {
-                title: 'The employee opens the email',
-                description: 'The subject and message content appear. Familiar branding does not prove that a message is genuine.',
-                notification: subject,
-                caption: 'Scene 2 of 5 • Email opened',
-                kicker: '00:05 — Message preview',
-                mood: '',
-                icon: '📨'
-            },
-            {
-                title: 'Investigate the warning signs',
-                description: inspectionDescription,
-                notification: 'Inspect sender • spelling • domain',
-                caption: 'Scene 3 of 5 • Investigation',
-                kicker: '00:10 — Inspect the evidence',
-                mood: 'alert',
-                icon: '🔎'
-            },
-            {
-                title: 'The employee pauses',
-                description: 'Do not share credentials, approve unexpected MFA prompts or follow unverified instructions.',
-                notification: 'Pause and verify independently',
-                caption: 'Scene 4 of 5 • Security decision',
-                kicker: '00:15 — Pause before acting',
-                mood: 'alert',
-                icon: '⚠'
-            },
-            {
-                title: 'Make the security decision',
-                description: finalDescription,
-                notification: 'Choose your response below',
-                caption: 'Scene 5 of 5 • Your turn to investigate',
-                kicker: '00:20 — Final decision',
-                mood: 'safe',
-                icon: '🛡'
-            }
-        ];
-
-    }
-
-    // ---------------------------------------------
-    // ANIMATION PLAYER
-    // ---------------------------------------------
-
-    function playScene(section) {
-
-        if (animationInterval) {
-            clearInterval(animationInterval);
-            animationInterval = null;
-        }
-
-        const panel = section.querySelector(
-            '.video-simulation'
-        );
-
-        if (!panel) {
-            return;
-        }
-
-        const heading = panel.querySelector(
-            '.scene-heading'
-        );
-
-        const description = panel.querySelector(
-            '.scene-description'
-        );
-
-        const kicker = panel.querySelector(
-            '.scene-kicker'
-        );
-
-        const notification = panel.querySelector(
-            '.scene-notification-text'
-        );
-
-        const notificationIcon = panel.querySelector(
-            '.scene-icon'
-        );
-
-        const caption = panel.querySelector(
-            '.scene-caption'
-        );
-
-        const countdown = panel.querySelector(
-            '.scene-countdown'
-        );
-
-        const fill = panel.querySelector(
-            '.scene-progress-fill'
-        );
-
-        const person = panel.querySelector(
-            '.animation-person'
-        );
-
-        const replay = panel.querySelector(
-            '.scene-replay'
-        );
-
-        const skip = panel.querySelector(
-            '.scene-skip'
-        );
-
-        const evidence = section.querySelector(
-            '.evidence'
-        );
-
-        const continueButton = section.querySelector(
-            '.continue-button'
-        );
-
-        const stages = getScenarioStages(section);
-
-        let elapsed = 0;
-
-        continueButton.disabled = true;
-
-        evidence.classList.remove('revealed');
-
-        panel.classList.remove(
-            'scene-alert',
-            'scene-safe',
-            'scene-arrival'
-        );
-
-        function renderStage() {
-
-            const stageIndex = Math.min(
-                4,
-                Math.floor(elapsed / 5)
-            );
-
-            const stage = stages[stageIndex];
-
-            heading.textContent = stage.title;
-            description.textContent = stage.description;
-            notification.textContent = stage.notification;
-            caption.textContent = stage.caption;
-            kicker.textContent = stage.kicker;
-            notificationIcon.textContent = stage.icon;
-
-            person.classList.remove(
-                'alert',
-                'safe'
-            );
-
-            if (stage.mood) {
-                person.classList.add(stage.mood);
-            }
-
-            panel.classList.remove(
-                'scene-alert',
-                'scene-safe',
-                'scene-arrival'
-            );
-
-            if (stageIndex === 0) {
-                panel.classList.add('scene-arrival');
-            }
-
-            if (stage.mood === 'alert') {
-                panel.classList.add('scene-alert');
-            }
-
-            if (stage.mood === 'safe') {
-                panel.classList.add('scene-safe');
-            }
-
-            if (stageIndex >= 1) {
-                evidence.classList.add('revealed');
-            }
-
-            fill.style.width =
-                Math.min(100, elapsed / 25 * 100) + '%';
-
-            countdown.textContent =
-                Math.max(0, 25 - elapsed) + 's';
-
-        }
-
-        function finishScene(skipped) {
-
-            if (animationInterval) {
-                clearInterval(animationInterval);
-                animationInterval = null;
-            }
-
-            fill.style.width = '100%';
-            countdown.textContent = 'Ready';
-
-            caption.textContent = skipped
-                ? 'Animation skipped • Begin your investigation.'
-                : 'Simulation complete • You can now answer.';
-
-            heading.textContent =
-                'Your investigation starts now';
-
-            description.textContent =
-                'Review the email evidence below and select your answer.';
-
-            notification.textContent =
-                'Choose your response below';
-
-            notificationIcon.textContent = '🛡';
-
-            kicker.textContent =
-                'SCENARIO COMPLETE';
-
-            person.classList.remove('alert');
-            person.classList.add('safe');
-
-            evidence.classList.add('revealed');
-
-            replay.disabled = false;
-            skip.disabled = true;
-            skip.textContent = 'Animation completed';
-
-            continueButton.disabled = false;
-
-        }
-
-        function start() {
-
-            if (animationInterval) {
-                clearInterval(animationInterval);
-            }
-
-            elapsed = 0;
-
-            continueButton.disabled = true;
-
-            skip.disabled = false;
-            skip.textContent = 'Skip animation';
-
-            replay.disabled = true;
-
-            evidence.classList.remove('revealed');
-
-            renderStage();
-
-            animationInterval = setInterval(() => {
-
-                elapsed++;
-
-                renderStage();
-
-                if (elapsed >= 25) {
-                    finishScene(false);
-                }
-
-            }, 1000);
-
-        }
-
-        skip.onclick = () => {
-            finishScene(true);
-        };
-
-        replay.onclick = () => {
-            start();
-        };
-
-        start();
-
-    }
-
-    // ---------------------------------------------
-    // SUBMIT ANSWERS
-    // ---------------------------------------------
-
-    async function send() {
-
-        if (submitting) {
-            return;
-        }
-
-        const answers = sections.map(section => {
-
-            const mode = section.dataset.mode;
-
-            if (mode === 'click_errors') {
-
-                return [
-                    ...section.querySelectorAll(
-                        '.email-token.selected'
-                    )
-                ].map(button =>
-                    button.dataset.errorId
-                );
-
-            }
-
-            if (mode === 'find_mistakes') {
-
-                return [
-                    ...section.querySelectorAll(
-                        '.mistake-item.selected'
-                    )
-                ].map(button =>
-                    button.dataset.mistakeId
-                );
-
-            }
-
-            const selected = section.querySelector(
-                'input[type="radio"]:checked'
-            );
-
-            return selected
-                ? Number(selected.value)
-                : -1;
-
-        });
-
-        const incomplete = answers.some(answer => {
-
-            return Array.isArray(answer)
-                ? answer.length === 0
-                : answer === -1;
-
-        });
-
-        if (incomplete) {
-
-            alert(
-                'Please answer all questions before submitting.'
-            );
-
-            return;
-        }
-
-        submitting = true;
-
-        document.querySelectorAll(
-            '.continue-button'
-        ).forEach(button => {
-            button.disabled = true;
-        });
-
-        try {
-
-            const response = await fetch('/submit', {
-
-                method: 'POST',
-
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-
-                body: JSON.stringify({
-                    answers: answers,
-                    attempt_id: Number({{ attempt_id|tojson }})
-                })
-
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.error || 'Submission failed.'
-                );
-            }
-
-            if (!data.url) {
-                throw new Error(
-                    'The server did not return a results page.'
-                );
-            }
-
-            window.location.href = data.url;
-
-        } catch (error) {
-
-            submitting = false;
-
-            document.querySelectorAll(
-                '.continue-button'
-            ).forEach(button => {
-                button.disabled = false;
-            });
-
-            alert(error.message);
-
-        }
-
-    }
-
-    // ---------------------------------------------
-    // INITIALIZE FIRST QUESTION
-    // ---------------------------------------------
+const QUESTIONS = {{ questions | tojson }};
+const ATTEMPT_ID = {{ attempt_id | tojson }};
+
+let currentIndex = 0;
+let selectedAnswers = {};
+let scenarioInterval = null;
+let scenarioSeconds = 25;
+let scenarioPlaying = false;
+let scenarioFinished = false;
+
+const questionCard = document.getElementById("questionCard");
+const scenarioCard = document.getElementById("scenarioCard");
+const continueButton = document.getElementById("continueButton");
+const nextQuestionButton = document.getElementById("nextQuestionButton");
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
+}
+
+function updateProgress() {
+    const total = QUESTIONS.length;
+    const number = currentIndex + 1;
+    const percentage = Math.round((number / total) * 100);
+
+    document.getElementById("questionCounter").textContent =
+        `Question ${number} of ${total}`;
+
+    document.getElementById("progressPercent").textContent =
+        `${percentage}%`;
+
+    document.getElementById("progressFill").style.width =
+        `${percentage}%`;
+}
+
+function renderEmail(email) {
+    const link = email.link
+        ? `<div class="email-link"><strong>Link:</strong><br>${escapeHTML(email.link)}</div>`
+        : "";
+
+    const attachment = email.attachment
+        ? `<div class="email-link"><strong>Attachment:</strong><br>${escapeHTML(email.attachment)}</div>`
+        : "";
+
+    return `
+        <article class="email-card">
+            <div class="email-heading">
+                ${escapeHTML(email.label || "EMAIL")}
+            </div>
+
+            <div class="email-content">
+
+                <div class="email-field">
+                    <small>From</small>
+                    <strong>${escapeHTML(email.sender || "")}</strong>
+                </div>
+
+                <div class="email-field">
+                    <small>Email address</small>
+                    <strong>${escapeHTML(email.sender_email || "")}</strong>
+                </div>
+
+                <div class="email-field">
+                    <small>Received</small>
+                    <strong>${escapeHTML(email.timestamp || "")}</strong>
+                </div>
+
+                <div class="email-field">
+                    <small>Subject</small>
+                    <strong>${escapeHTML(email.subject || "")}</strong>
+                </div>
+
+                <div class="email-body">${escapeHTML(email.body || "")}</div>
+
+                ${link}
+                ${attachment}
+
+            </div>
+        </article>
+    `;
+}
+
+function renderQuestion() {
+    stopScenario();
+
+    const q = QUESTIONS[currentIndex];
+
+    questionCard.style.display = "block";
+    scenarioCard.style.display = "none";
 
     updateProgress();
 
-    if (sections.length > 0) {
-        playScene(sections[current]);
+    document.getElementById("questionCategory").textContent =
+        q.category || "PHISHING INVESTIGATION";
+
+    document.getElementById("questionTitle").textContent =
+        q.title || `Question ${currentIndex + 1}`;
+
+    document.getElementById("questionDescription").textContent =
+        q.scenario || "";
+
+    document.getElementById("emailNote").textContent =
+        q.email_note || "";
+
+    const emailArea = document.getElementById("emailArea");
+
+    if (q.comparison && Array.isArray(q.emails)) {
+        emailArea.innerHTML = `
+            <div class="email-grid">
+                ${q.emails.map(renderEmail).join("")}
+            </div>
+        `;
+    } else {
+        const singleEmail = {
+            label: "EMAIL DETAILS",
+            sender: q.sender,
+            sender_email: q.sender_email,
+            timestamp: q.timestamp,
+            subject: q.subject,
+            body: q.body || "",
+            link: q.display_link,
+            attachment: q.attachment
+        };
+
+        emailArea.innerHTML = `
+            <div class="email-grid">
+                ${renderEmail(singleEmail)}
+            </div>
+        `;
     }
 
+    const optionsArea = document.getElementById("optionsArea");
+    optionsArea.innerHTML = "";
+
+    (q.options || []).forEach((option, index) => {
+        const label = document.createElement("label");
+        label.className = "option";
+
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "answer";
+        input.value = index;
+
+        const span = document.createElement("span");
+        span.textContent = option;
+
+        input.addEventListener("change", () => {
+            selectedAnswers[currentIndex] = index;
+
+            continueButton.disabled = false;
+            showAnswerFeedback(index);
+        });
+
+        label.appendChild(input);
+        label.appendChild(span);
+        optionsArea.appendChild(label);
+    });
+
+    const feedback = document.getElementById("answerFeedback");
+    feedback.className = "answer-feedback";
+    feedback.textContent = "";
+
+    continueButton.disabled = true;
+    continueButton.textContent = "Continue";
+}
+
+function showAnswerFeedback(selectedIndex) {
+    const q = QUESTIONS[currentIndex];
+    const feedback = document.getElementById("answerFeedback");
+    const options = document.querySelectorAll(".option");
+
+    options.forEach((option, index) => {
+        option.classList.remove("correct", "wrong");
+
+        if (index === Number(q.correct)) {
+            option.classList.add("correct");
+        }
+
+        if (index === selectedIndex && index !== Number(q.correct)) {
+            option.classList.add("wrong");
+        }
+    });
+
+    const isCorrect = selectedIndex === Number(q.correct);
+
+    feedback.className =
+        "answer-feedback " + (isCorrect ? "correct" : "wrong");
+
+    feedback.innerHTML = `
+        <strong>${isCorrect ? "Correct response" : "Not quite right"}</strong>
+        <br>
+        ${escapeHTML(q.explanation || "Review the email carefully and follow the company security process.")}
+    `;
+}
+
+function getScenarioStages(q, index) {
+    const title = (q.title || "").toLowerCase();
+    const category = (q.category || "").toLowerCase();
+
+    let subject = "Suspicious Email";
+    let icon = "📧";
+    let threat = "An unexpected message has arrived.";
+    let action = "Review the sender, message and destination before taking action.";
+
+    if (title.includes("microsoft")) {
+        subject = "Microsoft Account Alert";
+        icon = "🛡️";
+        threat = "A message claims that unusual sign-in activity has been detected.";
+        action = "The employee must inspect the sender domain and verify the alert independently.";
+    } else if (title.includes("password")) {
+        subject = "Company Password Maintenance";
+        icon = "🔐";
+        threat = "Two password-maintenance emails arrive with different sender addresses.";
+        action = "The employee compares the official company domain against the suspicious lookalike.";
+    } else if (title.includes("document")) {
+        subject = "Unexpected Shared Document";
+        icon = "📄";
+        threat = "A document-sharing notification pressures an employee to sign in.";
+        action = "The employee verifies the sharing request using a trusted company channel.";
+    } else if (title.includes("salary")) {
+        subject = "HR Salary Revision";
+        icon = "💼";
+        threat = "Two salary-revision messages request different employee actions.";
+        action = "The employee checks the HR domain and refuses requests for passwords or banking credentials.";
+    } else if (title.includes("project")) {
+        subject = "Project Coordination";
+        icon = "📁";
+        threat = "A project update arrives with an attachment.";
+        action = "The employee checks the context and follows the normal attachment security process.";
+    } else if (title.includes("security policy")) {
+        subject = "Security Policy Update";
+        icon = "🖥️";
+        threat = "A policy message contains an external file-sharing link.";
+        action = "The employee checks the destination and contacts the security team through an approved channel.";
+    } else if (title.includes("benefits")) {
+        subject = "Employee Benefits Enrollment";
+        icon = "📋";
+        threat = "A benefits form asks employees to submit personal information.";
+        action = "The employee verifies the enrollment process directly with HR.";
+    } else if (title.includes("google storage")) {
+        subject = "Google Storage Warning";
+        icon = "☁️";
+        threat = "Two storage notifications warn about possible file deletion.";
+        action = "The employee checks the sender domain and visits the official service directly.";
+    } else if (title.includes("payment")) {
+        subject = "Vendor Payment Confirmation";
+        icon = "💳";
+        threat = "An invoice-processing confirmation appears in the finance workflow.";
+        action = "The employee checks the invoice using the approved finance process.";
+    } else if (title.includes("executive")) {
+        subject = "Executive Impersonation";
+        icon = "⚠️";
+        threat = "An urgent confidential payment request claims to come from a senior executive.";
+        action = "The employee independently verifies the request before any financial action.";
+    }
+
+    return [
+        {
+            kicker: "INCOMING MESSAGE",
+            title: "A New Message Arrives",
+            description: `${subject}: ${threat}`,
+            notification: "New email notification received.",
+            caption: "An employee receives a message that requires careful inspection."
+        },
+        {
+            kicker: "INITIAL INSPECTION",
+            title: "Inspect the Email",
+            description: "The sender, subject, message and links need to be examined before responding.",
+            notification: "Checking sender identity and message details...",
+            caption: "A familiar logo or display name does not prove that an email is genuine."
+        },
+        {
+            kicker: "THREAT ANALYSIS",
+            title: "Look for Warning Signs",
+            description: "Look for unusual domains, urgency, spelling errors and requests for sensitive information.",
+            notification: "Security indicators are being reviewed.",
+            caption: "Small details in an email can reveal a phishing attempt."
+        },
+        {
+            kicker: "EMPLOYEE RESPONSE",
+            title: "Choose a Safe Action",
+            description: action,
+            notification: "The employee follows the approved verification process.",
+            caption: "Pause, verify and report suspicious messages instead of interacting with them."
+        },
+        {
+            kicker: "SECURITY AWARENESS",
+            title: "Protect Company Information",
+            description: "A careful employee helps protect company accounts, information and colleagues.",
+            notification: "Security awareness scenario completed.",
+            caption: "Think before you click. Verify before you trust. Report when in doubt."
+        }
+    ];
+}
+
+function playScenario() {
+    const q = QUESTIONS[currentIndex];
+
+    if (!q) return;
+
+    questionCard.style.display = "none";
+    scenarioCard.style.display = "block";
+
+    scenarioSeconds = 25;
+    scenarioPlaying = true;
+    scenarioFinished = false;
+
+    nextQuestionButton.disabled = true;
+    document.getElementById("scenarioTimer").textContent = "25 seconds";
+    document.getElementById("scenarioStatus").textContent =
+        "Playing security scenario...";
+
+    const stages = getScenarioStages(q, currentIndex);
+
+    const stageDuration = 5;
+    let elapsed = 0;
+
+    function updateScene() {
+        const stageIndex = Math.min(
+            Math.floor(elapsed / stageDuration),
+            stages.length - 1
+        );
+
+        const stage = stages[stageIndex];
+
+        document.getElementById("sceneIcon").textContent =
+            getScenarioIcon(q, stageIndex);
+
+        document.getElementById("sceneKicker").textContent =
+            stage.kicker;
+
+        document.getElementById("sceneTitle").textContent =
+            stage.title;
+
+        document.getElementById("sceneDescription").textContent =
+            stage.description;
+
+        document.getElementById("sceneNotification").textContent =
+            stage.notification;
+
+        document.getElementById("sceneCaption").textContent =
+            stage.caption;
+
+        document.getElementById("sceneProgressFill").style.width =
+            `${(elapsed / 25) * 100}%`;
+    }
+
+    updateScene();
+
+    stopScenario();
+
+    scenarioInterval = setInterval(() => {
+        elapsed++;
+        scenarioSeconds = 25 - elapsed;
+
+        document.getElementById("scenarioTimer").textContent =
+            scenarioSeconds > 0
+                ? `${scenarioSeconds} seconds`
+                : "Completed";
+
+        updateScene();
+
+        if (elapsed >= 25) {
+            finishScenario();
+        }
+    }, 1000);
+}
+
+function getScenarioIcon(q, stageIndex) {
+    const stages = getScenarioStages(q, currentIndex);
+
+    const title = (q.title || "").toLowerCase();
+
+    let icon = "📧";
+
+    if (title.includes("microsoft")) icon = "🛡️";
+    else if (title.includes("password")) icon = "🔐";
+    else if (title.includes("document")) icon = "📄";
+    else if (title.includes("salary")) icon = "💼";
+    else if (title.includes("project")) icon = "📁";
+    else if (title.includes("security policy")) icon = "🖥️";
+    else if (title.includes("benefits")) icon = "📋";
+    else if (title.includes("google storage")) icon = "☁️";
+    else if (title.includes("payment")) icon = "💳";
+    else if (title.includes("executive")) icon = "⚠️";
+
+    return stageIndex === 2 ? "🔍" :
+           stageIndex === 3 ? "🛡️" :
+           stageIndex === 4 ? "✅" : icon;
+}
+
+function finishScenario() {
+    stopScenario();
+
+    scenarioPlaying = false;
+    scenarioFinished = true;
+
+    document.getElementById("scenarioTimer").textContent = "Completed";
+    document.getElementById("scenarioStatus").textContent =
+        "Scenario completed. You can continue.";
+
+    document.getElementById("sceneProgressFill").style.width = "100%";
+
+    nextQuestionButton.disabled = false;
+}
+
+function stopScenario() {
+    if (scenarioInterval) {
+        clearInterval(scenarioInterval);
+        scenarioInterval = null;
+    }
+}
+
+function replayScenario() {
+    if (scenarioPlaying) return;
+    playScenario();
+}
+
+function skipScenario() {
+    if (!scenarioPlaying && !scenarioFinished) return;
+    finishScenario();
+}
+
+function proceed() {
+    if (selectedAnswers[currentIndex] === undefined) {
+        return;
+    }
+
+    // The final question submits without an extra animation.
+    if (currentIndex === QUESTIONS.length - 1) {
+        submitAssessment();
+        return;
+    }
+
+    playScenario();
+}
+
+function nextQuestion() {
+    if (!scenarioFinished) return;
+
+    stopScenario();
+
+    currentIndex++;
+
+    if (currentIndex >= QUESTIONS.length) {
+        submitAssessment();
+        return;
+    }
+
+    renderQuestion();
+}
+
+async function submitAssessment() {
+    stopScenario();
+
+    continueButton.disabled = true;
+    nextQuestionButton.disabled = true;
+
+    document.getElementById("scenarioStatus").textContent =
+        "Submitting your assessment...";
+
+    const payload = {
+        attempt_id: ATTEMPT_ID,
+        answers: selectedAnswers
+    };
+
+    try {
+        const response = await fetch("/submit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Submission failed.");
+        }
+
+        if (result.url) {
+            window.location.href = result.url;
+        } else {
+            throw new Error("The server did not return a results page.");
+        }
+
+    } catch (error) {
+        alert(error.message || "Unable to submit. Please try again.");
+        continueButton.disabled = false;
+        nextQuestionButton.disabled = false;
+    }
+}
+
+continueButton.addEventListener("click", proceed);
+nextQuestionButton.addEventListener("click", nextQuestion);
+
+document.getElementById("replayButton")
+    .addEventListener("click", replayScenario);
+
+document.getElementById("skipButton")
+    .addEventListener("click", skipScenario);
+
+if (!Array.isArray(QUESTIONS) || QUESTIONS.length === 0) {
+    document.getElementById("questionCard").innerHTML =
+        "<h2>No questions are available. Please contact the administrator.</h2>";
+} else {
+    renderQuestion();
+}
 </script>
 
 </body>
