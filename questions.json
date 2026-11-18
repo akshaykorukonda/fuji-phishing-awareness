@@ -3,24 +3,24 @@
   {
     "category": "PHISHING INVESTIGATION",
     "mode": "multiple_choice",
-    "title": "Investigation 01: Microsoft Security Alert",
-    "sender": "Microsoft 365 Security",
-    "sender_initial": "M",
-    "sender_email": "security@micros0ft-account.example",
+    "title": "Investigation 01: Suspicious VPN Security Update",
+    "sender": "Corporate Network Security",
+    "sender_initial": "N",
+    "sender_email": "network-security@fujisilvertech-support.com",
     "timestamp": "Today, 9:15 AM",
-    "subject": "URGENT: Unusual Sign-in Activity Detected",
-    "scenario": "We detected an unusual sign-in attempt on your Microsoft 365 account. Review the activity immediately to prevent account restrictions.",
-    "display_link": "https://micros0ft-account.example/verify",
-    "attachment": "",
-    "email_note": "The message claims to be from Microsoft Security.",
+    "subject": "Action Required: VPN Security Certificate Update",
+    "scenario": "Dear Employee,\n\nOur network monitoring system has detected that your VPN security certificate is outdated. All employees must renew their certificates today to avoid losing remote network access.\n\nDownload the attached certificate update and sign in using your company credentials to complete the installation.\n\nFailure to complete this process may result in your account being temporarily disabled.\n\nRegards,\nNetwork Security Team",
+    "display_link": "https://fujisilvertech-support.com/vpn-update",
+    "attachment": "VPN_Security_Certificate_Update.zip",
+    "email_note": "The sender uses a convincing company-related name and refers to a realistic IT security process.",
     "options": [
-      "Report the email as phishing because the sender domain is not Microsoft's official domain.",
-      "Click the link because the email mentions unusual sign-in activity.",
-      "Reply to the sender asking whether the alert is genuine.",
-      "Forward the email to colleagues to check whether they received it."
+      "Report the email because the sender domain is not the verified company domain and the attachment is unexpected.",
+      "Download the ZIP file because VPN certificate updates are important.",
+      "Enter your company credentials to avoid losing remote access.",
+      "Forward the attachment to colleagues so they can update their VPN certificates."
     ],
     "correct": 0,
-    "explanation": "The sender uses a lookalike domain with a zero replacing the letter 'o'. Attackers imitate trusted brands and create urgency to make employees click malicious links. Report the message through the approved security reporting process."
+    "explanation": "Attackers often imitate internal IT teams and use realistic technical language to make malicious messages convincing. The sender domain is not the official company domain, and an unexpected ZIP attachment requesting credentials is suspicious. Verify updates through the approved IT channel."
   },
   {
     "category": "EMAIL COMPARISON",
@@ -31,7 +31,7 @@
     "sender_email": "Compare Email A and Email B",
     "timestamp": "Today, 10:25 AM",
     "subject": "Company Password Maintenance Notification",
-    "scenario": "You receive two emails that appear to come from Fuji Silvertech IT Support. Both discuss company password maintenance. One is legitimate, while the other is designed to steal employee credentials.",
+    "scenario": "You receive two emails that appear to come from Fuji Silvertech IT Support. Both discuss company password maintenance. One is legitimate, while the other is designed to steal employee credentials. Compare the messages carefully.",
     "comparison": true,
     "emails": [
       {
@@ -47,17 +47,17 @@
       {
         "label": "EMAIL B",
         "sender": "IT Support",
-        "sender_email": "it-support@fuji-silvertec-secure.example",
+        "sender_email": "it-supp0rt@fujIsIlvertech.com",
         "timestamp": "Today, 10:25 AM",
-        "subject": "URGENT: Your Company Account Will Be Deactivated",
-        "body": "Dear Employee,\n\nYour Fuji Silvertech account will be deactivated today due to a security issue.\n\nYou must complete the account verification process immediately.\n\nEnter your company password and MFA code using the link below to avoid account suspension.\n\nRegards,\nIT Support Team",
-        "link": "https://fuji-silvertec-secure.example/verify",
+        "subject": "URGENT: Your Company Account Requires Verification",
+        "body": "Dear Employee,\n\nOur IT team has identified an issue with your company account.\n\nPlease complete the security verification process immediately to prevent any interruption to your account access.\n\nUse the link below to confirm your company email, password and MFA code.\n\nYour account may be restricted if verification is not completed today.\n\nRegards,\nIT Support Team",
+        "link": "https://fujisilvertech-account-check.example/verify",
         "attachment": ""
       }
     ],
     "display_link": "",
     "attachment": "",
-    "email_note": "Compare the sender addresses, domains, urgency, links and information requested.",
+    "email_note": "Both addresses look similar at first glance. Pay attention to the characters in the sender address and the information being requested.",
     "options": [
       "Email A is legitimate and Email B is suspicious.",
       "Email B is legitimate and Email A is suspicious.",
@@ -65,7 +65,7 @@
       "Both emails are phishing."
     ],
     "correct": 0,
-    "explanation": "Email A uses the official company domain and directs employees to access the company portal through their usual bookmarked address. Email B uses an unverified lookalike domain, creates urgency and asks for a password and MFA code. Never provide credentials through an email link."
+    "explanation": "Email B uses subtle character substitutions: the number zero replaces the letter o, and uppercase and lowercase characters are mixed to imitate the official company address. It also requests a password and MFA code. Email A uses the official company domain and does not ask for credentials."
   },
   {
     "category": "PHISHING INVESTIGATION",
@@ -98,7 +98,7 @@
     "sender_email": "Compare Email A and Email B",
     "timestamp": "Today, 12:05 PM",
     "subject": "Annual Salary Revision Notification",
-    "scenario": "Two emails arrive announcing the annual salary revision. Both appear to come from Human Resources. One follows a normal company communication process, while the other attempts to collect sensitive employee information.",
+    "scenario": "Two emails arrive announcing the annual salary revision. Both appear to come from Human Resources. One follows a normal company communication process, while the other attempts to collect sensitive employee information. Compare the sender details, spelling and requested action.",
     "comparison": true,
     "emails": [
       {
@@ -114,17 +114,17 @@
       {
         "label": "EMAIL B",
         "sender": "Human Resources",
-        "sender_email": "hr-payroll@fujisilvertech-careers.example",
+        "sender_email": "hr@fujislvertech.com",
         "timestamp": "Today, 12:05 PM",
-        "subject": "URGENT: Annual Salery Revision - Action Required",
-        "body": "Dear Employee,\n\nYour annual salery revision has been approved. Please compleate your employee information update immediately.\n\nUse the link below to confirm your revised salary.\n\nYou must provide your bank account details and current company password to receive your revised salary.\n\nRegards,\nHuman Resources",
-        "link": "https://fujisilvertech-careers.example/payroll",
+        "subject": "URGENT: Annual Salery Revesion - Action Requird",
+        "body": "Dear Employe,\n\nYour annual salery revesion has been aproved. Please compleate your employe information updation immediatly.\n\nClick the link below to confirm your revised salery and recieve your updated payroll details.\n\nYou must provide your bank account details and current company password to recieve your revised salary.\n\nFailure to submit the details today may delay your salary processing.\n\nRegards,\nHuman Resouces Team",
+        "link": "https://fujisilvertech-payroll.example/employee-update",
         "attachment": ""
       }
     ],
     "display_link": "",
     "attachment": "",
-    "email_note": "Compare the sender domain, spelling, requested information and communication process.",
+    "email_note": "Both messages appear to come from HR. Look closely at the sender address, spelling errors and information requested.",
     "options": [
       "Email A is legitimate and Email B is suspicious.",
       "Email B is legitimate and Email A is suspicious.",
@@ -132,7 +132,7 @@
       "Both emails are phishing."
     ],
     "correct": 0,
-    "explanation": "Email A uses the official company domain and directs employees to the approved HR communication channel. Email B uses an unverified domain, contains spelling mistakes and requests banking details and a company password. HR should never request company passwords through email."
+    "explanation": "Email B uses the misspelled domain fujislvertech.com, which omits the letter i. It also contains multiple spelling mistakes, creates urgency and requests banking information and a company password. Email A uses the official company domain and follows a normal HR communication process."
   },
   {
     "category": "PHISHING INVESTIGATION",
@@ -181,24 +181,24 @@
   {
     "category": "PHISHING INVESTIGATION",
     "mode": "multiple_choice",
-    "title": "Investigation 07: HR Benefits Announcement",
-    "sender": "Employee Benefits Desk",
-    "sender_initial": "E",
-    "sender_email": "benefits@fujisilvertech.com",
+    "title": "Investigation 07: IT Equipment Replacement Notice",
+    "sender": "IT Asset Management",
+    "sender_initial": "A",
+    "sender_email": "asset-management@fujisilvertech.com",
     "timestamp": "Today, 3:05 PM",
-    "subject": "New Employee Benefits Enrollment",
-    "scenario": "Hello Team,\n\nThe annual employee benefits enrollment period is approaching. An unexpected message in a group chat asks employees to complete a benefits form using an unfamiliar external website and submit personal details immediately.\n\nWhat should you do?",
-    "display_link": "https://employee-benefits-update.example/form",
+    "subject": "Action Required: Laptop Replacement Registration",
+    "scenario": "Dear Employee,\n\nThe IT department is preparing a laptop replacement cycle for selected employees. A message circulating among employees claims that everyone must register their existing laptop immediately through an external replacement portal.\n\nThe form requests your employee ID, current Windows password and laptop serial number to confirm eligibility.\n\nEmployees who do not register today may be excluded from the replacement program.\n\nRegards,\nIT Asset Management",
+    "display_link": "https://fujisilvertech-device-register.example/replace",
     "attachment": "",
-    "email_note": "The message combines a genuine workplace topic with an unfamiliar external form.",
+    "email_note": "The message uses a realistic workplace process and an internal-looking sender name, but the registration link is external.",
     "options": [
-      "Submit your details because benefits enrollment is important.",
-      "Share the form in your team group so everyone can complete it.",
-      "Verify the enrollment announcement with HR using an approved company channel before submitting any information.",
-      "Enter your personal details but leave the password field blank."
+      "Submit the requested information because laptop replacement is an official IT activity.",
+      "Enter your Windows password because the portal needs to verify your laptop.",
+      "Verify the replacement program directly with IT through an approved company channel and do not submit credentials.",
+      "Forward the registration link to other employees so they can register before the deadline."
     ],
     "correct": 2,
-    "explanation": "Attackers often use genuine workplace topics such as benefits enrollment to make fraudulent requests seem believable. Verify the announcement directly with HR and use only approved company systems."
+    "explanation": "Attackers may impersonate IT asset management and use realistic equipment replacement announcements to collect employee information. An external registration page requesting a Windows password is suspicious. Verify the program directly with IT and never share your password."
   },
   {
     "category": "EMAIL COMPARISON",
@@ -225,17 +225,17 @@
       {
         "label": "EMAIL B",
         "sender": "Google Workspace Storage",
-        "sender_email": "storage-alert@google-workspace-quota.example",
+        "sender_email": "n0-reply@Go0gle.com",
         "timestamp": "Today, 3:45 PM",
-        "subject": "URGENT: Your Google Storage Is Almost Full",
-        "body": "Dear User,\n\nYour cloud storage is almost full. Immediate action is requird to prevent your files from being deleted.\n\nYou are recieving this notification because your storage limit has been exceeded.\n\nUpgrade or verify your storage immediately using the link below.\n\nYour files will be removed immediatly unless you enter your account password and payment details.\n\nGoogle Workspace Support",
-        "link": "https://google-workspace-quota.example/upgrade",
+        "subject": "URGENT: Your Google Storage Is Almost Ful",
+        "body": "Dear User,\n\nYour cloud storage is almost ful. Immediate action is requird to prevent your files from being deleted.\n\nYou are recieving this notification because your storage limit has been exeeded.\n\nUpgrade or verify your storage immediatly using the link below.\n\nYour files will be removed immediatly unless you enter your account password and payment details.\n\nGoogle Workspace Support",
+        "link": "https://google-storage-alert.example/upgrade",
         "attachment": ""
       }
     ],
     "display_link": "",
     "attachment": "",
-    "email_note": "Compare the sender domain, spelling mistakes, urgency and destination links.",
+    "email_note": "Both sender addresses look similar at first glance. Inspect the characters carefully and look for spelling mistakes and unusual requests.",
     "options": [
       "Email A is legitimate and Email B is suspicious.",
       "Email B is legitimate and Email A is suspicious.",
@@ -243,7 +243,7 @@
       "Both emails are phishing."
     ],
     "correct": 0,
-    "explanation": "Email A directs the employee to Google's official website to review storage usage. Email B uses an unverified lookalike domain, contains spelling mistakes, threatens immediate deletion and requests a password and payment details. Never provide credentials or payment details through an unverified email link."
+    "explanation": "Email B uses character substitutions: the number zero replaces the letter o in both n0-reply and Go0gle. It also contains spelling mistakes, creates urgency and requests a password and payment details. Email A uses Google's official sender domain and directs the employee to its official website."
   },
   {
     "category": "PHISHING INVESTIGATION",
