@@ -2,6 +2,7 @@
 [
   {
     "category": "PHISHING INVESTIGATION",
+    "mode": "find_mistakes",
     "title": "Find the Mistakes: Fake Microsoft Email",
     "sender": "Microsoft 365 Security",
     "sender_initial": "M",
@@ -13,13 +14,35 @@
     "actual_link": "https://micros0ft-login.example/verify",
     "email_note": "TASK: Inspect the sender, domain, link and message. Identify the suspicious elements.",
     "options": [],
-    "correct": 0,
+    "mistakes": [
+      {
+        "id": "m1",
+        "text": "Sender address uses micros0ft with a zero instead of the letter o."
+      },
+      {
+        "id": "m2",
+        "text": "Actual destination uses an unrelated micros0ft-login.example domain."
+      },
+      {
+        "id": "m3",
+        "text": "Threatens permanent account suspension within 15 minutes."
+      },
+      {
+        "id": "m4",
+        "text": "Requests the employee's password and MFA code."
+      },
+      {
+        "id": "m5",
+        "text": "Tells the employee not to contact IT."
+      }
+    ],
     "explanation": "The sender uses a zero instead of the letter o in micros0ft. The destination is an unrelated domain, the message creates urgency, requests passwords and MFA codes, and discourages contacting IT.",
     "evidence_type": "email",
     "evidence_caption": "Find the suspicious mistakes in this email."
   },
   {
     "category": "PHISHING INVESTIGATION",
+    "mode": "find_mistakes",
     "title": "Find the Mistakes: Fake Company Domain",
     "sender": "Fuji Silvertech HR",
     "sender_initial": "H",
@@ -31,13 +54,35 @@
     "actual_link": "https://fujisilvertech-careers.example/salary",
     "email_note": "TASK: Examine the email carefully. Find every suspicious domain, address and request.",
     "options": [],
-    "correct": 0,
+    "mistakes": [
+      {
+        "id": "h1",
+        "text": "Sender uses fujisilvertech-careers.example instead of the official company domain."
+      },
+      {
+        "id": "h2",
+        "text": "Displayed company portal link redirects to a different domain."
+      },
+      {
+        "id": "h3",
+        "text": "Reply-To address belongs to an external email domain."
+      },
+      {
+        "id": "h4",
+        "text": "Attachment requests employee ID, password and bank details."
+      },
+      {
+        "id": "h5",
+        "text": "Uses salary delay as pressure to make employees respond."
+      }
+    ],
     "explanation": "The sender domain is not the official company domain, the displayed link differs from the actual destination, the Reply-To address is external, and the attachment requests sensitive credentials and bank information.",
     "evidence_type": "email",
     "evidence_caption": "Find the suspicious mistakes in this HR email."
   },
   {
     "category": "PHISHING INVESTIGATION",
+    "mode": "find_mistakes",
     "title": "Find the Mistakes: Fake Invoice",
     "sender": "Accounts Department",
     "sender_initial": "A",
@@ -49,13 +94,31 @@
     "actual_link": "",
     "email_note": "TASK: Inspect this payment request. Identify the warning signs that could indicate invoice fraud or impersonation.",
     "options": [],
-    "correct": 0,
+    "mistakes": [
+      {
+        "id": "a1",
+        "text": "Introduces a new bank account for an existing supplier."
+      },
+      {
+        "id": "a2",
+        "text": "Demands immediate payment of an overdue invoice."
+      },
+      {
+        "id": "a3",
+        "text": "Asks the finance team to bypass the usual approval process."
+      },
+      {
+        "id": "a4",
+        "text": "Claims management has already approved the payment without verification."
+      }
+    ],
     "explanation": "The request introduces new bank details, pressures the recipient to pay immediately and asks them to bypass normal approval controls. Verify the supplier and payment independently before processing.",
     "evidence_type": "business_document",
     "evidence_caption": "Find the suspicious payment instructions."
   },
   {
     "category": "PHISHING INVESTIGATION",
+    "mode": "find_mistakes",
     "title": "Find the Mistakes: Fake IT Support Email",
     "sender": "IT Helpdesk",
     "sender_initial": "I",
@@ -67,7 +130,28 @@
     "actual_link": "Unknown QR destination",
     "email_note": "TASK: Investigate the sender, attachment, QR code and authentication instructions. Identify the suspicious details.",
     "options": [],
-    "correct": 0,
+    "mistakes": [
+      {
+        "id": "i1",
+        "text": "Sender uses an unverified fujisilvertech-support.example domain."
+      },
+      {
+        "id": "i2",
+        "text": "Requests downloading an unexpected executable file named MFA_Update.exe."
+      },
+      {
+        "id": "i3",
+        "text": "Asks the employee to scan an unknown QR code and sign in."
+      },
+      {
+        "id": "i4",
+        "text": "Encourages approval of an unexpected authentication notification."
+      },
+      {
+        "id": "i5",
+        "text": "Creates urgency by imposing a 10-minute deadline."
+      }
+    ],
     "explanation": "The sender uses an unverified domain, the executable attachment is suspicious, the QR code could lead to a fake login page, the message creates urgency and encourages unexpected MFA approval.",
     "evidence_type": "email",
     "evidence_caption": "Find the suspicious elements in this IT support message."
