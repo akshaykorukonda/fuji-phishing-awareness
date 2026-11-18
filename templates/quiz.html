@@ -37,7 +37,7 @@ header {
 
 .header-label {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: #42627e;
 }
 
@@ -47,7 +47,9 @@ header {
     padding: 0 18px 50px;
 }
 
-.progress-card, .question-card, .scenario-card {
+.progress-card,
+.question-card,
+.scenario-card {
     background: white;
     border-radius: 16px;
     box-shadow: 0 5px 24px rgba(30,70,110,.08);
@@ -82,6 +84,7 @@ header {
 
 .question-card {
     padding: 28px;
+    display: none;
 }
 
 .category {
@@ -233,6 +236,11 @@ header {
     background: #fff2f2;
 }
 
+.option.locked {
+    cursor: default;
+    opacity: .9;
+}
+
 .answer-feedback {
     display: none;
     margin-top: 17px;
@@ -263,7 +271,8 @@ header {
     gap: 12px;
 }
 
-.primary-btn, .secondary-btn {
+.primary-btn,
+.secondary-btn {
     border: 0;
     border-radius: 9px;
     padding: 13px 23px;
@@ -289,7 +298,7 @@ header {
     color: #315b7d;
 }
 
-/* 3D SCENARIO */
+/* 3D SIMULATION */
 
 .scenario-card {
     display: none;
@@ -338,8 +347,8 @@ header {
     top: 16px;
     left: 16px;
     z-index: 3;
-    width: min(310px, calc(100% - 32px));
-    background: rgba(5,20,38,.82);
+    width: min(320px,calc(100% - 32px));
+    background: rgba(5,20,38,.84);
     border: 1px solid rgba(115,194,255,.35);
     border-radius: 11px;
     padding: 13px 15px;
@@ -387,7 +396,7 @@ header {
 
 .scene-caption {
     padding: 16px 20px;
-    min-height: 60px;
+    min-height: 65px;
     background: #f0f6fb;
     color: #3d607d;
     text-align: center;
@@ -421,6 +430,12 @@ header {
     font-size: 12px;
 }
 
+.scene-error {
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
 @media(max-width:700px) {
     .email-grid { grid-template-columns: 1fr; }
     .question-card { padding: 20px 16px; }
@@ -441,7 +456,10 @@ header {
          alt="Fuji Silvertech"
          class="logo"
          onerror="this.style.display='none'">
-    <div class="header-label">PHISHING AWARENESS ASSESSMENT</div>
+
+    <div class="header-label">
+        PHISHING AWARENESS ASSESSMENT
+    </div>
 </header>
 
 <main class="container">
@@ -451,20 +469,26 @@ header {
             <span id="questionCounter">Question 1 of 10</span>
             <span id="progressPercent">10%</span>
         </div>
+
         <div class="progress-track">
             <div class="progress-fill" id="progressFill"></div>
         </div>
     </section>
 
     <section class="question-card" id="questionCard">
+
         <div class="category" id="questionCategory"></div>
+
         <h1 class="question-title" id="questionTitle"></h1>
+
         <div class="question-description" id="questionDescription"></div>
 
         <div id="emailArea"></div>
+
         <div class="email-note" id="emailNote"></div>
 
         <div class="options-title">Select the best response:</div>
+
         <div id="optionsArea"></div>
 
         <div class="answer-feedback" id="answerFeedback"></div>
@@ -474,15 +498,18 @@ header {
                 Continue
             </button>
         </div>
+
     </section>
 
-    <!-- THREE.JS 3D ENVIRONMENT -->
+    <!-- 3D SCENARIO PANEL -->
 
     <section class="scenario-card" id="scenarioCard">
 
         <div class="scenario-top">
             <strong>3D CYBERSECURITY INCIDENT SIMULATION</strong>
-            <span class="scenario-timer" id="scenarioTimer">25 seconds</span>
+            <span class="scenario-timer" id="scenarioTimer">
+                Opening scene
+            </span>
         </div>
 
         <div class="scene-container" id="sceneContainer">
@@ -490,8 +517,8 @@ header {
             <canvas id="threeCanvas"></canvas>
 
             <div class="scene-hud">
-                <small id="sceneKicker">SECURITY OPERATIONS</small>
-                <strong id="sceneTitle">Incoming Email Detected</strong>
+                <small id="sceneKicker">INCIDENT PREVIEW</small>
+                <strong id="sceneTitle">Incoming Email</strong>
                 <p id="sceneDescription"></p>
             </div>
 
@@ -501,9 +528,7 @@ header {
 
         </div>
 
-        <div class="scene-caption" id="sceneCaption">
-            A security incident is being simulated.
-        </div>
+        <div class="scene-caption" id="sceneCaption"></div>
 
         <div class="scene-progress">
             <div class="scene-progress-fill" id="sceneProgressFill"></div>
@@ -515,54 +540,199 @@ header {
             <button class="secondary-btn" id="skipButton">Skip</button>
         </div>
 
-        <div class="button-row" style="padding:0 20px 20px;margin-top:0;">
-            <button class="primary-btn" id="nextQuestionButton" disabled>
-                Continue to Next Question
-            </button>
-        </div>
-
     </section>
 
 </main>
 
 <script>
+
+/* =====================================================
+   QUESTIONS AND ATTEMPT DATA FROM FLASK
+===================================================== */
+
 const QUESTIONS = {{ questions | tojson }};
 const ATTEMPT_ID = {{ attempt_id | tojson }};
 
 let currentIndex = 0;
 let selectedAnswers = {};
-let sceneTimer = null;
-let sceneElapsed = 0;
-let scenePlaying = false;
-let sceneFinished = false;
 
 let renderer = null;
 let scene = null;
 let camera = null;
-let animationFrame = null;
 let clock = null;
+let animationFrame = null;
 
 let character = null;
 let monitorScreen = null;
 let emailPanel = null;
 let alertObject = null;
-let particles = [];
-let sceneObjects = [];
+let shieldObject = null;
 
-let currentTheme = "general";
+let particles = [];
+let dynamicObjects = [];
+
+let introTimer = null;
+let outcomeTimer = null;
+
+let currentPhase = "intro";
+let introElapsed = 0;
+let outcomeElapsed = 0;
+
+let introRunning = false;
+let outcomeRunning = false;
+let answerLocked = false;
+let threeReady = false;
 
 const questionCard = document.getElementById("questionCard");
 const scenarioCard = document.getElementById("scenarioCard");
 const continueButton = document.getElementById("continueButton");
-const nextQuestionButton = document.getElementById("nextQuestionButton");
+
+const SCENARIOS = [
+
+    {
+        introTitle: "Microsoft Security Alert",
+        intro: "An employee is working at their desk when a Microsoft security warning suddenly appears on the computer.",
+        correctTitle: "Threat Successfully Reported",
+        correct: "The employee reports the suspicious email. The SOC team investigates the fake Microsoft domain and blocks the malicious link.",
+        wrongTitle: "Microsoft Account Compromised",
+        wrong: "The employee opens the fake verification page. A fraudulent login screen captures the employee's credentials.",
+        safe: "EMAIL REPORTED",
+        unsafe: "ACCOUNT COMPROMISED",
+        correctLabel: "THREAT BLOCKED",
+        wrongLabel: "FAKE LOGIN DETECTED"
+    },
+
+    {
+        introTitle: "Two Password Emails",
+        intro: "Two password maintenance emails arrive. The employee must identify which message genuinely comes from IT Support.",
+        correctTitle: "Legitimate Email Identified",
+        correct: "The employee chooses Email A and uses the familiar company portal. The account remains protected.",
+        wrongTitle: "Credentials Stolen",
+        wrong: "The employee trusts Email B. The fake login page captures the company password and MFA code.",
+        safe: "OFFICIAL PORTAL",
+        unsafe: "PASSWORD STOLEN",
+        correctLabel: "EMAIL A VERIFIED",
+        wrongLabel: "FAKE PASSWORD PAGE"
+    },
+
+    {
+        introTitle: "Shared Document Received",
+        intro: "An employee receives an unexpected document notification claiming that a colleague shared a confidential project file.",
+        correctTitle: "Document Request Verified",
+        correct: "The employee contacts the colleague through a trusted channel. The suspicious request is reported before credentials are shared.",
+        wrongTitle: "Fake Document Login",
+        wrong: "The employee opens the fake sharing page. The page requests company credentials and exposes the account.",
+        safe: "REQUEST VERIFIED",
+        unsafe: "CREDENTIALS EXPOSED",
+        correctLabel: "DOCUMENT VERIFIED",
+        wrongLabel: "FAKE DOCUMENT PAGE"
+    },
+
+    {
+        introTitle: "Salary Revision Announcement",
+        intro: "Two HR salary revision announcements appear on the employee's computer.",
+        correctTitle: "HR Fraud Prevented",
+        correct: "The employee selects Email A and contacts HR through the official company channel.",
+        wrongTitle: "Payroll Information Exposed",
+        wrong: "The employee follows the fake payroll link and enters sensitive banking information and a company password.",
+        safe: "HR VERIFIED",
+        unsafe: "DATA EXPOSED",
+        correctLabel: "OFFICIAL HR CHANNEL",
+        wrongLabel: "FAKE PAYROLL PAGE"
+    },
+
+    {
+        introTitle: "Project Attachment Received",
+        intro: "A project coordination email arrives with an updated timeline and a project attachment.",
+        correctTitle: "Attachment Reviewed Safely",
+        correct: "The employee checks the sender and project context, then reviews the attachment using normal company security procedures.",
+        wrongTitle: "Unsafe Attachment Opened",
+        wrong: "The employee ignores attachment safety checks. A simulated malware alert appears on the workstation.",
+        safe: "FILE VERIFIED",
+        unsafe: "MALWARE ALERT",
+        correctLabel: "SAFE FILE REVIEW",
+        wrongLabel: "MALWARE DETECTED"
+    },
+
+    {
+        introTitle: "Security Policy Update",
+        intro: "An email that appears to come from Information Security contains an external policy review link.",
+        correctTitle: "External Threat Blocked",
+        correct: "The employee notices the external destination, contacts the security team and avoids entering credentials.",
+        wrongTitle: "Fake Login Page",
+        wrong: "The employee trusts the sender name and enters credentials on an unverified external website.",
+        safe: "LINK BLOCKED",
+        unsafe: "LOGIN COMPROMISED",
+        correctLabel: "EXTERNAL LINK BLOCKED",
+        wrongLabel: "FAKE LOGIN DETECTED"
+    },
+
+    {
+        introTitle: "Employee Benefits Request",
+        intro: "An employee receives a benefits enrollment announcement with an unfamiliar online form.",
+        correctTitle: "Employee Data Protected",
+        correct: "The employee verifies the enrollment with HR through an approved company channel.",
+        wrongTitle: "Personal Information Exposed",
+        wrong: "The employee submits personal information through the fraudulent external form.",
+        safe: "HR CONFIRMED",
+        unsafe: "PERSONAL DATA EXPOSED",
+        correctLabel: "HR CONFIRMED",
+        wrongLabel: "FAKE FORM SUBMITTED"
+    },
+
+    {
+        introTitle: "Cloud Storage Warning",
+        intro: "Two Google storage notifications appear, warning that cloud storage needs attention.",
+        correctTitle: "Official Storage Checked",
+        correct: "The employee opens the official Google website directly and checks the actual storage usage.",
+        wrongTitle: "Fake Storage Upgrade",
+        wrong: "The employee follows the fraudulent upgrade link and exposes account and payment details.",
+        safe: "OFFICIAL WEBSITE",
+        unsafe: "ACCOUNT EXPOSED",
+        correctLabel: "STORAGE VERIFIED",
+        wrongLabel: "FAKE UPGRADE PAGE"
+    },
+
+    {
+        introTitle: "Vendor Payment Verification",
+        intro: "An invoice confirmation arrives from Accounts Payable. The employee must follow the finance process.",
+        correctTitle: "Finance Process Followed",
+        correct: "The employee follows the normal invoice approval workflow and verifies any unexpected payment changes.",
+        wrongTitle: "Finance Security Incident",
+        wrong: "The employee follows an unsafe payment instruction or shares credentials, triggering a simulated finance security incident.",
+        safe: "PAYMENT VERIFIED",
+        unsafe: "FINANCIAL RISK",
+        correctLabel: "FINANCE APPROVED",
+        wrongLabel: "PAYMENT RISK DETECTED"
+    },
+
+    {
+        introTitle: "Executive Impersonation",
+        intro: "A message claiming to be from the CEO requests an urgent confidential gift card purchase.",
+        correctTitle: "Executive Fraud Prevented",
+        correct: "The employee verifies the request through a known company contact method and reports the impersonation.",
+        wrongTitle: "Gift Card Fraud",
+        wrong: "The employee sends gift card redemption codes to the attacker. A simulated financial loss alert appears.",
+        safe: "FRAUD PREVENTED",
+        unsafe: "GIFT CARD FRAUD",
+        correctLabel: "EXECUTIVE VERIFIED",
+        wrongLabel: "FINANCIAL FRAUD"
+    }
+
+];
+
+
+/* =====================================================
+   GENERAL HELPERS
+===================================================== */
 
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, c => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
     })[c]);
 }
 
@@ -580,10 +750,20 @@ function updateProgress() {
         `${number / total * 100}%`;
 }
 
+
+/* =====================================================
+   EMAIL DISPLAY
+===================================================== */
+
 function renderEmail(email) {
+
     return `
     <article class="email-card">
-        <div class="email-heading">${escapeHTML(email.label || "EMAIL")}</div>
+
+        <div class="email-heading">
+            ${escapeHTML(email.label || "EMAIL")}
+        </div>
+
         <div class="email-content">
 
             <div class="email-field">
@@ -606,300 +786,94 @@ function renderEmail(email) {
                 <strong>${escapeHTML(email.subject)}</strong>
             </div>
 
-            <div class="email-body">${escapeHTML(email.body)}</div>
+            <div class="email-body">
+                ${escapeHTML(email.body)}
+            </div>
 
             ${email.link ? `
                 <div class="email-link">
-                    <strong>Link:</strong><br>${escapeHTML(email.link)}
-                </div>` : ""}
+                    <strong>Link:</strong><br>
+                    ${escapeHTML(email.link)}
+                </div>
+            ` : ""}
 
             ${email.attachment ? `
                 <div class="email-link">
-                    <strong>Attachment:</strong><br>${escapeHTML(email.attachment)}
-                </div>` : ""}
+                    <strong>Attachment:</strong><br>
+                    ${escapeHTML(email.attachment)}
+                </div>
+            ` : ""}
 
         </div>
     </article>`;
 }
 
-function renderQuestion() {
-    stopScenario();
 
-    const q = QUESTIONS[currentIndex];
+/* =====================================================
+   THREE.JS OBJECT HELPERS
+===================================================== */
 
-    questionCard.style.display = "block";
-    scenarioCard.style.display = "none";
+function addBox(w,h,d,color,x,y,z,options={}) {
 
-    updateProgress();
+    const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(w,h,d),
+        new THREE.MeshStandardMaterial({
+            color,
+            roughness: .7,
+            metalness: .05,
+            ...options
+        })
+    );
 
-    document.getElementById("questionCategory").textContent =
-        q.category || "PHISHING INVESTIGATION";
-
-    document.getElementById("questionTitle").textContent =
-        q.title || `Question ${currentIndex + 1}`;
-
-    document.getElementById("questionDescription").textContent =
-        q.scenario || "";
-
-    document.getElementById("emailNote").textContent =
-        q.email_note || "";
-
-    const emailArea = document.getElementById("emailArea");
-
-    if (q.comparison && Array.isArray(q.emails)) {
-        emailArea.innerHTML =
-            `<div class="email-grid">${q.emails.map(renderEmail).join("")}</div>`;
-    } else {
-        const email = {
-            label: "EMAIL DETAILS",
-            sender: q.sender,
-            sender_email: q.sender_email,
-            timestamp: q.timestamp,
-            subject: q.subject,
-            body: q.body || "",
-            link: q.display_link,
-            attachment: q.attachment
-        };
-
-        emailArea.innerHTML =
-            `<div class="email-grid">${renderEmail(email)}</div>`;
-    }
-
-    const optionsArea = document.getElementById("optionsArea");
-    optionsArea.innerHTML = "";
-
-    (q.options || []).forEach((option, index) => {
-        const label = document.createElement("label");
-        label.className = "option";
-
-        const input = document.createElement("input");
-        input.type = "radio";
-        input.name = "answer";
-        input.value = index;
-
-        const span = document.createElement("span");
-        span.textContent = option;
-
-        input.addEventListener("change", () => {
-            selectedAnswers[currentIndex] = index;
-            continueButton.disabled = false;
-            showAnswerFeedback(index);
-        });
-
-        label.append(input, span);
-        optionsArea.appendChild(label);
-    });
-
-    const feedback = document.getElementById("answerFeedback");
-    feedback.className = "answer-feedback";
-    feedback.textContent = "";
-
-    continueButton.disabled = true;
-    continueButton.textContent =
-        currentIndex === QUESTIONS.length - 1
-            ? "Submit Assessment"
-            : "Continue";
-}
-
-function showAnswerFeedback(selectedIndex) {
-    const q = QUESTIONS[currentIndex];
-    const feedback = document.getElementById("answerFeedback");
-
-    document.querySelectorAll(".option").forEach((option, index) => {
-        option.classList.remove("correct", "wrong");
-
-        if (index === Number(q.correct)) {
-            option.classList.add("correct");
-        }
-
-        if (index === selectedIndex && index !== Number(q.correct)) {
-            option.classList.add("wrong");
-        }
-    });
-
-    const isCorrect = selectedIndex === Number(q.correct);
-
-    feedback.className =
-        "answer-feedback " + (isCorrect ? "correct" : "wrong");
-
-    feedback.innerHTML = `
-        <strong>${isCorrect ? "Correct response" : "Not quite right"}</strong>
-        <br>${escapeHTML(q.explanation || "")}
-    `;
-}
-
-/* -------------------------------------
-   3D SCENARIO CONFIGURATION
-------------------------------------- */
-
-function getTheme(q) {
-    const title = (q.title || "").toLowerCase();
-
-    if (title.includes("microsoft")) return "microsoft";
-    if (title.includes("password")) return "password";
-    if (title.includes("document")) return "document";
-    if (title.includes("salary")) return "salary";
-    if (title.includes("project")) return "project";
-    if (title.includes("security policy")) return "policy";
-    if (title.includes("benefits")) return "benefits";
-    if (title.includes("google storage")) return "storage";
-    if (title.includes("payment")) return "payment";
-    if (title.includes("executive")) return "executive";
-
-    return "general";
-}
-
-const THEMES = {
-    microsoft: {
-        subject: "Microsoft Security Alert",
-        threat: "Unusual account activity detected.",
-        action: "Inspect the sender and report the suspicious alert.",
-        object: "ACCOUNT SECURITY WARNING"
-    },
-    password: {
-        subject: "Password Reset Comparison",
-        threat: "Two password reset emails have arrived.",
-        action: "Compare the company domains before taking action.",
-        object: "PASSWORD RESET REQUEST"
-    },
-    document: {
-        subject: "Shared Document Threat",
-        threat: "An unexpected document link requests credentials.",
-        action: "Verify the document with the sender.",
-        object: "DOCUMENT ACCESS REQUEST"
-    },
-    salary: {
-        subject: "HR Salary Revision",
-        threat: "An email requests sensitive employee information.",
-        action: "Verify the salary announcement with HR.",
-        object: "SALARY REVISION ALERT"
-    },
-    project: {
-        subject: "Project File Verification",
-        threat: "A project attachment needs inspection.",
-        action: "Follow the approved file-sharing procedure.",
-        object: "PROJECT FILE RECEIVED"
-    },
-    policy: {
-        subject: "Security Policy Update",
-        threat: "An external website asks for company credentials.",
-        action: "Verify the website with the security team.",
-        object: "EXTERNAL LOGIN DETECTED"
-    },
-    benefits: {
-        subject: "Benefits Enrollment",
-        threat: "A benefits form requests employee details.",
-        action: "Confirm the enrollment process with HR.",
-        object: "EMPLOYEE FORM REQUEST"
-    },
-    storage: {
-        subject: "Google Storage Warning",
-        threat: "A storage notification threatens file deletion.",
-        action: "Check storage through the official service.",
-        object: "STORAGE WARNING"
-    },
-    payment: {
-        subject: "Finance Payment Verification",
-        threat: "A vendor payment needs verification.",
-        action: "Use the normal finance approval process.",
-        object: "PAYMENT REQUEST"
-    },
-    executive: {
-        subject: "Executive Impersonation",
-        threat: "An urgent confidential payment request appears.",
-        action: "Verify the request through a separate trusted channel.",
-        object: "URGENT EXECUTIVE REQUEST"
-    },
-    general: {
-        subject: "Suspicious Email",
-        threat: "An unexpected message has arrived.",
-        action: "Inspect and report suspicious activity.",
-        object: "NEW EMAIL RECEIVED"
-    }
-};
-
-const STAGES = [
-    {
-        kicker: "STAGE 01 / INCOMING MESSAGE",
-        title: "An Email Arrives",
-        description: "An employee receives a new email at their workstation.",
-        caption: "A new message has appeared on the employee's computer."
-    },
-    {
-        kicker: "STAGE 02 / INSPECTION",
-        title: "Review the Sender",
-        description: "The employee examines the sender, subject and email details.",
-        caption: "A familiar name or company logo does not guarantee authenticity."
-    },
-    {
-        kicker: "STAGE 03 / THREAT DETECTION",
-        title: "Suspicious Activity Detected",
-        description: "Potential warning signs are identified and examined.",
-        caption: "Check unusual links, sender domains, urgency and requests for information."
-    },
-    {
-        kicker: "STAGE 04 / RESPONSE",
-        title: "Take Protective Action",
-        description: "The employee uses the approved verification and reporting process.",
-        caption: "Never share credentials or make an unusual payment based only on an email."
-    },
-    {
-        kicker: "STAGE 05 / RESOLUTION",
-        title: "Threat Contained",
-        description: "The suspicious message is reported and the workstation is protected.",
-        caption: "Think before you click. Verify before you trust. Report when in doubt."
-    }
-];
-
-/* -------------------------------------
-   THREE.JS OFFICE ENVIRONMENT
-------------------------------------- */
-
-function createBox(w,h,d,color,x,y,z, materialOptions={}) {
-    const geometry = new THREE.BoxGeometry(w,h,d);
-    const material = new THREE.MeshStandardMaterial({
-        color,
-        roughness: .7,
-        metalness: .05,
-        ...materialOptions
-    });
-
-    const mesh = new THREE.Mesh(geometry,material);
     mesh.position.set(x,y,z);
     scene.add(mesh);
-    sceneObjects.push(mesh);
+
     return mesh;
 }
 
-function createSphere(radius,color,x,y,z) {
+function addSphere(radius,color,x,y,z) {
+
     const mesh = new THREE.Mesh(
         new THREE.SphereGeometry(radius,24,16),
-        new THREE.MeshStandardMaterial({color,roughness:.55})
+        new THREE.MeshStandardMaterial({
+            color,
+            roughness: .55
+        })
     );
+
     mesh.position.set(x,y,z);
     scene.add(mesh);
-    sceneObjects.push(mesh);
+
     return mesh;
 }
 
-function createCylinder(radiusTop,radiusBottom,height,color,x,y,z) {
+function addCylinder(top,bottom,height,color,x,y,z) {
+
     const mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(radiusTop,radiusBottom,height,20),
-        new THREE.MeshStandardMaterial({color,roughness:.65})
+        new THREE.CylinderGeometry(top,bottom,height,20),
+        new THREE.MeshStandardMaterial({color})
     );
+
     mesh.position.set(x,y,z);
     scene.add(mesh);
-    sceneObjects.push(mesh);
+
     return mesh;
 }
 
-function createTextSprite(text,color="#ffffff") {
+
+/* =====================================================
+   3D FLOATING TEXT
+===================================================== */
+
+function addFloatingLabel(text,color,x,y,z) {
+
     const canvas = document.createElement("canvas");
     canvas.width = 512;
     canvas.height = 128;
 
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "rgba(5,18,34,.88)";
+
+    ctx.fillStyle = "rgba(5,18,34,.94)";
     ctx.fillRect(0,0,512,128);
 
     ctx.strokeStyle = color;
@@ -913,94 +887,204 @@ function createTextSprite(text,color="#ffffff") {
     ctx.fillText(String(text).slice(0,27),256,64);
 
     const texture = new THREE.CanvasTexture(canvas);
+
     const sprite = new THREE.Sprite(
-        new THREE.SpriteMaterial({map:texture,transparent:true})
+        new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true
+        })
     );
 
+    sprite.position.set(x,y,z);
     sprite.scale.set(3.2,.8,1);
+
+    sprite.userData.dynamicLabel = true;
+
+    scene.add(sprite);
+    dynamicObjects.push(sprite);
+
     return sprite;
 }
 
+function clearSceneLabels() {
+
+    dynamicObjects.forEach(object => {
+        scene.remove(object);
+
+        if (object.material && object.material.map) {
+            object.material.map.dispose();
+        }
+
+        if (object.material) {
+            object.material.dispose();
+        }
+    });
+
+    dynamicObjects = [];
+}
+
+
+/* =====================================================
+   3D SHIELD OBJECT
+===================================================== */
+
+function createShield() {
+
+    const group = new THREE.Group();
+
+    const shieldShape = new THREE.Shape();
+
+    shieldShape.moveTo(0,.55);
+    shieldShape.lineTo(.42,.35);
+    shieldShape.lineTo(.36,-.15);
+    shieldShape.lineTo(0,-.55);
+    shieldShape.lineTo(-.36,-.15);
+    shieldShape.lineTo(-.42,.35);
+    shieldShape.closePath();
+
+    const geometry = new THREE.ExtrudeGeometry(
+        shieldShape,
+        {
+            depth:.12,
+            bevelEnabled:true,
+            bevelSegments:2,
+            steps:1,
+            bevelSize:.04,
+            bevelThickness:.04
+        }
+    );
+
+    const material = new THREE.MeshStandardMaterial({
+        color:0x24d77b,
+        emissive:0x087b42,
+        emissiveIntensity:.7,
+        metalness:.25,
+        roughness:.3
+    });
+
+    const shield = new THREE.Mesh(geometry,material);
+    shield.rotation.y = Math.PI;
+    group.add(shield);
+
+    // Check mark
+    const check = new THREE.Group();
+
+    const first = new THREE.Mesh(
+        new THREE.BoxGeometry(.1,.32,.08),
+        new THREE.MeshStandardMaterial({color:0xffffff})
+    );
+
+    first.rotation.z = -.75;
+    first.position.set(-.1,-.02,.2);
+
+    const second = new THREE.Mesh(
+        new THREE.BoxGeometry(.1,.48,.08),
+        new THREE.MeshStandardMaterial({color:0xffffff})
+    );
+
+    second.rotation.z = .75;
+    second.position.set(.13,.04,.2);
+
+    check.add(first,second);
+    group.add(check);
+
+    group.position.set(2.5,3.6,-1);
+    group.scale.set(.9,.9,.9);
+
+    scene.add(group);
+    group.visible = false;
+
+    return group;
+}
+
+
+/* =====================================================
+   BUILD 3D OFFICE
+===================================================== */
+
 function buildOffice() {
-    sceneObjects = [];
+
     particles = [];
 
     scene.background = new THREE.Color(0x10243b);
     scene.fog = new THREE.Fog(0x10243b,12,28);
 
-    // Office floor
-    createBox(20,.25,15,0x253b50,0,-.2,0);
+    // Floor
+    addBox(20,.25,15,0x253b50,0,-.2,0);
 
-    // Back wall and side walls
-    createBox(20,7,.25,0x18334e,0,3.3,-7);
-    createBox(.25,7,15,0x173149,-10,3.3,0);
-    createBox(.25,7,15,0x173149,10,3.3,0);
+    // Walls
+    addBox(20,7,.25,0x18334e,0,3.3,-7);
+    addBox(.25,7,15,0x173149,-10,3.3,0);
+    addBox(.25,7,15,0x173149,10,3.3,0);
 
     // Window
-    createBox(5,2.8,.12,0x28638a,-5,3.7,-6.8,{
+    addBox(5,2.8,.12,0x28638a,-5,3.7,-6.8,{
         metalness:.3,
         roughness:.25
     });
 
-    // Window dividers
-    createBox(.07,2.8,.08,0x8bc9e9,-5,3.7,-6.7);
-    createBox(5,.07,.08,0x8bc9e9,-5,3.7,-6.7);
+    addBox(.07,2.8,.08,0x8bc9e9,-5,3.7,-6.7);
+    addBox(5,.07,.08,0x8bc9e9,-5,3.7,-6.7);
 
     // Desk
-    createBox(5,.25,2,0x704b35,0,1.55,-1);
-    createBox(.22,1.5,.22,0x344b60,-2, .75,-1);
-    createBox(.22,1.5,.22,0x344b60,2,.75,-1);
-    createBox(.22,1.5,.22,0x344b60,-2,.75,.5);
-    createBox(.22,1.5,.22,0x344b60,2,.75,.5);
+    addBox(5,.25,2,0x704b35,0,1.55,-1);
 
-    // Monitor stand
-    createBox(.18,.7,.18,0x394e61,0,2,-1.4);
+    addBox(.22,1.5,.22,0x344b60,-2,.75,-1);
+    addBox(.22,1.5,.22,0x344b60,2,.75,-1);
+    addBox(.22,1.5,.22,0x344b60,-2,.75,.5);
+    addBox(.22,1.5,.22,0x344b60,2,.75,.5);
 
-    // Monitor body
-    createBox(3,2,.18,0x101b2a,0,3,-1.5);
+    // Monitor
+    addBox(3,2,.18,0x101b2a,0,3,-1.5);
 
-    // Monitor screen
-    monitorScreen = createBox(
+    monitorScreen = addBox(
         2.78,1.78,.025,0x10385a,0,3,-1.39,
-        {emissive:0x07213a,emissiveIntensity:.9}
+        {
+            emissive:0x07213a,
+            emissiveIntensity:.9
+        }
     );
 
-    // Keyboard
-    createBox(1.5,.08,.45,0x1c2b3b,0,1.75,-.15);
+    // Monitor stand
+    addBox(.18,.7,.18,0x394e61,0,2,-1.4);
 
-    // Mouse
-    createSphere(.13,0x9baebe,1.05,1.78,-.2);
+    // Keyboard and mouse
+    addBox(1.5,.08,.45,0x1c2b3b,0,1.75,-.15);
+    addSphere(.13,0x9baebe,1.05,1.78,-.2);
 
     // Coffee mug
-    createCylinder(.15,.12,.35,0xd7e2e9,-1.8,1.83,-.1);
+    addCylinder(.15,.12,.35,0xd7e2e9,-1.8,1.83,-.1);
 
-    // Character chair
-    createBox(1.4,.2,1.1,0x263a54,0,.85,1.6);
-    createBox(1.3,1.4,.18,0x263a54,0,1.6,2.1);
+    // Chair
+    addBox(1.4,.2,1.1,0x263a54,0,.85,1.6);
+    addBox(1.3,1.4,.18,0x263a54,0,1.6,2.1);
 
-    // Character body
+    // Employee group
     character = new THREE.Group();
 
     const shirt = new THREE.Mesh(
         new THREE.BoxGeometry(1.15,1.35,.65),
-        new THREE.MeshStandardMaterial({color:0x2674a9,roughness:.8})
+        new THREE.MeshStandardMaterial({color:0x2674a9})
     );
+
     shirt.position.set(0,2,0);
     character.add(shirt);
 
-    // Head
     const head = new THREE.Mesh(
         new THREE.SphereGeometry(.42,24,24),
         new THREE.MeshStandardMaterial({color:0xd6a47f})
     );
+
     head.position.set(0,3.05,-.05);
     character.add(head);
 
-    // Hair
     const hair = new THREE.Mesh(
-        new THREE.SphereGeometry(.43,24,12,0,Math.PI*2,0,Math.PI/2),
+        new THREE.SphereGeometry(
+            .43,24,12,0,Math.PI*2,0,Math.PI/2
+        ),
         new THREE.MeshStandardMaterial({color:0x25242b})
     );
+
     hair.position.set(0,3.14,-.05);
     character.add(hair);
 
@@ -1009,6 +1093,7 @@ function buildOffice() {
         new THREE.BoxGeometry(.27,.95,.3),
         new THREE.MeshStandardMaterial({color:0x2674a9})
     );
+
     leftArm.position.set(-.7,1.95,-.4);
     leftArm.rotation.z=-.35;
     character.add(leftArm);
@@ -1020,9 +1105,19 @@ function buildOffice() {
 
     character.position.set(0,0,1.15);
     scene.add(character);
-    sceneObjects.push(character);
 
-    // Overhead lights
+    // Email panel
+    emailPanel = addBox(2.7,1.65,.06,0x1c3b57,0,3.3,-.8);
+    emailPanel.visible = false;
+
+    // Warning indicator
+    alertObject = addSphere(.32,0xff4242,2.5,4,-1);
+    alertObject.visible = false;
+
+    // Shield
+    shieldObject = createShield();
+
+    // Lights
     const light1 = new THREE.PointLight(0x80cfff,45,18);
     light1.position.set(-4,6,1);
     scene.add(light1);
@@ -1034,30 +1129,28 @@ function buildOffice() {
     const ambient = new THREE.AmbientLight(0xffffff,1.15);
     scene.add(ambient);
 
-    // Decorative floating particles
-    for (let i=0;i<50;i++) {
-        const particle = createSphere(
+    // Floating particles
+    for (let i=0;i<45;i++) {
+
+        const particle = addSphere(
             .025,
             i%2 ? 0x49bfff : 0x9bdcff,
             (Math.random()-.5)*15,
             Math.random()*6,
             (Math.random()-.5)*10
         );
+
         particles.push(particle);
     }
-
-    // Email panel
-    emailPanel = createBox(
-        2.7,1.65,.06,0x1c3b57,0,3.3,-.8
-    );
-    emailPanel.visible = false;
-
-    // Warning symbol panel
-    alertObject = createSphere(.32,0xff4242,2.5,4,-1);
-    alertObject.visible = false;
 }
 
+
+/* =====================================================
+   INITIALIZE THREE.JS
+===================================================== */
+
 function initialize3D() {
+
     if (!window.THREE) {
         document.getElementById("sceneStatus3D").textContent =
             "3D library unavailable";
@@ -1071,7 +1164,7 @@ function initialize3D() {
 
     camera = new THREE.PerspectiveCamera(
         48,
-        container.clientWidth/container.clientHeight,
+        container.clientWidth / container.clientHeight,
         .1,
         100
     );
@@ -1079,14 +1172,25 @@ function initialize3D() {
     camera.position.set(7,5.5,9);
     camera.lookAt(0,2,0);
 
-    renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias:true,
-        alpha:false
-    });
+    try {
+        renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias:true,
+            alpha:false
+        });
+    } catch (error) {
+        document.getElementById("sceneStatus3D").textContent =
+            "WebGL unavailable";
+        return false;
+    }
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-    renderer.setSize(container.clientWidth,container.clientHeight);
+
+    renderer.setSize(
+        container.clientWidth,
+        container.clientHeight
+    );
+
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -1096,23 +1200,37 @@ function initialize3D() {
 
     window.addEventListener("resize",resize3D);
 
+    threeReady = true;
+
     animate3D();
 
     return true;
 }
 
 function resize3D() {
+
     if (!renderer || !camera) return;
 
     const container = document.getElementById("sceneContainer");
 
-    camera.aspect = container.clientWidth/container.clientHeight;
+    camera.aspect =
+        container.clientWidth / container.clientHeight;
+
     camera.updateProjectionMatrix();
 
-    renderer.setSize(container.clientWidth,container.clientHeight);
+    renderer.setSize(
+        container.clientWidth,
+        container.clientHeight
+    );
 }
 
+
+/* =====================================================
+   3D ANIMATION LOOP
+===================================================== */
+
 function animate3D() {
+
     animationFrame = requestAnimationFrame(animate3D);
 
     const time = clock ? clock.getElapsedTime() : 0;
@@ -1133,6 +1251,12 @@ function animate3D() {
     if (alertObject && alertObject.visible) {
         const pulse = 1 + Math.sin(time*5)*.13;
         alertObject.scale.setScalar(pulse);
+        alertObject.rotation.y += .025;
+    }
+
+    if (shieldObject && shieldObject.visible) {
+        shieldObject.rotation.y = Math.sin(time)*.18;
+        shieldObject.position.y = 3.6 + Math.sin(time*2)*.08;
     }
 
     if (renderer && scene && camera) {
@@ -1140,217 +1264,548 @@ function animate3D() {
     }
 }
 
-function clearSceneLabels() {
-    const removable = [];
 
-    scene.children.forEach(object => {
-        if (object.userData.dynamicLabel) removable.push(object);
-    });
+/* =====================================================
+   RESET 3D SCENE
+===================================================== */
 
-    removable.forEach(object => scene.remove(object));
-}
+function reset3DScene() {
 
-function addFloatingLabel(text,color,x,y,z) {
-    const sprite = createTextSprite(text,color);
-    sprite.position.set(x,y,z);
-    sprite.userData.dynamicLabel = true;
-    scene.add(sprite);
-}
-
-function show3DStage(stageIndex) {
-    const q = QUESTIONS[currentIndex];
-    const theme = THEMES[currentTheme];
-    const stage = STAGES[stageIndex];
-
-    document.getElementById("sceneKicker").textContent = stage.kicker;
-    document.getElementById("sceneTitle").textContent =
-        stageIndex === 0 ? theme.subject : stage.title;
-
-    document.getElementById("sceneDescription").textContent =
-        stageIndex === 0 ? theme.threat :
-        stageIndex === 3 ? theme.action : stage.description;
-
-    document.getElementById("sceneCaption").textContent =
-        stage.caption;
-
-    document.getElementById("sceneStatus3D").textContent =
-        stageIndex < 2 ? "INCOMING EMAIL" :
-        stageIndex === 2 ? "THREAT DETECTED" :
-        stageIndex === 3 ? "SECURITY RESPONSE" :
-        "THREAT CONTAINED";
-
-    if (!scene) return;
+    if (!threeReady) return;
 
     clearSceneLabels();
 
-    // Stage 1: New email arrives
-    if (stageIndex === 0) {
-        emailPanel.visible = true;
-        alertObject.visible = false;
+    emailPanel.visible = true;
+    alertObject.visible = false;
+    shieldObject.visible = false;
 
-        monitorScreen.material.color.set(0x12608a);
-        monitorScreen.material.emissive.set(0x0c4a70);
+    monitorScreen.material.color.set(0x14557b);
+    monitorScreen.material.emissive.set(0x0b3855);
 
-        addFloatingLabel("NEW EMAIL RECEIVED","#83d8ff",0,4.35,-.65);
-
-        camera.position.set(7,5.5,9);
-        camera.lookAt(0,2.5,0);
-    }
-
-    // Stage 2: Inspect the sender
-    if (stageIndex === 1) {
-        emailPanel.visible = true;
-
-        monitorScreen.material.color.set(0x174a72);
-        addFloatingLabel("INSPECT SENDER","#ffffff",0,4.35,-.65);
-
-        camera.position.set(4,4.2,7);
-        camera.lookAt(0,2.8,-.5);
-    }
-
-    // Stage 3: Threat detection
-    if (stageIndex === 2) {
-        emailPanel.visible = true;
-        alertObject.visible = true;
-
-        monitorScreen.material.color.set(0x8a2424);
-        monitorScreen.material.emissive.set(0x601010);
-
-        addFloatingLabel("THREAT DETECTED","#ff7070",0,4.35,-.65);
-
-        camera.position.set(3,4,6);
-        camera.lookAt(0,2.7,-.5);
-    }
-
-    // Stage 4: Employee response
-    if (stageIndex === 3) {
-        alertObject.visible = true;
-
-        monitorScreen.material.color.set(0x235d77);
-        monitorScreen.material.emissive.set(0x16415e);
-
-        addFloatingLabel("REPORTING INCIDENT","#8ee5ff",0,4.35,-.65);
-
-        camera.position.set(6,5,8);
-        camera.lookAt(0,2,0);
-    }
-
-    // Stage 5: Resolution
-    if (stageIndex === 4) {
-        alertObject.visible = false;
-        emailPanel.visible = false;
-
-        monitorScreen.material.color.set(0x168354);
-        monitorScreen.material.emissive.set(0x0a603b);
-
-        addFloatingLabel("THREAT CONTAINED","#7dffb1",0,4.35,-.65);
-
-        camera.position.set(7,5.5,9);
-        camera.lookAt(0,2,0);
-    }
+    camera.position.set(7,5.5,9);
+    camera.lookAt(0,2,0);
 }
 
-/* -------------------------------------
-   SCENARIO PLAYBACK
-------------------------------------- */
 
-function playScenario() {
-    currentTheme = getTheme(QUESTIONS[currentIndex]);
+/* =====================================================
+   DISPLAY SCENE TEXT
+===================================================== */
+
+function setSceneText(kicker,title,description,caption) {
+
+    document.getElementById("sceneKicker").textContent = kicker;
+    document.getElementById("sceneTitle").textContent = title;
+    document.getElementById("sceneDescription").textContent = description;
+    document.getElementById("sceneCaption").textContent = caption;
+}
+
+
+/* =====================================================
+   OPENING ANIMATION FOR EACH QUESTION
+===================================================== */
+
+function showIntroScene() {
+
+    clearInterval(introTimer);
+    clearInterval(outcomeTimer);
+
+    currentPhase = "intro";
+    introRunning = true;
+    outcomeRunning = false;
+    introElapsed = 0;
+
+    const s = SCENARIOS[currentIndex];
 
     questionCard.style.display = "none";
     scenarioCard.style.display = "block";
 
-    sceneElapsed = 0;
-    scenePlaying = true;
-    sceneFinished = false;
+    if (!threeReady && !initialize3D()) {
+        document.getElementById("sceneDescription").textContent =
+            "The 3D scene could not be loaded. Check your browser's WebGL support and internet connection.";
+        return;
+    }
 
-    nextQuestionButton.disabled = true;
+    reset3DScene();
 
+    setSceneText(
+        "INCIDENT PREVIEW / QUESTION " + (currentIndex+1),
+        s.introTitle,
+        s.intro,
+        "Watch the incident carefully. The question will appear after this opening scene."
+    );
+
+    document.getElementById("sceneStatus3D").textContent = "NEW INCIDENT";
+    document.getElementById("scenarioTimer").textContent = "Opening scene";
     document.getElementById("scenarioStatus").textContent =
-        "3D simulation playing...";
-
-    document.getElementById("scenarioTimer").textContent =
-        "25 seconds";
+        "Opening animation playing...";
 
     document.getElementById("sceneProgressFill").style.width = "0%";
 
-    if (!renderer) {
-        const success = initialize3D();
+    introTimer = setInterval(() => {
 
-        if (!success) {
-            document.getElementById("scenarioStatus").textContent =
-                "3D rendering could not be started. You can skip this scene.";
-        }
-    }
-
-    show3DStage(0);
-
-    stopScenario();
-
-    sceneTimer = setInterval(() => {
-        sceneElapsed++;
-
-        const remaining = 25-sceneElapsed;
-
-        document.getElementById("scenarioTimer").textContent =
-            remaining > 0 ? `${remaining} seconds` : "Completed";
+        introElapsed++;
 
         document.getElementById("sceneProgressFill").style.width =
-            `${sceneElapsed/25*100}%`;
+            `${introElapsed/8*100}%`;
 
-        const stageIndex = Math.min(
-            Math.floor(sceneElapsed/5),4
-        );
+        if (introElapsed === 2) {
 
-        if (sceneElapsed % 5 === 0 && sceneElapsed < 25) {
-            show3DStage(stageIndex);
+            clearSceneLabels();
+
+            addFloatingLabel(
+                "NEW EMAIL RECEIVED",
+                "#83d8ff",
+                0,4.35,-.65
+            );
+
+            document.getElementById("sceneStatus3D").textContent =
+                "NEW EMAIL";
         }
 
-        if (sceneElapsed >= 25) {
-            finishScenario();
+        if (introElapsed === 5) {
+
+            clearSceneLabels();
+
+            addFloatingLabel(
+                "EMPLOYEE INSPECTING",
+                "#ffffff",
+                0,4.35,-.65
+            );
+
+            document.getElementById("sceneStatus3D").textContent =
+                "UNDER REVIEW";
+
+            camera.position.set(4,4.2,7);
+            camera.lookAt(0,2.8,-.5);
         }
+
+        if (introElapsed >= 8) {
+
+            clearInterval(introTimer);
+
+            introRunning = false;
+
+            scenarioCard.style.display = "none";
+            questionCard.style.display = "block";
+
+            document.getElementById("scenarioStatus").textContent =
+                "Opening scene completed.";
+
+        }
+
     },1000);
 }
 
-function stopScenario() {
-    if (sceneTimer) {
-        clearInterval(sceneTimer);
-        sceneTimer = null;
+
+/* =====================================================
+   CORRECT ANSWER OUTCOME
+===================================================== */
+
+function playCorrectOutcome(s) {
+
+    reset3DScene();
+
+    monitorScreen.material.color.set(0x087b50);
+    monitorScreen.material.emissive.set(0x075d3e);
+
+    alertObject.material.color.set(0x36e68a);
+    alertObject.visible = true;
+
+    shieldObject.visible = true;
+
+    addFloatingLabel(
+        s.correctLabel,
+        "#7dffb1",
+        0,4.35,-.65
+    );
+
+    camera.position.set(7,5.5,9);
+    camera.lookAt(0,2,0);
+
+    document.getElementById("sceneStatus3D").textContent =
+        s.safe;
+}
+
+
+/* =====================================================
+   INCORRECT ANSWER OUTCOME
+===================================================== */
+
+function playWrongOutcome(s) {
+
+    reset3DScene();
+
+    monitorScreen.material.color.set(0x9b2424);
+    monitorScreen.material.emissive.set(0x681010);
+
+    alertObject.material.color.set(0xff2929);
+    alertObject.visible = true;
+
+    shieldObject.visible = false;
+
+    addFloatingLabel(
+        s.wrongLabel,
+        "#ff7777",
+        0,4.35,-.65
+    );
+
+    camera.position.set(3,4,6);
+    camera.lookAt(0,2.7,-.5);
+
+    document.getElementById("sceneStatus3D").textContent =
+        s.unsafe;
+}
+
+
+/* =====================================================
+   ANSWER OUTCOME ANIMATION
+===================================================== */
+
+function showOutcomeScene(selectedIndex) {
+
+    clearInterval(introTimer);
+    clearInterval(outcomeTimer);
+
+    currentPhase = "outcome";
+    introRunning = false;
+    outcomeRunning = true;
+    outcomeElapsed = 0;
+
+    const q = QUESTIONS[currentIndex];
+    const s = SCENARIOS[currentIndex];
+
+    const isCorrect =
+        Number(selectedIndex) === Number(q.correct);
+
+    questionCard.style.display = "none";
+    scenarioCard.style.display = "block";
+
+    reset3DScene();
+
+    if (isCorrect) {
+
+        setSceneText(
+            "CORRECT DECISION / POSITIVE OUTCOME",
+            s.correctTitle,
+            s.correct,
+            "The employee followed the safer security practice."
+        );
+
+        playCorrectOutcome(s);
+
+    } else {
+
+        setSceneText(
+            "INCORRECT DECISION / SECURITY INCIDENT",
+            s.wrongTitle,
+            s.wrong,
+            "This simulated incident demonstrates what could happen after an unsafe decision."
+        );
+
+        playWrongOutcome(s);
+
+    }
+
+    document.getElementById("scenarioTimer").textContent =
+        "Outcome simulation";
+
+    document.getElementById("scenarioStatus").textContent =
+        "Playing answer outcome...";
+
+    document.getElementById("sceneProgressFill").style.width = "0%";
+
+    outcomeTimer = setInterval(() => {
+
+        outcomeElapsed++;
+
+        document.getElementById("sceneProgressFill").style.width =
+            `${outcomeElapsed/12*100}%`;
+
+        if (outcomeElapsed === 4) {
+
+            clearSceneLabels();
+
+            addFloatingLabel(
+                isCorrect ? "THREAT BLOCKED" : "INCIDENT DETECTED",
+                isCorrect ? "#7dffb1" : "#ff7777",
+                0,4.35,-.65
+            );
+
+            document.getElementById("sceneStatus3D").textContent =
+                isCorrect ? "THREAT BLOCKED" : "INCIDENT DETECTED";
+        }
+
+        if (outcomeElapsed === 8) {
+
+            clearSceneLabels();
+
+            addFloatingLabel(
+                isCorrect ? "EMPLOYEE PROTECTED" : "SECURITY RESPONSE",
+                isCorrect ? "#7dffb1" : "#ff7777",
+                0,4.35,-.65
+            );
+        }
+
+        if (outcomeElapsed >= 12) {
+
+            clearInterval(outcomeTimer);
+
+            outcomeRunning = false;
+
+            scenarioCard.style.display = "none";
+            questionCard.style.display = "block";
+
+            showAnswerFeedback(selectedIndex);
+
+            continueButton.disabled = false;
+
+            continueButton.textContent =
+                currentIndex === QUESTIONS.length-1
+                    ? "Submit Assessment"
+                    : "Continue";
+
+            document.getElementById("scenarioStatus").textContent =
+                "Outcome completed.";
+        }
+
+    },1000);
+}
+
+
+/* =====================================================
+   REPLAY AND SKIP
+===================================================== */
+
+function replayScene() {
+
+    if (currentPhase === "intro") {
+        showIntroScene();
+        return;
+    }
+
+    if (currentPhase === "outcome" &&
+        selectedAnswers[currentIndex] !== undefined) {
+
+        showOutcomeScene(selectedAnswers[currentIndex]);
     }
 }
 
-function finishScenario() {
-    stopScenario();
+function skipScene() {
 
-    scenePlaying = false;
-    sceneFinished = true;
+    if (currentPhase === "intro" && introRunning) {
 
-    show3DStage(4);
+        clearInterval(introTimer);
+        introRunning = false;
 
-    document.getElementById("scenarioTimer").textContent = "Completed";
-    document.getElementById("scenarioStatus").textContent =
-        "Simulation completed.";
+        scenarioCard.style.display = "none";
+        questionCard.style.display = "block";
 
-    document.getElementById("sceneProgressFill").style.width = "100%";
+        document.getElementById("scenarioStatus").textContent =
+            "Opening scene skipped.";
 
-    nextQuestionButton.disabled = false;
+        return;
+    }
+
+    if (currentPhase === "outcome" && outcomeRunning) {
+
+        clearInterval(outcomeTimer);
+        outcomeRunning = false;
+
+        scenarioCard.style.display = "none";
+        questionCard.style.display = "block";
+
+        showAnswerFeedback(selectedAnswers[currentIndex]);
+
+        continueButton.disabled = false;
+
+        continueButton.textContent =
+            currentIndex === QUESTIONS.length-1
+                ? "Submit Assessment"
+                : "Continue";
+
+        document.getElementById("scenarioStatus").textContent =
+            "Outcome skipped.";
+
+    }
 }
 
-function replayScenario() {
-    if (scenePlaying) return;
-    playScenario();
+
+/* =====================================================
+   RENDER QUESTION
+===================================================== */
+
+function renderQuestion() {
+
+    clearInterval(introTimer);
+    clearInterval(outcomeTimer);
+
+    answerLocked = false;
+
+    const q = QUESTIONS[currentIndex];
+
+    selectedAnswers[currentIndex] = undefined;
+
+    questionCard.style.display = "none";
+    scenarioCard.style.display = "none";
+
+    updateProgress();
+
+    document.getElementById("questionCategory").textContent =
+        q.category || "PHISHING INVESTIGATION";
+
+    document.getElementById("questionTitle").textContent =
+        q.title || `Question ${currentIndex+1}`;
+
+    document.getElementById("questionDescription").textContent =
+        q.scenario || "";
+
+    document.getElementById("emailNote").textContent =
+        q.email_note || "";
+
+    const emailArea = document.getElementById("emailArea");
+
+    if (q.comparison && Array.isArray(q.emails)) {
+
+        emailArea.innerHTML =
+            `<div class="email-grid">
+                ${q.emails.map(renderEmail).join("")}
+            </div>`;
+
+    } else {
+
+        const email = {
+            label:"EMAIL DETAILS",
+            sender:q.sender,
+            sender_email:q.sender_email,
+            timestamp:q.timestamp,
+            subject:q.subject,
+            body:q.scenario,
+            link:q.display_link,
+            attachment:q.attachment
+        };
+
+        emailArea.innerHTML =
+            `<div class="email-grid">
+                ${renderEmail(email)}
+            </div>`;
+    }
+
+    const optionsArea = document.getElementById("optionsArea");
+
+    optionsArea.innerHTML = "";
+
+    (q.options || []).forEach((option,index) => {
+
+        const label = document.createElement("label");
+        label.className = "option";
+
+        const input = document.createElement("input");
+
+        input.type = "radio";
+        input.name = "answer";
+        input.value = index;
+
+        const span = document.createElement("span");
+        span.textContent = option;
+
+        input.addEventListener("change",() => {
+
+            if (answerLocked) return;
+
+            answerLocked = true;
+
+            selectedAnswers[currentIndex] = index;
+
+            // Lock the answer after selection.
+            document.querySelectorAll(
+                'input[name="answer"]'
+            ).forEach(radio => {
+                radio.disabled = true;
+            });
+
+            document.querySelectorAll(".option").forEach(item => {
+                item.classList.add("locked");
+            });
+
+            continueButton.disabled = true;
+
+            showAnswerFeedback(index);
+
+            // Play the selected answer's unique 3D outcome.
+            showOutcomeScene(index);
+        });
+
+        label.append(input,span);
+
+        optionsArea.appendChild(label);
+    });
+
+    const feedback = document.getElementById("answerFeedback");
+
+    feedback.className = "answer-feedback";
+    feedback.textContent = "";
+
+    continueButton.disabled = true;
+
+    continueButton.textContent =
+        currentIndex === QUESTIONS.length-1
+            ? "Submit Assessment"
+            : "Continue";
+
+    // Opening 3D animation automatically starts for every question.
+    showIntroScene();
 }
 
-function skipScenario() {
-    if (!scenePlaying && !sceneFinished) return;
-    finishScenario();
+
+/* =====================================================
+   SHOW ANSWER AND EXPLANATION
+===================================================== */
+
+function showAnswerFeedback(selectedIndex) {
+
+    const q = QUESTIONS[currentIndex];
+
+    const feedback = document.getElementById("answerFeedback");
+
+    const isCorrect =
+        Number(selectedIndex) === Number(q.correct);
+
+    document.querySelectorAll(".option").forEach((option,index) => {
+
+        option.classList.remove("correct","wrong");
+
+        if (index === Number(q.correct)) {
+            option.classList.add("correct");
+        }
+
+        if (
+            index === Number(selectedIndex) &&
+            index !== Number(q.correct)
+        ) {
+            option.classList.add("wrong");
+        }
+
+    });
+
+    feedback.className =
+        "answer-feedback " + (isCorrect ? "correct" : "wrong");
+
+    feedback.innerHTML = `
+        <strong>
+            ${isCorrect ? "Correct response" : "Incorrect response"}
+        </strong>
+        <br>
+        ${escapeHTML(q.explanation || "")}
+    `;
 }
 
-/* -------------------------------------
-   QUESTION NAVIGATION
-------------------------------------- */
+
+/* =====================================================
+   CONTINUE TO NEXT QUESTION
+===================================================== */
 
 function proceed() {
+
     if (selectedAnswers[currentIndex] === undefined) return;
 
     if (currentIndex === QUESTIONS.length-1) {
@@ -1358,44 +1813,38 @@ function proceed() {
         return;
     }
 
-    playScenario();
-}
-
-function nextQuestion() {
-    if (!sceneFinished) return;
-
-    stopScenario();
-
     currentIndex++;
-
-    if (currentIndex >= QUESTIONS.length) {
-        submitAssessment();
-        return;
-    }
 
     renderQuestion();
 }
 
-/* -------------------------------------
-   SUBMISSION
-------------------------------------- */
+
+/* =====================================================
+   SUBMIT ASSESSMENT TO FLASK
+===================================================== */
 
 async function submitAssessment() {
-    stopScenario();
+
+    clearInterval(introTimer);
+    clearInterval(outcomeTimer);
 
     continueButton.disabled = true;
-    nextQuestionButton.disabled = true;
 
     try {
+
         const response = await fetch("/submit", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
             },
-            body: JSON.stringify({
-                attempt_id: ATTEMPT_ID,
-                answers: selectedAnswers
+
+            body:JSON.stringify({
+                attempt_id:ATTEMPT_ID,
+                answers:selectedAnswers
             })
+
         });
 
         const result = await response.json();
@@ -1405,37 +1854,54 @@ async function submitAssessment() {
         }
 
         if (result.url) {
+
             window.location.href = result.url;
+
         } else {
+
             throw new Error("Results URL was not returned.");
+
         }
 
-    } catch (error) {
+    } catch(error) {
+
         alert(error.message || "Unable to submit assessment.");
+
         continueButton.disabled = false;
-        nextQuestionButton.disabled = false;
     }
 }
 
-/* -------------------------------------
-   EVENTS
-------------------------------------- */
+
+/* =====================================================
+   BUTTON EVENTS
+===================================================== */
 
 continueButton.addEventListener("click",proceed);
-nextQuestionButton.addEventListener("click",nextQuestion);
 
 document.getElementById("replayButton")
-    .addEventListener("click",replayScenario);
+    .addEventListener("click",replayScene);
 
 document.getElementById("skipButton")
-    .addEventListener("click",skipScenario);
+    .addEventListener("click",skipScene);
+
+
+/* =====================================================
+   START QUIZ
+===================================================== */
 
 if (Array.isArray(QUESTIONS) && QUESTIONS.length > 0) {
+
     renderQuestion();
+
 } else {
+
+    questionCard.style.display = "block";
+
     questionCard.innerHTML =
         "<h2>No questions available. Contact the administrator.</h2>";
+
 }
+
 </script>
 
 </body>
