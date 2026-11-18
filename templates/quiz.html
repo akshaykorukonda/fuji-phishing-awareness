@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -340,572 +339,227 @@
                 padding: 13px;
             }
         }
+
+        /* 25-second animated training scene */
+
+        .video-simulation {
+            margin: 18px 0 24px;
+            padding: 18px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #102b49, #164c73 60%, #087e9b);
+            color: #fff;
+            overflow: hidden;
+            box-shadow: 0 10px 28px rgba(10,42,70,.2);
+        }
+
+        .video-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            color: #d7efff;
+        }
+
+        .video-duration {
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 30px;
+            padding: 5px 10px;
+            font-weight: 700;
+        }
+
+        .animation-stage {
+            position: relative;
+            min-height: 190px;
+            margin: 15px 0 12px;
+            padding: 18px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 80% 15%,rgba(82,211,255,.25),transparent 30%),linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.04));
+            border: 1px solid rgba(255,255,255,.2);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .animation-person {
+            width: 92px;
+            height: 120px;
+            flex: 0 0 92px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .person-head {
+            position: absolute;
+            top: 5px;
+            width: 43px;
+            height: 43px;
+            border-radius: 50%;
+            background: #ffd2a6;
+            border: 3px solid rgba(255,255,255,.7);
+            animation: personLook 3s ease-in-out infinite;
+        }
+
+        .person-body {
+            width: 72px;
+            height: 67px;
+            border-radius: 30px 30px 10px 10px;
+            background: #48b7d9;
+            box-shadow: inset 0 -8px rgba(0,0,0,.1);
+        }
+
+        .animation-person.alert .person-body {
+            background: #e6a34c;
+        }
+
+        .animation-person.safe .person-body {
+            background: #43bd87;
+        }
+
+        .animation-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .animation-content small {
+            display: block;
+            color: #bfeaff;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .animation-content h3 {
+            margin: 0 0 8px;
+            font-size: clamp(17px,3vw,23px);
+            color: #fff;
+        }
+
+        .animation-content p {
+            margin: 0;
+            color: #e5f5ff;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .scene-notification {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin-top: 12px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            background: rgba(255,255,255,.95);
+            color: #17334e;
+            font-size: 12px;
+            font-weight: 700;
+            animation: notificationPop .45s ease both;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        .scene-notification span:first-child {
+            font-size: 18px;
+        }
+
+        .scene-progress {
+            height: 6px;
+            border-radius: 20px;
+            background: rgba(255,255,255,.2);
+            overflow: hidden;
+        }
+
+        .scene-progress-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: #75e2c0;
+            transition: width .2s linear;
+        }
+
+        .scene-caption {
+            margin: 9px 0 0;
+            color: #d7efff;
+            font-size: 12px;
+            min-height: 18px;
+        }
+
+        .scene-controls {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .scene-controls button {
+            border: 1px solid rgba(255,255,255,.45);
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 13px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .scene-controls button:hover {
+            background: rgba(255,255,255,.23);
+        }
+
+        .scene-controls button:focus-visible {
+            outline: 3px solid #fff;
+            outline-offset: 2px;
+        }
+
+        .scene-controls button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        @keyframes personLook {
+            0%,100% { transform: rotate(0); }
+            45% { transform: rotate(5deg); }
+        }
+
+        @keyframes notificationPop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media(max-width:600px) {
+            .video-simulation {
+                padding: 13px;
+            }
+
+            .animation-stage {
+                min-height: 210px;
+                padding: 13px;
+                gap: 10px;
+            }
+
+            .animation-person {
+                width: 60px;
+                flex-basis: 60px;
+                transform: scale(.78);
+                transform-origin: center;
+            }
+
+            .animation-content p {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
-
-<body>
-
-<header>
-    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
-    <span>{{ email }}</span>
-</header>
-
-<main>
-
-    <div class="progress">
-        <span id="counter">Question 1 of {{ questions|length }}</span>
-        <div><i id="bar"></i></div>
-    </div>
-
-    <form id="quiz" onsubmit="return false;">
-
-        {% for q in questions %}
-        {% set question_index = loop.index0 %}
-
-        <section class="q"
-            data-correct="{{ q.correct|default(-1) }}"
-            data-explanation="{{ q.explanation|default('') }}"
-            data-mode="{{ q.mode|default('multiple_choice') }}"
-            style="display:{% if loop.first %}block{% else %}none{% endif %}">
-
-            <p class="tag">
-                {{ q.category }} • {{ loop.index }}/{{ questions|length }}
-            </p>
-
-            <h1>{{ q.title }}</h1>
-
-            <div class="evidence">
-
-                <p class="evidence-label">EMAIL EVIDENCE</p>
-
-                <div class="email-card">
-
-                    <div class="email-top">
-                        <span>Mail • Message preview</span>
-                        <span class="email-time">
-                            {{ q.timestamp|default('Today, 9:41 AM') }}
-                        </span>
-                    </div>
-
-                    <h2 class="email-subject">
-                        {{ q.subject|default(q.title) }}
-                    </h2>
-
-                    <div class="sender-row">
-
-                        <div class="sender-avatar">
-                            {{ q.sender_initial|default('M') }}
-                        </div>
-
-                        <div class="sender-details">
-                            <p>
-                                <strong>
-                                    {{ q.sender|default('Workplace Support') }}
-                                </strong>
-                            </p>
-
-                            <p class="sender-address">
-                                {{ q.sender_email|default('support@example.com') }}
-                            </p>
-
-                            <p class="sender-address">
-                                To: {{ email }}
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <hr>
-
-                    <div class="email-body">{{ q.scenario }}</div>
-
-                    {% if q.display_link|default('') %}
-                    <div>
-                        <span class="email-link">
-                            {{ q.display_link }}
-                        </span>
-                    </div>
-                    {% endif %}
-
-                    {% if q.actual_link|default('') %}
-                    <div class="email-warning">
-                        <strong>Link inspection:</strong><br>
-                        Displayed link: {{ q.display_link }}<br>
-                        Actual destination: {{ q.actual_link }}
-                    </div>
-                    {% endif %}
-
-                    {% if q.attachment|default('') %}
-                    <div class="email-attachment">
-                        <strong>Attachment</strong><br>
-                        📎 {{ q.attachment }}
-                    </div>
-                    {% endif %}
-
-                    {% if q.email_note|default('') %}
-                    <div class="email-warning">
-                        {{ q.email_note }}
-                    </div>
-                    {% endif %}
-
-                </div>
-
-                {% if q.category == 'OFFICE FRAUD INVESTIGATION' %}
-
-                <div class="document-preview">
-                    <p class="evidence-label">
-                        ATTACHED BUSINESS DOCUMENT PREVIEW
-                    </p>
-
-                    <div class="document-sheet">
-
-                        <div class="document-head">
-                            <div>
-                                <strong>
-                                    {% if 'Vendor Bank' in q.title %}
-                                        SUPPLIER BANK DETAIL NOTICE
-                                    {% elif 'Duplicate Invoice' in q.title %}
-                                        SUPPLIER INVOICE
-                                    {% elif 'Purchase Order' in q.title %}
-                                        PURCHASE ORDER APPROVAL
-                                    {% else %}
-                                        EMPLOYEE PAYROLL CHANGE REQUEST
-                                    {% endif %}
-                                </strong>
-
-                                <div style="font-size:11px;color:#64748b;margin-top:5px;">
-                                    Fuji Silvertech • Training evidence preview
-                                </div>
-                            </div>
-
-                            <span class="document-stamp">SIMULATION</span>
-                        </div>
-
-                        <div class="document-lines">
-
-                            <div>
-                                <strong>Document:</strong><br>
-                                {{ q.attachment|default('Internal_Request.pdf') }}
-                            </div>
-
-                            <div>
-                                <strong>Reference:</strong><br>
-                                {% if 'Duplicate Invoice' in q.title %}
-                                    INV-2481
-                                {% elif 'Purchase Order' in q.title %}
-                                    PO-URGENT-APPROVAL
-                                {% elif 'Vendor Bank' in q.title %}
-                                    SUPPLIER-CHANGE
-                                {% else %}
-                                    PAYROLL-CHANGE
-                                {% endif %}
-                            </div>
-
-                            <div>
-                                <strong>Requested action:</strong><br>
-                                {% if 'Vendor Bank' in q.title %}
-                                    Replace beneficiary bank details
-                                {% elif 'Duplicate Invoice' in q.title %}
-                                    Release another payment
-                                {% elif 'Purchase Order' in q.title %}
-                                    Release order before workflow approval
-                                {% else %}
-                                    Change employee salary account
-                                {% endif %}
-                            </div>
-
-                            <div>
-                                <strong>Processing status:</strong><br>
-                                Awaiting independent verification
-                            </div>
-
-                        </div>
-
-                        <table class="document-table">
-                            <thead>
-                                <tr>
-                                    <th>Control item</th>
-                                    <th>Evidence shown</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {% if 'Vendor Bank' in q.title %}
-                                <tr>
-                                    <td>Bank detail change</td>
-                                    <td>New beneficiary details attached</td>
-                                </tr>
-                                <tr>
-                                    <td>Prior verification</td>
-                                    <td>Not recorded in this request</td>
-                                </tr>
-
-                                {% elif 'Duplicate Invoice' in q.title %}
-                                <tr>
-                                    <td>Invoice reference</td>
-                                    <td>INV-2481 — second copy</td>
-                                </tr>
-                                <tr>
-                                    <td>Previous payment reconciliation</td>
-                                    <td>Not yet confirmed</td>
-                                </tr>
-
-                                {% elif 'Purchase Order' in q.title %}
-                                <tr>
-                                    <td>Approval evidence</td>
-                                    <td>Verbal approval claimed</td>
-                                </tr>
-                                <tr>
-                                    <td>Workflow record</td>
-                                    <td>Formal approval pending</td>
-                                </tr>
-
-                                {% else %}
-                                <tr>
-                                    <td>Employee confirmation</td>
-                                    <td>Not available</td>
-                                </tr>
-                                <tr>
-                                    <td>Payroll verification</td>
-                                    <td>Pending</td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-
-                        <div class="document-alert">
-                            <strong>Review point:</strong>
-                            This is a fictional training document. Do not treat the
-                            presence of a document, reference number or familiar
-                            branding as proof of authorization.
-                        </div>
-
-                    </div>
-
-                    <p class="simulation-note">
-                        Illustrative document preview • No real payment or employee data
-                    </p>
-                </div>
-
-                {% elif q.attachment|default('') %}
-
-                <div class="document-preview">
-                    <p class="evidence-label">ATTACHMENT PREVIEW</p>
-
-                    <div class="document-sheet">
-                        <div class="document-head">
-                            <strong>{{ q.attachment }}</strong>
-                            <span class="document-stamp">UNVERIFIED</span>
-                        </div>
-
-                        <p style="font-size:13px;line-height:1.6;">
-                            This simulated attachment has not been opened.
-                            Assess its source, file type and business context
-                            before deciding whether it is safe.
-                        </p>
-
-                        <div class="document-alert">
-                            Never enable macros, scan unexpected QR codes or enter
-                            credentials just because an email includes an attachment.
-                        </div>
-                    </div>
-
-                    <p class="simulation-note">
-                        Illustrative attachment preview • Training simulation
-                    </p>
-                </div>
-
-                {% endif %}
-
-            </div>
-
-            {% if q.mode|default('multiple_choice') == 'find_mistakes' %}
-
-            <h2 class="question-heading">
-                Find the mistakes in this email
-            </h2>
-
-            <div class="mistake-instructions">
-                <strong>Investigation task:</strong>
-                Carefully inspect the email. Select every suspicious detail
-                you identify. There are no multiple-choice answers.
-            </div>
-
-            <div class="mistake-list">
-                {% for mistake in q.mistakes %}
-                <button
-                    type="button"
-                    class="mistake-item"
-                    data-mistake-id="{{ mistake.id }}"
-                    aria-pressed="false"
-                >
-                    {{ mistake.text }}
-                </button>
-                {% endfor %}
-            </div>
-
-            <p class="mistake-count">
-                Selected: <span class="selected-count">0</span>
-            </p>
-
-            {% else %}
-
-            <h2 class="question-heading">
-                If you received this message, what would you do?
-            </h2>
-
-            <div class="options">
-                {% for option in q.options %}
-                <label>
-                    <input
-                        type="radio"
-                        name="q{{ question_index }}"
-                        value="{{ loop.index0 }}"
-                    >
-
-                    <span>
-                        {{ 'ABCD'[loop.index0] }}. {{ option }}
-                    </span>
-                </label>
-                {% endfor %}
-            </div>
-
-            {% endif %}
-
-            <div class="answer-feedback" hidden aria-live="polite"></div>
-
-            <p class="submit-error" aria-live="polite"></p>
-
-            <div class="nav">
-
-                <button
-                    type="button"
-                    class="secondary"
-                    onclick="move(-1)"
-                    {% if loop.first %}disabled{% endif %}
-                >
-                    Previous
-                </button>
-
-                <button type="button" onclick="move(1)">
-                    {% if loop.last %}
-                        Submit assessment
-                    {% else %}
-                        Next question
-                    {% endif %}
-                </button>
-
-            </div>
-
-        </section>
-
-        {% endfor %}
-
-    </form>
-
-</main>
-
-<footer>
-    For any queries, contact support.soc@fujisilvertech.com
-</footer>
-
-<script>
-    let current = 0;
-    let submitting = false;
-
-    const sections = [...document.querySelectorAll('.q')];
-    const counter = document.getElementById('counter');
-    const bar = document.getElementById('bar');
-    const total = sections.length;
-
-    // Identify question type from the question data.
-    sections.forEach(section => {
-        section.querySelectorAll('.mistake-item').forEach(button => {
-            button.addEventListener('click', () => {
-                if (submitting) return;
-
-                button.classList.toggle('selected');
-
-                const selected =
-                    button.classList.contains('selected');
-
-                button.setAttribute('aria-pressed', String(selected));
-
-                const count = section.querySelectorAll(
-                    '.mistake-item.selected'
-                ).length;
-
-                section.querySelector('.selected-count').textContent =
-                    count;
-            });
-        });
-
-        const radios = section.querySelectorAll(
-            'input[type="radio"]'
-        );
-
-        const feedback = section.querySelector('.answer-feedback');
-        const correctIndex = Number(section.dataset.correct);
-        const explanation = section.dataset.explanation;
-
-        radios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                const selectedIndex = Number(radio.value);
-
-                const correctRadio = [...radios].find(
-                    item => Number(item.value) === correctIndex
-                );
-
-                if (!correctRadio || !feedback) return;
-
-                const correctAnswer = correctRadio
-                    .closest('label')
-                    .innerText.trim();
-
-                feedback.hidden = false;
-
-                if (selectedIndex === correctIndex) {
-                    feedback.textContent =
-                        '✓ Correct! ' + explanation;
-
-                    feedback.className =
-                        'answer-feedback correct';
-                } else {
-                    feedback.textContent =
-                        '✗ Incorrect. Correct answer: ' +
-                        correctAnswer + '. ' + explanation;
-
-                    feedback.className =
-                        'answer-feedback incorrect';
-                }
-            });
-        });
-    });
-
-    function updateProgress() {
-        counter.textContent =
-            'Question ' + (current + 1) + ' of ' + total;
-
-        bar.style.width =
-            ((current + 1) / total * 100) + '%';
-    }
-
-    function hasAnswer(section) {
-        if (section.dataset.mode === 'find_mistakes') {
-            return section.querySelectorAll(
-                '.mistake-item.selected'
-            ).length > 0;
-        }
-
-        return !!section.querySelector(
-            'input[type="radio"]:checked'
-        );
-    }
-
-    function move(direction) {
-        if (submitting) return;
-
-        const currentSection = sections[current];
-        const error = currentSection.querySelector('.submit-error');
-
-        error.textContent = '';
-
-        if (direction === 1 && !hasAnswer(currentSection)) {
-            error.textContent =
-                'Please identify at least one suspicious detail or select an answer.';
-            return;
-        }
-
-        if (direction === 1 && current === total - 1) {
-            send();
-            return;
-        }
-
-        currentSection.style.display = 'none';
-
-        current = Math.max(
-            0,
-            Math.min(total - 1, current + direction)
-        );
-
-        sections[current].style.display = 'block';
-
-        updateProgress();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function send() {
-        if (submitting) return;
-
-        const answers = sections.map(section => {
-            if (section.dataset.mode === 'find_mistakes') {
-                return [...section.querySelectorAll(
-                    '.mistake-item.selected'
-                )].map(button => button.dataset.mistakeId);
-            }
-
-            const selected = section.querySelector(
-                'input[type="radio"]:checked'
-            );
-
-            return selected ? Number(selected.value) : -1;
-        });
-
-        const incomplete = answers.some(answer =>
-            Array.isArray(answer)
-                ? answer.length === 0
-                : answer === -1
-        );
-
-        if (incomplete) {
-            alert('Please answer all questions before submitting.');
-            return;
-        }
-
-        submitting = true;
-
-        const buttons = document.querySelectorAll('.nav button');
-        buttons.forEach(button => button.disabled = true);
-
-        try {
-            const response = await fetch('/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    answers: answers,
-                    attempt_id: Number("{{ attempt_id }}")
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Submission failed.');
-            }
-
-            if (!data.url) {
-                throw new Error(
-                    'The server did not return a results page.'
-                );
-            }
-
-            window.location.href = data.url;
-
-        } catch (error) {
-            submitting = false;
-
-            buttons.forEach(button => {
-                button.disabled = false;
-            });
-
-            alert(error.message);
-        }
-    }
-
-    updateProgress();
-</script>
-
-</body>
-</html>
