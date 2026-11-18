@@ -140,7 +140,7 @@
             padding: 16px;
             border-radius: 10px;
             font-weight: 600;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         .answer-feedback.correct {
@@ -155,7 +155,8 @@
             border: 1px solid #e6a0a0;
         }
 
-        .mistake-instructions {
+        .mistake-instructions,
+        .click-instructions {
             background: #eaf3ff;
             color: #174477;
             padding: 15px;
@@ -207,7 +208,8 @@
             color: #805b12;
         }
 
-        .mistake-count {
+        .mistake-count,
+        .selection-summary {
             margin-top: 13px;
             font-weight: bold;
             color: #174477;
@@ -228,6 +230,7 @@
             font: inherit;
             padding: 2px 3px;
             cursor: pointer;
+            overflow-wrap: anywhere;
         }
 
         .email-token:hover {
@@ -259,25 +262,10 @@
             color: #805b12;
         }
 
-        .click-instructions {
-            background: #eaf3ff;
-            color: #174477;
-            padding: 15px;
-            border-radius: 9px;
-            margin: 15px 0;
-            line-height: 1.6;
-        }
-
-        .selection-summary {
-            margin-top: 14px;
-            font-weight: bold;
-            color: #174477;
-        }
-
-        .feedback-list {
-            margin: 10px 0 0;
-            padding-left: 20px;
-            font-weight: normal;
+        .email-token:disabled,
+        .mistake-item:disabled {
+            opacity: 1;
+            cursor: default;
         }
 
         .quiz-action {
@@ -570,9 +558,28 @@
 
                         <div class="sender-details">
                             <p><strong>{{ q.sender|default('Workplace Support') }}</strong></p>
+
                             <p class="sender-address">
-                                {{ q.sender_email|default('support@example.com') }}
+                                {% if q.mode == 'click_errors' and q.sender_parts %}
+                                    {% for part in q.sender_parts %}
+                                        {% if part.clickable|default(false) %}
+                                            <button type="button"
+                                                class="email-token"
+                                                data-error-id="{{ part.id }}"
+                                                data-is-correct="{{ part.correct|default(false)|lower }}"
+                                                aria-pressed="false"
+                                                title="Click to flag this detail">
+                                                {{ part.text }}
+                                            </button>
+                                        {% else %}
+                                            {{ part.text }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {{ q.sender_email|default('support@example.com') }}
+                                {% endif %}
                             </p>
+
                             <p class="sender-address">To: {{ email }}</p>
                         </div>
                     </div>
@@ -587,6 +594,7 @@
                                 <button type="button"
                                     class="email-token"
                                     data-error-id="{{ part.id }}"
+                                    data-is-correct="{{ part.correct|default(false)|lower }}"
                                     aria-pressed="false"
                                     title="Click to flag this suspicious detail">
                                     {{ part.text }}
@@ -658,6 +666,7 @@
                 <button type="button"
                     class="mistake-item"
                     data-mistake-id="{{ mistake.id }}"
+                    data-is-correct="{{ (mistake.id|string in (q.correct_mistakes|default([])|map('string')|list))|lower }}"
                     aria-pressed="false">
                     {{ mistake.text }}
                 </button>
@@ -737,6 +746,7 @@
                 if (submitting || section.dataset.checked === 'true') return;
 
                 button.classList.toggle('selected');
+
                 button.setAttribute(
                     'aria-pressed',
                     String(button.classList.contains('selected'))
@@ -761,6 +771,7 @@
                 if (!correctRadio || !feedback) return;
 
                 const correctAnswer = correctRadio.closest('label').innerText.trim();
+
                 feedback.hidden = false;
 
                 if (Number(radio.value) === correctIndex) {
@@ -770,6 +781,7 @@
                     feedback.textContent =
                         '✗ Incorrect. Correct answer: ' +
                         correctAnswer + '. ' + explanation;
+
                     feedback.className = 'answer-feedback incorrect';
                 }
             });
@@ -801,12 +813,10 @@
         if (!feedback) return;
 
         if (mode === 'click_errors' || mode === 'find_mistakes') {
+
             const items = [...section.querySelectorAll(
                 mode === 'click_errors' ? '.email-token' : '.mistake-item'
             )];
-
-            const selected = items.filter(item => item.classList.contains('selected'));
-            const correct = items.filter(item => item.dataset.isCorrect === 'true');
 
             let correctCount = 0;
             let wrongCount = 0;
@@ -817,7 +827,9 @@
                 const isCorrect = item.dataset.isCorrect === 'true';
 
                 item.classList.remove(
-                    'correct-selection', 'wrong-selection', 'missed-selection'
+                    'correct-selection',
+                    'wrong-selection',
+                    'missed-selection'
                 );
 
                 if (isSelected && isCorrect) {
@@ -830,23 +842,35 @@
                     item.classList.add('missed-selection');
                     missedCount++;
                 }
+
+                item.disabled = true;
             });
 
             feedback.hidden = false;
-            feedback.className = 'answer-feedback ' +
-                (wrongCount === 0 && missedCount === 0 ? 'correct' : 'incorrect');
 
-            feedback.innerHTML =
-                `<strong>Investigation results</strong><br>
-                Correct selections: ${correctCount}<br>
-                Incorrect selections: ${wrongCount}<br>
-                Missed suspicious details: ${missedCount}<br>
-                <small>Green = correct selection. Red = incorrect selection.
-                Yellow = missed suspicious detail.</small>`;
+            feedback.className = 'answer-feedback ' +
+                (wrongCount === 0 && missedCount === 0
+                    ? 'correct'
+                    : 'incorrect');
+
+            feedback.innerHTML = `
+                <strong>Investigation Results</strong><br><br>
+                <span style="color:#198754">
+                    ✓ Correct findings: ${correctCount}
+                </span><br>
+                <span style="color:#dc3545">
+                    ✗ Incorrect selections: ${wrongCount}
+                </span><br>
+                <span style="color:#a87500">
+                    ! Missed findings: ${missedCount}
+                </span><br><br>
+                <strong>Review:</strong><br>
+                Green = correctly identified.<br>
+                Red = incorrectly selected.<br>
+                Yellow = suspicious detail you missed.
+            `;
 
             section.dataset.checked = 'true';
-
-            items.forEach(item => item.disabled = true);
         }
     }
 
@@ -855,6 +879,7 @@
 
         const section = sections[current];
         const error = section.querySelector('.submit-error');
+
         error.textContent = '';
 
         if (!hasAnswer(section)) {
@@ -865,11 +890,17 @@
 
         const mode = section.dataset.mode;
 
-        if ((mode === 'click_errors' || mode === 'find_mistakes') &&
-            section.dataset.checked !== 'true') {
+        if (
+            (mode === 'click_errors' || mode === 'find_mistakes') &&
+            section.dataset.checked !== 'true'
+        ) {
             showSelectionFeedback(section);
+
             section.querySelector('.continue-button').textContent =
-                current === total - 1 ? 'Confirm and submit' : 'Continue to next question';
+                current === total - 1
+                    ? 'Confirm and submit'
+                    : 'Continue to next question';
+
             return;
         }
 
@@ -880,6 +911,7 @@
 
         section.style.display = 'none';
         current++;
+
         sections[current].style.display = 'block';
 
         updateProgress();
@@ -966,7 +998,10 @@
             kicker.textContent = stage.kicker;
 
             person.classList.remove('alert', 'safe');
-            if (stage.mood) person.classList.add(stage.mood);
+
+            if (stage.mood) {
+                person.classList.add(stage.mood);
+            }
 
             fill.style.width = Math.min(100, elapsed / 25 * 100) + '%';
             countdown.textContent = Math.max(0, 25 - elapsed) + 's';
@@ -980,11 +1015,15 @@
 
             fill.style.width = '100%';
             countdown.textContent = 'Ready';
+
             caption.textContent = skipped
                 ? 'Animation skipped • Begin the investigation.'
                 : 'Simulation complete • You can now answer.';
+
             heading.textContent = 'Your investigation starts now';
-            description.textContent = 'Review the evidence below and select your answer.';
+            description.textContent =
+                'Review the evidence below and select your answer.';
+
             notification.textContent = 'Choose your response below';
             kicker.textContent = 'Scenario complete';
 
@@ -1000,6 +1039,7 @@
             if (animationInterval) clearInterval(animationInterval);
 
             elapsed = 0;
+
             skip.disabled = false;
             skip.textContent = 'Skip animation';
             replay.disabled = true;
@@ -1010,7 +1050,9 @@
                 elapsed++;
                 renderStage();
 
-                if (elapsed >= 25) finishScene(false);
+                if (elapsed >= 25) {
+                    finishScene(false);
+                }
             }, 1000);
         }
 
@@ -1036,12 +1078,17 @@
                     .map(button => button.dataset.mistakeId);
             }
 
-            const selected = section.querySelector('input[type="radio"]:checked');
+            const selected = section.querySelector(
+                'input[type="radio"]:checked'
+            );
+
             return selected ? Number(selected.value) : -1;
         });
 
         const incomplete = answers.some(answer =>
-            Array.isArray(answer) ? answer.length === 0 : answer === -1
+            Array.isArray(answer)
+                ? answer.length === 0
+                : answer === -1
         );
 
         if (incomplete) {
@@ -1058,7 +1105,9 @@
         try {
             const response = await fetch('/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     answers: answers,
                     attempt_id: Number("{{ attempt_id }}")
