@@ -1,47 +1,463 @@
 
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/style.css">
+
     <title>Fuji Silvertech | Phishing Awareness</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        :root {
+            --blue: #2588c8;
+            --teal: #0b9f9a;
+            --navy: #174b68;
+            --light-blue: #edf7ff;
+            --light-teal: #eaf9f6;
+            --text: #29485a;
+            --muted: #718797;
+            --border: #dfedf3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 10% 15%, #e0f2ff 0, transparent 32%),
+                radial-gradient(circle at 90% 80%, #dff8f2 0, transparent 30%),
+                #f7fbfe;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            padding: 17px 7%;
+            background: rgba(255,255,255,.94);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 3px 18px rgba(30,90,120,.04);
+        }
+
+        header img {
+            max-width: 190px;
+            max-height: 58px;
+            object-fit: contain;
+        }
+
+        .hero {
+            width: min(1150px, 92%);
+            margin: 55px auto;
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            align-items: center;
+            gap: 65px;
+        }
+
+        .hero-content {
+            animation: slideUp .7s ease both;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 9px 16px;
+            border-radius: 30px;
+            background: #e5f5f8;
+            color: #087e88;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+        }
+
+        h1 {
+            font-size: clamp(37px, 5vw, 57px);
+            line-height: 1.13;
+            color: var(--navy);
+            margin: 24px 0 17px;
+            letter-spacing: -1.8px;
+        }
+
+        h1 em {
+            font-style: normal;
+            background: linear-gradient(100deg, #2588c8, #0b9f9a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .intro {
+            max-width: 520px;
+            font-size: 16px;
+            line-height: 1.85;
+            color: var(--muted);
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .feature {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 12px 15px;
+            color: #426477;
+            font-size: 13px;
+            font-weight: 650;
+            box-shadow: 0 4px 12px rgba(30,90,120,.04);
+        }
+
+        .feature span {
+            color: var(--teal);
+            margin-right: 5px;
+        }
+
+        /* Decorative security illustration */
+
+        .visual-area {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 390px;
+            animation: slideUp .9s ease both;
+        }
+
+        .visual-circle {
+            width: 310px;
+            height: 310px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #e5f5ff, #e4f9f3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                inset 0 0 40px rgba(255,255,255,.9),
+                0 20px 55px rgba(45,130,160,.10);
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .shield {
+            width: 165px;
+            height: 190px;
+            background: linear-gradient(145deg, #42a7d8, #0a9e9a);
+            clip-path: polygon(50% 0%, 94% 17%, 90% 62%, 75% 83%, 50% 100%, 25% 83%, 10% 62%, 6% 17%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 14px 15px rgba(13,125,145,.25));
+        }
+
+        .shield svg {
+            width: 82px;
+            height: 82px;
+            fill: none;
+            stroke: white;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .float-card {
+            position: absolute;
+            background: white;
+            border: 1px solid var(--border);
+            padding: 13px 16px;
+            border-radius: 13px;
+            box-shadow: 0 9px 28px rgba(35,90,120,.10);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .float-card small {
+            display: block;
+            color: var(--muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .card-one { top: 45px; left: 0; animation: float 4s ease-in-out infinite; }
+        .card-two { bottom: 55px; right: 0; animation: float 4.5s ease-in-out infinite; }
+
+        /* Login panel */
+
+        .login-area {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: -5px;
+        }
+
+        .login-card {
+            width: min(530px, 100%);
+            padding: 32px;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 45px rgba(35,90,120,.09);
+            animation: slideUp 1s ease both;
+        }
+
+        .login-card h2 {
+            color: var(--navy);
+            font-size: 24px;
+            margin: 0 0 8px;
+        }
+
+        .login-card > p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #38586b;
+            margin-bottom: 8px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 19px;
+            border: 1px solid #dce9ef;
+            background: #f9fcfe;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: border .2s, box-shadow .2s;
+        }
+
+        .login-card input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(11,159,154,.11);
+            background: white;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            background: linear-gradient(105deg, #2588c8, #0b9f9a);
+            cursor: pointer;
+            box-shadow: 0 7px 18px rgba(20,145,160,.2);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .login-card button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(20,145,160,.3);
+        }
+
+        .error {
+            color: #d33f50;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            margin: 12px 0;
+        }
+
+        .privacy-note {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            margin-top: 20px;
+            padding: 13px;
+            background: #f0f9fb;
+            border-radius: 10px;
+            color: #64808e;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 23px 15px;
+            color: var(--muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            background: rgba(255,255,255,.65);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media(max-width: 800px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                margin: 35px auto;
+            }
+
+            .hero-content { text-align: center; }
+            .intro { margin: auto; }
+            .features { justify-content: center; }
+            .visual-area { min-height: 320px; }
+            .visual-circle { width: 250px; height: 250px; }
+            .shield { width: 135px; height: 155px; }
+            .login-area { margin-top: 10px; }
+        }
+
+        @media(max-width: 480px) {
+            header { padding: 14px 5%; }
+            header img { max-width: 160px; }
+            .hero { width: 90%; }
+            .visual-area { min-height: 270px; }
+            .visual-circle { width: 210px; height: 210px; }
+            .shield { width: 115px; height: 135px; }
+            .card-one { top: 10px; left: -5px; }
+            .card-two { bottom: 15px; right: -5px; }
+            .float-card { padding: 10px; font-size: 11px; }
+            .login-card { padding: 23px; }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <header>
-        <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
-    </header>
 
-    <main class="hero">
-        <p class="tag">FUJI SILVERTECH • EMPLOYEE LEARNING</p>
-        <h1>Phishing Awareness <em>Assessment</em></h1>
+<header>
+    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+</header>
 
-        <p>
-            Ten realistic workplace scenarios to help identify suspicious
-            requests and protect company information.
+<main class="hero">
+
+    <section class="hero-content">
+
+        <p class="tag">FUJI SILVERTECH · EMPLOYEE LEARNING</p>
+
+        <h1>
+            Think Before You
+            <em>Click.</em>
+        </h1>
+
+        <p class="intro">
+            Welcome to the Fuji Silvertech Phishing Awareness Assessment.
+            Explore realistic workplace scenarios, identify suspicious
+            messages and strengthen your ability to protect company information.
         </p>
 
-        <form class="card" method="post">
-            <h2>Employee sign in</h2>
-            <p>Enter your company email to begin the assessment.</p>
+        <div class="features">
+            <div class="feature"><span>✓</span> Realistic scenarios</div>
+            <div class="feature"><span>✓</span> Interactive assessment</div>
+            <div class="feature"><span>✓</span> Instant learning feedback</div>
+        </div>
 
-            <input type="email" name="email"
-                   placeholder="name@fujisilvertech.com" required>
+    </section>
 
-            <input type="password" name="admin_key"
-                   placeholder="Admin access key (administrators only)">
+    <section class="visual-area" aria-label="Cybersecurity shield illustration">
 
-            <button type="submit">Start assessment</button>
+        <div class="visual-circle">
+            <div class="shield">
+                <svg viewBox="0 0 100 100" aria-hidden="true">
+                    <path d="M50 8 L82 21 V47 C82 68 68 83 50 93 C32 83 18 68 18 47 V21 Z"/>
+                    <path d="M33 50 L45 62 L69 36"/>
+                </svg>
+            </div>
+        </div>
 
-            <p class="error">{{ msg }}</p>
+        <div class="float-card card-one">
+            ✓ Security First
+            <small>Stay alert. Stay protected.</small>
+        </div>
 
-            <small>
-                Individual answers are available only to authorized administrators.
-            </small>
+        <div class="float-card card-two">
+            ✉ Email Awareness
+            <small>Spot suspicious messages.</small>
+        </div>
+
+    </section>
+
+    <section class="login-area">
+
+        <form class="login-card" method="post">
+
+            <h2>Employee Sign In</h2>
+
+            <p>
+                Enter your company email address to begin your
+                phishing awareness assessment.
+            </p>
+
+            <label class="field-label" for="email">
+                Company Email Address
+            </label>
+
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="name@fujisilvertech.com"
+                autocomplete="email"
+                required
+            >
+
+            <label class="field-label" for="admin_key">
+                Admin Access Key
+                <span style="font-weight:400;color:#8a9da8;">(Administrators only)</span>
+            </label>
+
+            <input
+                type="password"
+                id="admin_key"
+                name="admin_key"
+                placeholder="Leave blank if you are an employee"
+                autocomplete="off"
+            >
+
+            <button type="submit">
+                Start Assessment →
+            </button>
+
+            {% if msg %}
+                <p class="error">{{ msg }}</p>
+            {% endif %}
+
+            <div class="privacy-note">
+                <span>🔒</span>
+                <span>
+                    Individual assessment responses are available only
+                    to authorized administrators.
+                </span>
+            </div>
+
         </form>
-    </main>
 
-    <footer>
-        For any queries, contact support.soc@fujisilvertech.com
-    </footer>
+    </section>
+
+</main>
+
+<footer>
+    For any queries, contact support.soc@fujisilvertech.com
+</footer>
+
 </body>
 </html>
