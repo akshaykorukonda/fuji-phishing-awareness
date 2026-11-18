@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,8 +66,7 @@
             overflow-wrap: anywhere;
         }
 
-        .sender-address,
-        .email-time {
+        .sender-address, .email-time {
             color: #5f6368;
         }
 
@@ -115,107 +115,8 @@
             color: #6b7280;
         }
 
-        .document-preview {
-            margin-top: 16px;
-            padding: 18px;
-            background: #f7f9fc;
-            border: 1px solid #d9e2ec;
-            border-radius: 10px;
-            color: #24364b;
-            font-family: Arial, sans-serif;
-        }
-
-        .document-sheet {
-            max-width: 620px;
-            margin: 10px auto 0;
-            padding: 22px;
-            background: white;
-            border: 1px solid #d6dde6;
-            box-shadow: 0 4px 14px rgba(31,55,80,.08);
-        }
-
-        .document-head {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            align-items: flex-start;
-            border-bottom: 2px solid #dce5ee;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
-        }
-
-        .document-head strong {
-            font-size: 17px;
-        }
-
-        .document-stamp {
-            border: 2px solid #b45309;
-            color: #9a3412;
-            padding: 5px 8px;
-            font-size: 10px;
-            font-weight: 800;
-            transform: rotate(-3deg);
-            white-space: nowrap;
-        }
-
-        .document-lines {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 9px 16px;
-            font-size: 12px;
-            margin: 14px 0;
-        }
-
-        .document-lines div {
-            padding: 8px;
-            background: #f5f7fa;
-            border-radius: 5px;
-            overflow-wrap: anywhere;
-        }
-
-        .document-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
-
-        .document-table th,
-        .document-table td {
-            border: 1px solid #dce3eb;
-            padding: 8px;
-            font-size: 11px;
-        }
-
-        .document-alert {
-            margin-top: 13px;
-            padding: 10px;
-            background: #fff4e5;
-            border-left: 4px solid #d97706;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .simulation-note {
-            margin-top: 10px;
-            color: #64748b;
-            font-size: 11px;
-            text-align: center;
-        }
-
         .question-heading {
             margin-top: 28px;
-        }
-
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .nav button:disabled {
-            opacity: .5;
-            cursor: not-allowed;
         }
 
         .options label {
@@ -232,12 +133,6 @@
         .options input {
             flex-shrink: 0;
             margin-top: 5px;
-        }
-
-        .submit-error {
-            color: #dc3545;
-            font-weight: bold;
-            margin-top: 12px;
         }
 
         .answer-feedback {
@@ -286,12 +181,6 @@
             width: 100%;
             font-size: 14px;
             line-height: 1.5;
-            transition: .2s;
-        }
-
-        .mistake-item:hover {
-            border-color: #168bd2;
-            background: #f1f8ff;
         }
 
         .mistake-item.selected {
@@ -300,14 +189,22 @@
             color: #a32626;
         }
 
-        .mistake-item.selected::before {
-            content: "✓ ";
-            font-weight: bold;
+        .mistake-item.correct-selection {
+            border-color: #198754;
+            background: #e8f7ed;
+            color: #176b37;
         }
 
-        .mistake-item:focus-visible {
-            outline: 3px solid #168bd2;
-            outline-offset: 2px;
+        .mistake-item.wrong-selection {
+            border-color: #dc3545;
+            background: #fff0f0;
+            color: #a32626;
+        }
+
+        .mistake-item.missed-selection {
+            border-color: #d99b22;
+            background: #fff8e8;
+            color: #805b12;
         }
 
         .mistake-count {
@@ -316,29 +213,103 @@
             color: #174477;
         }
 
-        @media(max-width:600px) {
-            .email-card {
-                padding: 15px;
-            }
-
-            .email-subject {
-                font-size: 18px;
-            }
-
-            .nav button {
-                font-size: 13px;
-            }
-
-            .document-lines {
-                grid-template-columns: 1fr;
-            }
-
-            .document-sheet {
-                padding: 13px;
-            }
+        .clickable-email {
+            line-height: 2.1;
+            font-size: 15px;
+            overflow-wrap: anywhere;
         }
 
-        /* Animated training scene */
+        .email-token {
+            display: inline;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            padding: 2px 3px;
+            cursor: pointer;
+        }
+
+        .email-token:hover {
+            background: #fff0c2;
+            outline: 1px solid #e0a52b;
+        }
+
+        .email-token.selected {
+            background: #ffe0e0;
+            outline: 2px solid #d43b3b;
+            color: #a32626;
+        }
+
+        .email-token.correct-selection {
+            background: #d8f4e1;
+            outline: 2px solid #198754;
+            color: #176b37;
+        }
+
+        .email-token.wrong-selection {
+            background: #ffe0e0;
+            outline: 2px solid #dc3545;
+            color: #a32626;
+        }
+
+        .email-token.missed-selection {
+            background: #fff0c2;
+            outline: 2px solid #d99b22;
+            color: #805b12;
+        }
+
+        .click-instructions {
+            background: #eaf3ff;
+            color: #174477;
+            padding: 15px;
+            border-radius: 9px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .selection-summary {
+            margin-top: 14px;
+            font-weight: bold;
+            color: #174477;
+        }
+
+        .feedback-list {
+            margin: 10px 0 0;
+            padding-left: 20px;
+            font-weight: normal;
+        }
+
+        .quiz-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+            gap: 10px;
+        }
+
+        .quiz-action button {
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 22px;
+            background: #087db4;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .quiz-action button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .submit-error {
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        /* Animated simulation */
 
         .video-simulation {
             margin: 18px 0 24px;
@@ -350,32 +321,21 @@
             box-shadow: 0 10px 28px rgba(10,42,70,.2);
         }
 
-        .video-topline {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            font-size: 12px;
-            letter-spacing: .7px;
-            text-transform: uppercase;
-            color: #d7efff;
-        }
-
         .video-duration {
+            display: inline-block;
             border: 1px solid rgba(255,255,255,.35);
             border-radius: 30px;
             padding: 5px 10px;
             font-weight: 700;
+            font-size: 12px;
         }
 
         .animation-stage {
-            position: relative;
             min-height: 190px;
             margin: 15px 0 12px;
             padding: 18px;
             border-radius: 12px;
-            background: radial-gradient(circle at 80% 15%,rgba(82,211,255,.25),transparent 30%),linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.04));
+            background: linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.04));
             border: 1px solid rgba(255,255,255,.2);
             display: flex;
             align-items: center;
@@ -429,7 +389,6 @@
             color: #bfeaff;
             font-size: 11px;
             letter-spacing: 1px;
-            text-transform: uppercase;
             margin-bottom: 7px;
         }
 
@@ -457,13 +416,8 @@
             color: #17334e;
             font-size: 12px;
             font-weight: 700;
-            animation: notificationPop .45s ease both;
             max-width: 100%;
             overflow-wrap: anywhere;
-        }
-
-        .scene-notification span:first-child {
-            font-size: 18px;
         }
 
         .scene-progress {
@@ -507,57 +461,17 @@
             font-size: 12px;
         }
 
-        .scene-controls button:hover {
-            background: rgba(255,255,255,.23);
-        }
-
-        .scene-controls button:focus-visible {
-            outline: 3px solid #fff;
-            outline-offset: 2px;
-        }
-
-        .scene-controls button:disabled {
-            opacity: .55;
-            cursor: not-allowed;
-        }
-
         @keyframes personLook {
             0%,100% { transform: rotate(0); }
             45% { transform: rotate(5deg); }
         }
 
-        @keyframes notificationPop {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
         @media(max-width:600px) {
-            .video-simulation {
-                padding: 13px;
-            }
-
-            .animation-stage {
-                min-height: 210px;
-                padding: 13px;
-                gap: 10px;
-            }
-
-            .animation-person {
-                width: 60px;
-                flex-basis: 60px;
-                transform: scale(.78);
-                transform-origin: center;
-            }
-
-            .animation-content p {
-                font-size: 12px;
-            }
+            .email-card { padding: 15px; }
+            .email-subject { font-size: 18px; }
+            .animation-stage { min-height: 210px; padding: 13px; gap: 10px; }
+            .animation-person { width: 60px; flex-basis: 60px; transform: scale(.78); }
+            .animation-content p { font-size: 12px; }
         }
     </style>
 </head>
@@ -583,7 +497,7 @@
 
         <section class="q"
             data-correct="{{ q.correct|default(-1) }}"
-            data-explanation="{{ q.explanation|default('') }}"
+            data-explanation="{{ q.explanation|default('')|e }}"
             data-mode="{{ q.mode|default('multiple_choice') }}"
             style="display:{% if loop.first %}block{% else %}none{% endif %}">
 
@@ -594,48 +508,31 @@
             <h1>{{ q.title }}</h1>
 
             <div class="video-simulation"
-                data-title="{{ q.title|e }}"
                 data-sender="{{ q.sender|default('Workplace contact')|e }}"
                 data-subject="{{ q.subject|default(q.title)|e }}"
                 data-mode="{{ q.mode|default('multiple_choice') }}">
 
-                <div class="video-topline">
-                    <strong>Animated security scenario</strong>
-                    <span class="video-duration">25-second simulation</span>
-                </div>
+                <span class="video-duration">25-SECOND SIMULATION</span>
 
                 <div class="animation-stage">
-
                     <div class="animation-person" aria-hidden="true">
                         <div class="person-head"></div>
                         <div class="person-body"></div>
                     </div>
 
                     <div class="animation-content">
-
-                        <small class="scene-kicker">
-                            Workplace simulation
-                        </small>
-
-                        <h3 class="scene-heading">
-                            A new message arrives
-                        </h3>
-
+                        <small class="scene-kicker">Workplace simulation</small>
+                        <h3 class="scene-heading">A new message arrives</h3>
                         <p class="scene-description">
                             An employee receives a message and needs to decide how to respond.
                         </p>
-
                         <div class="scene-notification">
-                            <span>✉</span>
-                            <span class="scene-notification-text">
-                                New email notification
-                            </span>
+                            ✉ <span class="scene-notification-text">New email notification</span>
                         </div>
-
                     </div>
                 </div>
 
-                <div class="scene-progress" aria-label="Animation progress">
+                <div class="scene-progress">
                     <div class="scene-progress-fill"></div>
                 </div>
 
@@ -644,30 +541,19 @@
                 </p>
 
                 <div class="scene-controls">
-                    <button type="button" class="scene-replay">
-                        ↻ Replay scene
-                    </button>
-
-                    <button type="button" class="scene-skip">
-                        Skip animation
-                    </button>
-
-                    <span class="scene-countdown" aria-live="off">
-                        25s
-                    </span>
+                    <button type="button" class="scene-replay">↻ Replay scene</button>
+                    <button type="button" class="scene-skip">Skip animation</button>
+                    <span class="scene-countdown">25s</span>
                 </div>
-
             </div>
 
             <div class="evidence">
-
                 <p class="evidence-label">EMAIL EVIDENCE</p>
 
                 <div class="email-card">
 
                     <div class="email-top">
                         <span>Mail • Message preview</span>
-
                         <span class="email-time">
                             {{ q.timestamp|default('Today, 9:41 AM') }}
                         </span>
@@ -678,39 +564,48 @@
                     </h2>
 
                     <div class="sender-row">
-
                         <div class="sender-avatar">
                             {{ q.sender_initial|default('M') }}
                         </div>
 
                         <div class="sender-details">
-
-                            <p>
-                                <strong>
-                                    {{ q.sender|default('Workplace Support') }}
-                                </strong>
-                            </p>
-
+                            <p><strong>{{ q.sender|default('Workplace Support') }}</strong></p>
                             <p class="sender-address">
                                 {{ q.sender_email|default('support@example.com') }}
                             </p>
-
-                            <p class="sender-address">
-                                To: {{ email }}
-                            </p>
-
+                            <p class="sender-address">To: {{ email }}</p>
                         </div>
                     </div>
 
                     <hr>
 
+                    {% if q.mode == 'click_errors' %}
+
+                    <div class="email-body clickable-email">
+                        {% for part in q.email_parts %}
+                            {% if part.clickable|default(false) %}
+                                <button type="button"
+                                    class="email-token"
+                                    data-error-id="{{ part.id }}"
+                                    aria-pressed="false"
+                                    title="Click to flag this suspicious detail">
+                                    {{ part.text }}
+                                </button>
+                            {% else %}
+                                {{ part.text }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% else %}
+
                     <div class="email-body">{{ q.scenario }}</div>
+
+                    {% endif %}
 
                     {% if q.display_link|default('') %}
                     <div>
-                        <span class="email-link">
-                            {{ q.display_link }}
-                        </span>
+                        <span class="email-link">{{ q.display_link }}</span>
                     </div>
                     {% endif %}
 
@@ -730,226 +625,40 @@
                     {% endif %}
 
                     {% if q.email_note|default('') %}
-                    <div class="email-warning">
-                        {{ q.email_note }}
-                    </div>
+                    <div class="email-warning">{{ q.email_note }}</div>
                     {% endif %}
 
                 </div>
-
-                {% if q.category == 'OFFICE FRAUD INVESTIGATION' %}
-
-                <div class="document-preview">
-
-                    <p class="evidence-label">
-                        ATTACHED BUSINESS DOCUMENT PREVIEW
-                    </p>
-
-                    <div class="document-sheet">
-
-                        <div class="document-head">
-
-                            <div>
-                                <strong>
-                                    {% if 'Vendor Bank' in q.title %}
-                                        SUPPLIER BANK DETAIL NOTICE
-                                    {% elif 'Duplicate Invoice' in q.title %}
-                                        SUPPLIER INVOICE
-                                    {% elif 'Purchase Order' in q.title %}
-                                        PURCHASE ORDER APPROVAL
-                                    {% else %}
-                                        EMPLOYEE PAYROLL CHANGE REQUEST
-                                    {% endif %}
-                                </strong>
-
-                                <div style="font-size:11px;color:#64748b;margin-top:5px;">
-                                    Fuji Silvertech • Training evidence preview
-                                </div>
-                            </div>
-
-                            <span class="document-stamp">
-                                SIMULATION
-                            </span>
-
-                        </div>
-
-                        <div class="document-lines">
-
-                            <div>
-                                <strong>Document:</strong><br>
-                                {{ q.attachment|default('Internal_Request.pdf') }}
-                            </div>
-
-                            <div>
-                                <strong>Reference:</strong><br>
-
-                                {% if 'Duplicate Invoice' in q.title %}
-                                    INV-2481
-                                {% elif 'Purchase Order' in q.title %}
-                                    PO-URGENT-APPROVAL
-                                {% elif 'Vendor Bank' in q.title %}
-                                    SUPPLIER-CHANGE
-                                {% else %}
-                                    PAYROLL-CHANGE
-                                {% endif %}
-                            </div>
-
-                            <div>
-                                <strong>Requested action:</strong><br>
-
-                                {% if 'Vendor Bank' in q.title %}
-                                    Replace beneficiary bank details
-                                {% elif 'Duplicate Invoice' in q.title %}
-                                    Release another payment
-                                {% elif 'Purchase Order' in q.title %}
-                                    Release order before workflow approval
-                                {% else %}
-                                    Change employee salary account
-                                {% endif %}
-                            </div>
-
-                            <div>
-                                <strong>Processing status:</strong><br>
-                                Awaiting independent verification
-                            </div>
-
-                        </div>
-
-                        <table class="document-table">
-
-                            <thead>
-                                <tr>
-                                    <th>Control item</th>
-                                    <th>Evidence shown</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                {% if 'Vendor Bank' in q.title %}
-
-                                <tr>
-                                    <td>Bank detail change</td>
-                                    <td>New beneficiary details attached</td>
-                                </tr>
-
-                                <tr>
-                                    <td>Prior verification</td>
-                                    <td>Not recorded in this request</td>
-                                </tr>
-
-                                {% elif 'Duplicate Invoice' in q.title %}
-
-                                <tr>
-                                    <td>Invoice reference</td>
-                                    <td>INV-2481 — second copy</td>
-                                </tr>
-
-                                <tr>
-                                    <td>Previous payment reconciliation</td>
-                                    <td>Not yet confirmed</td>
-                                </tr>
-
-                                {% elif 'Purchase Order' in q.title %}
-
-                                <tr>
-                                    <td>Approval evidence</td>
-                                    <td>Verbal approval claimed</td>
-                                </tr>
-
-                                <tr>
-                                    <td>Workflow record</td>
-                                    <td>Formal approval pending</td>
-                                </tr>
-
-                                {% else %}
-
-                                <tr>
-                                    <td>Employee confirmation</td>
-                                    <td>Not available</td>
-                                </tr>
-
-                                <tr>
-                                    <td>Payroll verification</td>
-                                    <td>Pending</td>
-                                </tr>
-
-                                {% endif %}
-
-                            </tbody>
-                        </table>
-
-                        <div class="document-alert">
-                            <strong>Review point:</strong>
-                            This is a fictional training document. Do not treat the
-                            presence of a document, reference number or familiar
-                            branding as proof of authorization.
-                        </div>
-
-                    </div>
-
-                    <p class="simulation-note">
-                        Illustrative document preview • No real payment or employee data
-                    </p>
-
-                </div>
-
-                {% elif q.attachment|default('') %}
-
-                <div class="document-preview">
-
-                    <p class="evidence-label">ATTACHMENT PREVIEW</p>
-
-                    <div class="document-sheet">
-
-                        <div class="document-head">
-                            <strong>{{ q.attachment }}</strong>
-                            <span class="document-stamp">UNVERIFIED</span>
-                        </div>
-
-                        <p style="font-size:13px;line-height:1.6;">
-                            This simulated attachment has not been opened.
-                            Assess its source, file type and business context
-                            before deciding whether it is safe.
-                        </p>
-
-                        <div class="document-alert">
-                            Never enable macros, scan unexpected QR codes or enter
-                            credentials just because an email includes an attachment.
-                        </div>
-
-                    </div>
-
-                    <p class="simulation-note">
-                        Illustrative attachment preview • Training simulation
-                    </p>
-
-                </div>
-
-                {% endif %}
-
             </div>
 
-            {% if q.mode|default('multiple_choice') == 'find_mistakes' %}
+            {% if q.mode == 'click_errors' %}
 
-            <h2 class="question-heading">
-                Find the mistakes in this email
-            </h2>
+            <h2 class="question-heading">Identify the suspicious details</h2>
+
+            <div class="click-instructions">
+                <strong>Investigation task:</strong>
+                Click every suspicious spelling mistake, incorrect word or email domain.
+                Select all the errors you can identify in the email.
+            </div>
+
+            <p class="selection-summary">
+                Selected errors: <span class="selected-count">0</span>
+            </p>
+
+            {% elif q.mode == 'find_mistakes' %}
+
+            <h2 class="question-heading">Find the suspicious details</h2>
 
             <div class="mistake-instructions">
-                <strong>Investigation task:</strong>
-                Carefully inspect the email. Select every suspicious detail
-                you identify. There are no multiple-choice answers.
+                Select the suspicious details you identify in this email.
             </div>
 
             <div class="mistake-list">
                 {% for mistake in q.mistakes %}
-                <button
-                    type="button"
+                <button type="button"
                     class="mistake-item"
                     data-mistake-id="{{ mistake.id }}"
-                    aria-pressed="false"
-                >
+                    aria-pressed="false">
                     {{ mistake.text }}
                 </button>
                 {% endfor %}
@@ -968,17 +677,10 @@
             <div class="options">
                 {% for option in q.options %}
                 <label>
-
-                    <input
-                        type="radio"
+                    <input type="radio"
                         name="q{{ question_index }}"
-                        value="{{ loop.index0 }}"
-                    >
-
-                    <span>
-                        {{ 'ABCD'[loop.index0] }}. {{ option }}
-                    </span>
-
+                        value="{{ loop.index0 }}">
+                    <span>{{ 'ABCD'[loop.index0] }}. {{ option }}</span>
                 </label>
                 {% endfor %}
             </div>
@@ -986,36 +688,18 @@
             {% endif %}
 
             <div class="answer-feedback" hidden aria-live="polite"></div>
-
             <p class="submit-error" aria-live="polite"></p>
 
-            <div class="nav">
-
-                <button
-                    type="button"
-                    class="secondary"
-                    onclick="move(-1)"
-                    {% if loop.first %}disabled{% endif %}
-                >
-                    Previous
+            <div class="quiz-action">
+                <button type="button" class="continue-button">
+                    {% if loop.last %}Submit assessment{% else %}Continue{% endif %}
                 </button>
-
-                <button type="button" onclick="move(1)">
-                    {% if loop.last %}
-                        Submit assessment
-                    {% else %}
-                        Next question
-                    {% endif %}
-                </button>
-
             </div>
 
         </section>
-
         {% endfor %}
 
     </form>
-
 </main>
 
 <footer>
@@ -1025,101 +709,189 @@
 <script>
     let current = 0;
     let submitting = false;
+    let animationInterval = null;
 
     const sections = [...document.querySelectorAll('.q')];
     const counter = document.getElementById('counter');
     const bar = document.getElementById('bar');
     const total = sections.length;
 
+    function updateProgress() {
+        counter.textContent = `Question ${current + 1} of ${total}`;
+        bar.style.width = ((current + 1) / total * 100) + '%';
+    }
+
+    function updateSelectionCount(section) {
+        const count = section.querySelectorAll(
+            '.email-token.selected, .mistake-item.selected'
+        ).length;
+
+        const output = section.querySelector('.selected-count');
+        if (output) output.textContent = count;
+    }
+
     sections.forEach(section => {
 
-        section.querySelectorAll('.mistake-item').forEach(button => {
-
+        section.querySelectorAll('.email-token, .mistake-item').forEach(button => {
             button.addEventListener('click', () => {
-
-                if (submitting) return;
+                if (submitting || section.dataset.checked === 'true') return;
 
                 button.classList.toggle('selected');
+                button.setAttribute(
+                    'aria-pressed',
+                    String(button.classList.contains('selected'))
+                );
 
-                const selected =
-                    button.classList.contains('selected');
-
-                button.setAttribute('aria-pressed', String(selected));
-
-                const count = section.querySelectorAll(
-                    '.mistake-item.selected'
-                ).length;
-
-                section.querySelector('.selected-count').textContent =
-                    count;
-
+                updateSelectionCount(section);
             });
-
         });
 
-        const radios = section.querySelectorAll(
-            'input[type="radio"]'
-        );
-
-        const feedback = section.querySelector('.answer-feedback');
-        const correctIndex = Number(section.dataset.correct);
-        const explanation = section.dataset.explanation;
-
-        radios.forEach(radio => {
-
+        section.querySelectorAll('input[type="radio"]').forEach(radio => {
             radio.addEventListener('change', () => {
+                if (section.dataset.checked === 'true') return;
 
-                const selectedIndex = Number(radio.value);
+                const feedback = section.querySelector('.answer-feedback');
+                const correctIndex = Number(section.dataset.correct);
+                const explanation = section.dataset.explanation;
 
-                const correctRadio = [...radios].find(
-                    item => Number(item.value) === correctIndex
-                );
+                const correctRadio = [...section.querySelectorAll(
+                    'input[type="radio"]'
+                )].find(item => Number(item.value) === correctIndex);
 
                 if (!correctRadio || !feedback) return;
 
-                const correctAnswer = correctRadio
-                    .closest('label')
-                    .innerText.trim();
-
+                const correctAnswer = correctRadio.closest('label').innerText.trim();
                 feedback.hidden = false;
 
-                if (selectedIndex === correctIndex) {
-
-                    feedback.textContent =
-                        '✓ Correct! ' + explanation;
-
-                    feedback.className =
-                        'answer-feedback correct';
-
+                if (Number(radio.value) === correctIndex) {
+                    feedback.textContent = '✓ Correct! ' + explanation;
+                    feedback.className = 'answer-feedback correct';
                 } else {
-
                     feedback.textContent =
                         '✗ Incorrect. Correct answer: ' +
                         correctAnswer + '. ' + explanation;
-
-                    feedback.className =
-                        'answer-feedback incorrect';
-
+                    feedback.className = 'answer-feedback incorrect';
                 }
-
             });
-
         });
 
+        section.querySelector('.continue-button').addEventListener('click', () => {
+            continueQuestion();
+        });
     });
 
+    function hasAnswer(section) {
+        const mode = section.dataset.mode;
 
-    let animationInterval = null;
-
-    function playScene(section) {
-
-        if (animationInterval) {
-            clearInterval(animationInterval);
-            animationInterval = null;
+        if (mode === 'find_mistakes') {
+            return section.querySelectorAll('.mistake-item.selected').length > 0;
         }
 
-        const panel = section.querySelector('.video-simulation');
+        if (mode === 'click_errors') {
+            return section.querySelectorAll('.email-token.selected').length > 0;
+        }
 
+        return !!section.querySelector('input[type="radio"]:checked');
+    }
+
+    function showSelectionFeedback(section) {
+        const mode = section.dataset.mode;
+        const feedback = section.querySelector('.answer-feedback');
+
+        if (!feedback) return;
+
+        if (mode === 'click_errors' || mode === 'find_mistakes') {
+            const items = [...section.querySelectorAll(
+                mode === 'click_errors' ? '.email-token' : '.mistake-item'
+            )];
+
+            const selected = items.filter(item => item.classList.contains('selected'));
+            const correct = items.filter(item => item.dataset.isCorrect === 'true');
+
+            let correctCount = 0;
+            let wrongCount = 0;
+            let missedCount = 0;
+
+            items.forEach(item => {
+                const isSelected = item.classList.contains('selected');
+                const isCorrect = item.dataset.isCorrect === 'true';
+
+                item.classList.remove(
+                    'correct-selection', 'wrong-selection', 'missed-selection'
+                );
+
+                if (isSelected && isCorrect) {
+                    item.classList.add('correct-selection');
+                    correctCount++;
+                } else if (isSelected && !isCorrect) {
+                    item.classList.add('wrong-selection');
+                    wrongCount++;
+                } else if (!isSelected && isCorrect) {
+                    item.classList.add('missed-selection');
+                    missedCount++;
+                }
+            });
+
+            feedback.hidden = false;
+            feedback.className = 'answer-feedback ' +
+                (wrongCount === 0 && missedCount === 0 ? 'correct' : 'incorrect');
+
+            feedback.innerHTML =
+                `<strong>Investigation results</strong><br>
+                Correct selections: ${correctCount}<br>
+                Incorrect selections: ${wrongCount}<br>
+                Missed suspicious details: ${missedCount}<br>
+                <small>Green = correct selection. Red = incorrect selection.
+                Yellow = missed suspicious detail.</small>`;
+
+            section.dataset.checked = 'true';
+
+            items.forEach(item => item.disabled = true);
+        }
+    }
+
+    function continueQuestion() {
+        if (submitting) return;
+
+        const section = sections[current];
+        const error = section.querySelector('.submit-error');
+        error.textContent = '';
+
+        if (!hasAnswer(section)) {
+            error.textContent =
+                'Please identify at least one suspicious detail or select an answer.';
+            return;
+        }
+
+        const mode = section.dataset.mode;
+
+        if ((mode === 'click_errors' || mode === 'find_mistakes') &&
+            section.dataset.checked !== 'true') {
+            showSelectionFeedback(section);
+            section.querySelector('.continue-button').textContent =
+                current === total - 1 ? 'Confirm and submit' : 'Continue to next question';
+            return;
+        }
+
+        if (current === total - 1) {
+            send();
+            return;
+        }
+
+        section.style.display = 'none';
+        current++;
+        sections[current].style.display = 'block';
+
+        updateProgress();
+        playScene(sections[current]);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function playScene(section) {
+        if (animationInterval) clearInterval(animationInterval);
+
+        const panel = section.querySelector('.video-simulation');
         if (!panel) return;
 
         const heading = panel.querySelector('.scene-heading');
@@ -1138,62 +910,53 @@
         const mode = panel.dataset.mode;
 
         const stages = [
-
             {
                 title: 'A message arrives',
-                description: 'A workplace notification appears. Before opening it, notice who sent it and why.',
+                description: 'A workplace notification appears. Notice who sent it and why.',
                 notification: sender + ' sent a message',
                 caption: 'Scene 1 of 5 • An unexpected message arrives',
                 kicker: '00:00 — Notification',
                 mood: ''
             },
-
             {
                 title: 'The employee opens the message',
-                description: 'The subject and message content appear. Familiar branding alone does not prove authenticity.',
+                description: 'The subject and message content appear. Familiar branding does not prove authenticity.',
                 notification: subject,
                 caption: 'Scene 2 of 5 • Read the message carefully',
                 kicker: '00:05 — Message preview',
                 mood: ''
             },
-
             {
                 title: 'Check the details',
-                description: mode === 'find_mistakes'
-                    ? 'Inspect the sender, links, attachments, requests and any pressure to act quickly.'
-                    : 'Check the sender address, request, links and whether the action fits normal company process.',
-                notification: 'Inspect sender • link • request',
+                description: mode === 'click_errors'
+                    ? 'Inspect spelling, sender address, domain and unusual wording.'
+                    : 'Check the sender address, request, links and normal company process.',
+                notification: 'Inspect sender • spelling • domain',
                 caption: 'Scene 3 of 5 • Look for warning signs',
                 kicker: '00:10 — Investigation',
                 mood: 'alert'
             },
-
             {
                 title: 'Pause before taking action',
-                description: 'Do not share credentials, approve unexpected MFA prompts, download unknown files or make unverified payments.',
+                description: 'Do not share credentials, approve unexpected MFA prompts or follow unverified instructions.',
                 notification: 'Pause and verify independently',
                 caption: 'Scene 4 of 5 • Think before you act',
                 kicker: '00:15 — Safety check',
                 mood: 'alert'
             },
-
             {
                 title: 'Make your decision',
-                description: 'Use the evidence in the message and choose the safest response in the question below.',
+                description: 'Use the evidence in the email and select the suspicious details or safest response.',
                 notification: 'Your decision matters',
                 caption: 'Scene 5 of 5 • Your turn to investigate',
                 kicker: '00:20 — Decision',
                 mood: 'safe'
             }
-
         ];
 
         let elapsed = 0;
 
-        replay.disabled = true;
-
         function renderStage() {
-
             const stage = stages[Math.min(4, Math.floor(elapsed / 5))];
 
             heading.textContent = stage.title;
@@ -1203,21 +966,13 @@
             kicker.textContent = stage.kicker;
 
             person.classList.remove('alert', 'safe');
+            if (stage.mood) person.classList.add(stage.mood);
 
-            if (stage.mood) {
-                person.classList.add(stage.mood);
-            }
-
-            fill.style.width =
-                Math.min(100, elapsed / 25 * 100) + '%';
-
-            countdown.textContent =
-                Math.max(0, 25 - elapsed) + 's';
-
+            fill.style.width = Math.min(100, elapsed / 25 * 100) + '%';
+            countdown.textContent = Math.max(0, 25 - elapsed) + 's';
         }
 
         function finishScene(skipped) {
-
             if (animationInterval) {
                 clearInterval(animationInterval);
                 animationInterval = null;
@@ -1225,16 +980,11 @@
 
             fill.style.width = '100%';
             countdown.textContent = 'Ready';
-
             caption.textContent = skipped
-                ? 'Animation skipped • You can begin the investigation.'
-                : 'Simulation complete • You can now answer the question.';
-
+                ? 'Animation skipped • Begin the investigation.'
+                : 'Simulation complete • You can now answer.';
             heading.textContent = 'Your investigation starts now';
-
-            description.textContent =
-                'Review the evidence below and select your answer.';
-
+            description.textContent = 'Review the evidence below and select your answer.';
             notification.textContent = 'Choose your response below';
             kicker.textContent = 'Scenario complete';
 
@@ -1244,178 +994,75 @@
             replay.disabled = false;
             skip.disabled = true;
             skip.textContent = 'Animation completed';
-
         }
 
         function start() {
-
-            if (animationInterval) {
-                clearInterval(animationInterval);
-            }
+            if (animationInterval) clearInterval(animationInterval);
 
             elapsed = 0;
-
             skip.disabled = false;
             skip.textContent = 'Skip animation';
-
             replay.disabled = true;
 
             renderStage();
 
             animationInterval = setInterval(() => {
-
-                elapsed += 1;
-
+                elapsed++;
                 renderStage();
 
-                if (elapsed >= 25) {
-                    finishScene(false);
-                }
-
+                if (elapsed >= 25) finishScene(false);
             }, 1000);
-
         }
 
         skip.onclick = () => finishScene(true);
         replay.onclick = start;
 
         start();
-
     }
-
-
-    function updateProgress() {
-
-        counter.textContent =
-            'Question ' + (current + 1) + ' of ' + total;
-
-        bar.style.width =
-            ((current + 1) / total * 100) + '%';
-
-    }
-
-
-    function hasAnswer(section) {
-
-        if (section.dataset.mode === 'find_mistakes') {
-
-            return section.querySelectorAll(
-                '.mistake-item.selected'
-            ).length > 0;
-
-        }
-
-        return !!section.querySelector(
-            'input[type="radio"]:checked'
-        );
-
-    }
-
-
-    function move(direction) {
-
-        if (submitting) return;
-
-        const currentSection = sections[current];
-        const error = currentSection.querySelector('.submit-error');
-
-        error.textContent = '';
-
-        if (direction === 1 && !hasAnswer(currentSection)) {
-
-            error.textContent =
-                'Please identify at least one suspicious detail or select an answer.';
-
-            return;
-        }
-
-        if (direction === 1 && current === total - 1) {
-            send();
-            return;
-        }
-
-        currentSection.style.display = 'none';
-
-        current = Math.max(
-            0,
-            Math.min(total - 1, current + direction)
-        );
-
-        sections[current].style.display = 'block';
-
-        updateProgress();
-
-        playScene(sections[current]);
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-
-    }
-
 
     async function send() {
-
         if (submitting) return;
 
         const answers = sections.map(section => {
+            const mode = section.dataset.mode;
 
-            if (section.dataset.mode === 'find_mistakes') {
-
-                return [...section.querySelectorAll(
-                    '.mistake-item.selected'
-                )].map(button => button.dataset.mistakeId);
-
+            if (mode === 'click_errors') {
+                return [...section.querySelectorAll('.email-token.selected')]
+                    .map(button => button.dataset.errorId);
             }
 
-            const selected = section.querySelector(
-                'input[type="radio"]:checked'
-            );
+            if (mode === 'find_mistakes') {
+                return [...section.querySelectorAll('.mistake-item.selected')]
+                    .map(button => button.dataset.mistakeId);
+            }
 
+            const selected = section.querySelector('input[type="radio"]:checked');
             return selected ? Number(selected.value) : -1;
-
         });
 
         const incomplete = answers.some(answer =>
-            Array.isArray(answer)
-                ? answer.length === 0
-                : answer === -1
+            Array.isArray(answer) ? answer.length === 0 : answer === -1
         );
 
         if (incomplete) {
-
             alert('Please answer all questions before submitting.');
-
             return;
         }
 
         submitting = true;
 
-        const buttons = document.querySelectorAll('.nav button');
-
-        buttons.forEach(button => {
+        document.querySelectorAll('.continue-button').forEach(button => {
             button.disabled = true;
         });
 
         try {
-
             const response = await fetch('/submit', {
-
                 method: 'POST',
-
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-
                     answers: answers,
-
                     attempt_id: Number("{{ attempt_id }}")
-
                 })
-
             });
 
             const data = await response.json();
@@ -1425,33 +1072,24 @@
             }
 
             if (!data.url) {
-
-                throw new Error(
-                    'The server did not return a results page.'
-                );
-
+                throw new Error('The server did not return a results page.');
             }
 
             window.location.href = data.url;
 
         } catch (error) {
-
             submitting = false;
 
-            buttons.forEach(button => {
+            document.querySelectorAll('.continue-button').forEach(button => {
                 button.disabled = false;
             });
 
             alert(error.message);
-
         }
-
     }
 
     updateProgress();
-
     playScene(sections[current]);
-
 </script>
 
 </body>
