@@ -2,356 +2,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Dashboard | Fuji Silvertech</title>
-    <link rel="stylesheet" href="/static/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard | Fuji Silvertech</title>
+<link rel="stylesheet" href="/static/style.css">
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            overflow-x: hidden;
-        }
-
-        .dashboard-heading {
-            margin-bottom: 25px;
-            animation: fadeDown .7s ease both;
-        }
-
-        .dashboard-heading h1 {
-            margin-bottom: 8px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin: 25px 0;
-        }
-
-        .stat {
-            background: linear-gradient(135deg, #edf7ff, #ffffff);
-            padding: 22px;
-            border-radius: 14px;
-            border: 1px solid #d5e9f8;
-            box-shadow: 0 5px 18px rgba(20, 80, 120, .07);
-            animation: slideUp .7s ease both;
-            transition: transform .3s, box-shadow .3s;
-        }
-
-        .stat:nth-child(2) {
-            animation-delay: .15s;
-        }
-
-        .stat:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(20, 80, 120, .13);
-        }
-
-        .stat strong {
-            display: block;
-            font-size: 32px;
-            margin-top: 9px;
-            color: #176db2;
-        }
-
-        .stat small {
-            color: #64748b;
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 25px 0;
-            animation: fadeIn .8s ease both;
-        }
-
-        .admin-actions a {
-            transition: transform .2s, box-shadow .2s;
-        }
-
-        .admin-actions a:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0,0,0,.12);
-        }
-
-        .search {
-            width: 100%;
-            max-width: 420px;
-            padding: 13px 15px;
-            border: 1px solid #cbd8e5;
-            border-radius: 9px;
-            font-size: 14px;
-            margin: 10px 0 25px;
-            outline: none;
-            transition: border .2s, box-shadow .2s;
-        }
-
-        .search:focus {
-            border-color: #168bd2;
-            box-shadow: 0 0 0 3px rgba(22,139,210,.12);
-        }
-
-        .attempt {
-            background: white;
-            border: 1px solid #d9e8f5;
-            border-radius: 14px;
-            padding: 18px;
-            margin: 18px 0;
-            box-shadow: 0 4px 15px rgba(20, 70, 110, .05);
-            animation: slideUp .6s ease both;
-            transition: box-shadow .3s, transform .3s;
-        }
-
-        .attempt:hover {
-            box-shadow: 0 9px 25px rgba(20, 70, 110, .10);
-        }
-
-        .attempt summary {
-            cursor: pointer;
-            font-weight: bold;
-            line-height: 1.8;
-            list-style: none;
-            position: relative;
-            padding-right: 28px;
-        }
-
-        .attempt summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .attempt summary::after {
-            content: "+";
-            position: absolute;
-            right: 0;
-            top: 0;
-            font-size: 23px;
-            color: #168bd2;
-        }
-
-        .attempt[open] summary::after {
-            content: "−";
-        }
-
-        .attempt summary small {
-            color: #64748b;
-            font-weight: normal;
-        }
-
-        .attempt-content {
-            animation: fadeIn .4s ease both;
-        }
-
-        .attempt-question {
-            border-top: 1px solid #e1ebf3;
-            padding: 17px 0;
-        }
-
-        .answer-box {
-            background: #f4f8fb;
-            padding: 13px;
-            border-radius: 8px;
-            margin: 9px 0;
-            line-height: 1.7;
-            overflow-wrap: anywhere;
-        }
-
-        .correct {
-            color: #198754;
-            font-weight: bold;
-        }
-
-        .incorrect {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .partial {
-            color: #a87500;
-            font-weight: bold;
-        }
-
-        .explanation {
-            background: #fff8e8;
-            padding: 13px;
-            border-radius: 8px;
-            line-height: 1.7;
-            margin-top: 10px;
-        }
-
-        .attempt-count {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .question-category {
-            color: #347cae;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .08em;
-        }
-
-        .correct-option {
-            border-left: 4px solid #198754;
-        }
-
-        .selected-option {
-            border-left: 4px solid #398bd0;
-        }
-
-        .mistake-found {
-            background: #e8f6ee;
-            border-left: 4px solid #198754;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            line-height: 1.6;
-            animation: fadeIn .35s ease both;
-        }
-
-        .mistake-missed {
-            background: #fff0f0;
-            border-left: 4px solid #dc3545;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            line-height: 1.6;
-            animation: fadeIn .35s ease both;
-        }
-
-        .mistake-wrong {
-            background: #fff4df;
-            border-left: 4px solid #e0a800;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            line-height: 1.6;
-            animation: fadeIn .35s ease both;
-        }
-
-        .review-heading {
-            margin-top: 18px;
-        }
-
-        .score-pill {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            background: #eaf4ff;
-            color: #176db2;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-
-        .score-track {
-            height: 8px;
-            background: #e7edf3;
-            border-radius: 20px;
-            overflow: hidden;
-            margin: 12px 0;
-        }
-
-        .score-fill {
-            height: 100%;
-            width: 0;
-            border-radius: inherit;
-            background: linear-gradient(90deg, #168bd2, #43bd87);
-            transition: width 1.2s ease;
-        }
-
-        .empty {
-            padding: 25px;
-            background: #f4f8fb;
-            border-radius: 10px;
-        }
-
-        .empty-search {
-            display: none;
-            padding: 20px;
-            background: #f4f8fb;
-            border-radius: 10px;
-            color: #64748b;
-        }
-
-        .result-label {
-            display: inline-block;
-            padding: 5px 9px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .label-found {
-            background: #dff5e7;
-            color: #176b37;
-        }
-
-        .label-missed {
-            background: #ffe3e3;
-            color: #a32626;
-        }
-
-        .label-wrong {
-            background: #fff0ce;
-            color: #805b12;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-18px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(22px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media(max-width:600px) {
-            .attempt {
-                padding: 13px;
-            }
-
-            .attempt summary {
-                font-size: 14px;
-            }
-
-            .stat strong {
-                font-size: 27px;
-            }
-        }
-
-        @media(prefers-reduced-motion:reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: .01ms !important;
-                transition-duration: .01ms !important;
-            }
-        }
-    </style>
+<style>
+*{box-sizing:border-box}
+body{overflow-x:hidden}
+.dashboard-heading{margin-bottom:25px;animation:fadeDown .7s ease both}
+.dashboard-heading h1{margin-bottom:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:25px 0}
+.stat{background:linear-gradient(135deg,#edf7ff,#fff);padding:22px;border-radius:14px;border:1px solid #d5e9f8;box-shadow:0 5px 18px rgba(20,80,120,.07);animation:slideUp .7s ease both}
+.stat strong{display:block;font-size:32px;margin-top:9px;color:#176db2}
+.stat small{color:#64748b}
+.admin-actions{display:flex;gap:12px;flex-wrap:wrap;margin:25px 0}
+.admin-actions a:hover{transform:translateY(-3px)}
+.search{width:100%;max-width:420px;padding:13px 15px;border:1px solid #cbd8e5;border-radius:9px;font-size:14px;margin:10px 0 25px}
+.attempt{background:white;border:1px solid #d9e8f5;border-radius:14px;padding:18px;margin:18px 0;box-shadow:0 4px 15px rgba(20,70,110,.05)}
+.attempt summary{cursor:pointer;font-weight:bold;line-height:1.8;list-style:none;position:relative;padding-right:28px}
+.attempt summary::-webkit-details-marker{display:none}
+.attempt summary:after{content:"+";position:absolute;right:0;top:0;font-size:23px;color:#168bd2}
+.attempt[open] summary:after{content:"−"}
+.attempt summary small{color:#64748b;font-weight:normal}
+.attempt-question{border-top:1px solid #e1ebf3;padding:17px 0}
+.answer-box{background:#f4f8fb;padding:13px;border-radius:8px;margin:9px 0;line-height:1.7;overflow-wrap:anywhere}
+.correct{color:#198754;font-weight:bold}
+.incorrect{color:#dc3545;font-weight:bold}
+.partial{color:#a87500;font-weight:bold}
+.explanation{background:#fff8e8;padding:13px;border-radius:8px;line-height:1.7;margin-top:10px}
+.attempt-count{color:#64748b;font-size:13px}
+.question-category{color:#347cae;font-size:12px;font-weight:800;letter-spacing:.08em}
+.correct-option{border-left:4px solid #198754}
+.selected-option{border-left:4px solid #398bd0}
+.score-pill{display:inline-block;padding:5px 10px;border-radius:20px;background:#eaf4ff;color:#176db2;font-size:12px;font-weight:bold}
+.score-track{height:8px;background:#e7edf3;border-radius:20px;overflow:hidden;margin:12px 0}
+.score-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#168bd2,#43bd87);transition:width 1.2s ease}
+.empty{padding:25px;background:#f4f8fb;border-radius:10px}
+.empty-search{display:none;padding:20px;background:#f4f8fb;border-radius:10px;color:#64748b}
+.email-review{border:1px solid #ddd;border-radius:10px;padding:15px;margin:12px 0;background:#fafafa;overflow-wrap:anywhere}
+.email-review p{line-height:1.6}
+.email-review.legitimate{border-left:4px solid #198754}
+.email-review.suspicious{border-left:4px solid #dc3545}
+.mistake-found,.mistake-missed,.mistake-wrong{padding:12px;border-radius:8px;margin:8px 0;line-height:1.6}
+.mistake-found{background:#e8f6ee;border-left:4px solid #198754}
+.mistake-missed{background:#fff0f0;border-left:4px solid #dc3545}
+.mistake-wrong{background:#fff4df;border-left:4px solid #e0a800}
+.result-label{display:inline-block;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;margin-bottom:8px}
+.label-found{background:#dff5e7;color:#176b37}
+.label-missed{background:#ffe3e3;color:#a32626}
+.label-wrong{background:#fff0ce;color:#805b12}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.attempt{padding:13px}.attempt summary{font-size:14px}.stat strong{font-size:27px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 
 <body>
@@ -363,429 +68,283 @@
 
 <main>
 
-    <div class="dashboard-heading">
-        <p class="tag">FUJI SILVERTECH • ADMINISTRATION</p>
-        <h1>Assessment Reports</h1>
-        <p>Employee phishing awareness assessment results.</p>
+<div class="dashboard-heading">
+    <p class="tag">FUJI SILVERTECH • ADMINISTRATION</p>
+    <h1>Assessment Reports</h1>
+    <p>Employee phishing awareness assessment results.</p>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        Total completed attempts
+        <strong class="count-up" data-value="{{ rows|length }}">0</strong>
+        <small>Completed assessments</small>
+    </div>
+    <div class="stat">
+        Average score
+        <strong class="count-up" data-value="{{ avg }}">0</strong>
+        <small>Overall employee performance (%)</small>
+    </div>
+</div>
+
+<div class="admin-actions">
+    <a class="button" href="/admin/export">↓ Export CSV</a>
+    <a class="button secondary" href="/logout">Sign Out</a>
+</div>
+
+<h2>Employee submissions</h2>
+
+<input class="search" id="search" type="text"
+       placeholder="Search employee email..." autocomplete="off">
+
+{% if rows %}
+
+<div id="attempt-list">
+
+{% for r in rows %}
+
+<details class="attempt">
+
+<summary>
+    {{ r.email }} — Score: {{ r.score }}% — Attempt #{{ r.id }}
+    <br>
+    <small>Completed: {{ r.completed }} | Duration: {{ r.duration }} seconds</small>
+</summary>
+
+<div class="attempt-content">
+
+    <p><strong>Started:</strong> {{ r.started }}</p>
+    <p><strong>Completed:</strong> {{ r.completed }}</p>
+    <p><strong>Duration:</strong> {{ r.duration }} seconds</p>
+    <p><strong>Final score:</strong> <span class="score-pill">{{ r.score }}%</span></p>
+
+    <div class="score-track">
+        <div class="score-fill" data-score="{{ r.score }}"></div>
     </div>
 
-    <!-- DASHBOARD STATISTICS -->
-
-    <div class="stats">
-
-        <div class="stat">
-            Total completed attempts
-            <strong class="count-up" data-value="{{ rows|length }}">0</strong>
-            <small>Completed assessments</small>
-        </div>
-
-        <div class="stat">
-            Average score
-            <strong class="count-up" data-value="{{ avg }}">0</strong>
-            <small>Overall employee performance (%)</small>
-        </div>
-
-    </div>
-
-    <!-- ACTIONS -->
-
-    <div class="admin-actions">
-
-        <a class="button" href="/admin/export">
-            ↓ Export CSV
-        </a>
-
-        <a class="button secondary" href="/logout">
-            Sign Out
-        </a>
-
-    </div>
-
-    <!-- SEARCH -->
-
-    <h2>Employee submissions</h2>
-
-    <input
-        class="search"
-        id="search"
-        type="text"
-        placeholder="Search employee email..."
-        autocomplete="off"
-    >
-
-    {% if rows %}
-
-        <div id="attempt-list">
-
-        {% for r in rows %}
-
-            <details class="attempt">
-
-                <summary>
-                    {{ r.email }}
-                    — Score: {{ r.score }}%
-                    — Attempt #{{ r.id }}
-
-                    <br>
-
-                    <small>
-                        Completed: {{ r.completed }}
-                        | Duration: {{ r.duration }} seconds
-                    </small>
-                </summary>
-
-                <div class="attempt-content">
-
-                    <p>
-                        <strong>Started:</strong>
-                        {{ r.started }}
-                    </p>
-
-                    <p>
-                        <strong>Completed:</strong>
-                        {{ r.completed }}
-                    </p>
-
-                    <p>
-                        <strong>Duration:</strong>
-                        {{ r.duration }} seconds
-                    </p>
-
-                    <p>
-                        <strong>Final score:</strong>
-                        <span class="score-pill">{{ r.score }}%</span>
-                    </p>
-
-                    <div class="score-track">
-                        <div class="score-fill"
-                             data-score="{{ r.score }}"></div>
-                    </div>
-
-                    <hr>
-
-                    <h3>Individual answer review</h3>
-
-                    <p class="attempt-count">
-                        Exact question and answer order used in this attempt.
-                    </p>
-
-                    {% for question in r.question_list %}
-
-                        {% set i = loop.index0 %}
-                        {% set selected = r.answer_list[i] if i < r.answer_list|length else none %}
-                        {% set mode = question.mode|default('multiple_choice') %}
-
-                        <div class="attempt-question">
-
-                            <p class="question-category">
-                                {{ question.category|default('AWARENESS ASSESSMENT') }}
-                            </p>
-
-                            <h4>
-                                Question {{ loop.index }}:
-                                {{ question.title }}
-                            </h4>
-
-                            <!-- FIND MISTAKES / CLICK ERRORS -->
-
-                            {% if mode == 'find_mistakes' or mode == 'click_errors' %}
-
-                                {% if mode == 'find_mistakes' %}
-
-                                    {% set candidates = question.mistakes|default([]) %}
-                                    {% set correct_ids = question.correct_mistakes|default(candidates|map(attribute='id')|list)|map('string')|list %}
-
-                                {% else %}
-
-                                    {% set candidates = (question.sender_parts|default([])) + (question.email_parts|default([])) %}
-                                    {% set correct_ids = question.correct_errors|default([])|map('string')|list %}
-
-                                {% endif %}
-
-                                {% set selected_ids = selected if selected is iterable and selected is not string else [] %}
-                                {% set counts = namespace(found=0, missed=0, wrong=0) %}
-
-                                {% for item in candidates %}
-
-                                    {% set item_id = item.id|string %}
-                                    {% set selectable = mode == 'find_mistakes' or item.clickable|default(false) %}
-
-                                    {% if selectable and item_id in correct_ids %}
-
-                                        {% if item_id in selected_ids %}
-                                            {% set counts.found = counts.found + 1 %}
-                                        {% else %}
-                                            {% set counts.missed = counts.missed + 1 %}
-                                        {% endif %}
-
-                                    {% elif selectable and item_id in selected_ids %}
-
-                                        {% set counts.wrong = counts.wrong + 1 %}
-
-                                    {% endif %}
-
-                                {% endfor %}
-
-                                {% if counts.found == correct_ids|length and counts.wrong == 0 and counts.missed == 0 %}
-
-                                    <p class="correct">
-                                        ✓ All suspicious details identified
-                                    </p>
-
-                                {% elif counts.found > 0 %}
-
-                                    <p class="partial">
-                                        ! Partially identified
-                                    </p>
-
-                                {% else %}
-
-                                    <p class="incorrect">
-                                        ✗ No suspicious details identified
-                                    </p>
-
-                                {% endif %}
-
-                                <div class="answer-box">
-                                    <strong>Employee investigation summary</strong>
-                                    <br>
-                                    Correct findings: {{ counts.found }}
-                                    <br>
-                                    Missed findings: {{ counts.missed }}
-                                    <br>
-                                    Incorrect selections: {{ counts.wrong }}
-                                    <br>
-                                    Total correct findings: {{ correct_ids|length }}
-                                </div>
-
-                                <h4 class="review-heading">
-                                    Investigation detail review
-                                </h4>
-
-                                {% for item in candidates %}
-
-                                    {% set item_id = item.id|string %}
-                                    {% set selectable = mode == 'find_mistakes' or item.clickable|default(false) %}
-
-                                    {% if selectable %}
-
-                                        {% if item_id in correct_ids and item_id in selected_ids %}
-
-                                            <div class="mistake-found">
-                                                <span class="result-label label-found">
-                                                    ✓ CORRECTLY IDENTIFIED
-                                                </span>
-                                                <br>
-                                                {{ item.text }}
-                                            </div>
-
-                                        {% elif item_id in correct_ids %}
-
-                                            <div class="mistake-missed">
-                                                <span class="result-label label-missed">
-                                                    ✗ MISSED FINDING
-                                                </span>
-                                                <br>
-                                                {{ item.text }}
-                                            </div>
-
-                                        {% elif item_id in selected_ids %}
-
-                                            <div class="mistake-wrong">
-                                                <span class="result-label label-wrong">
-                                                    ! INCORRECT SELECTION
-                                                </span>
-                                                <br>
-                                                {{ item.text }}
-                                            </div>
-
-                                        {% endif %}
-
-                                    {% endif %}
-
-                                {% endfor %}
-
-                            <!-- MULTIPLE CHOICE -->
-
-                            {% else %}
-
-                                {% set is_correct = selected == question.correct %}
-
-                                {% if is_correct %}
-
-                                    <p class="correct">
-                                        ✓ Correct answer
-                                    </p>
-
-                                {% else %}
-
-                                    <p class="incorrect">
-                                        ✗ Incorrect answer
-                                    </p>
-
-                                {% endif %}
-
-                                {% if selected is integer and selected >= 0 and selected < question.options|length %}
-
-                                    <div class="answer-box selected-option">
-                                        <strong>Employee selected:</strong>
-                                        <br>
-                                        {{ 'ABCD'[selected] }}.
-                                        {{ question.options[selected] }}
-                                    </div>
-
-                                {% else %}
-
-                                    <div class="answer-box">
-                                        <strong>Employee selected:</strong>
-                                        No valid answer recorded.
-                                    </div>
-
-                                {% endif %}
-
-                                <div class="answer-box correct-option">
-                                    <strong>Correct answer:</strong>
-                                    <br>
-
-                                    <span class="correct">
-                                        {{ 'ABCD'[question.correct] }}.
-                                        {{ question.options[question.correct] }}
-                                    </span>
-                                </div>
-
-                            {% endif %}
-
-                            <div class="explanation">
-                                <strong>Explanation:</strong>
-                                <br>
-                                {{ question.explanation|default('No explanation available.') }}
-                            </div>
-
+    <hr>
+    <h3>Individual answer review</h3>
+    <p class="attempt-count">Exact question and answer order used in this attempt.</p>
+
+    {% for question in r.question_list %}
+
+    {% set i = loop.index0 %}
+    {% set selected = r.answer_list[i] if i < r.answer_list|length else none %}
+    {% set mode = question.mode|default('multiple_choice') %}
+
+    <div class="attempt-question">
+
+        <p class="question-category">{{ question.category|default('AWARENESS ASSESSMENT') }}</p>
+        <h4>Question {{ loop.index }}: {{ question.title }}</h4>
+
+        {% if mode in ['find_mistakes','click_errors'] %}
+
+            {% if mode == 'find_mistakes' %}
+                {% set candidates = question.mistakes|default([]) %}
+                {% set correct_ids = question.correct_mistakes|default(candidates|map(attribute='id')|list)|map('string')|list %}
+            {% else %}
+                {% set candidates = question.sender_parts|default([]) + question.email_parts|default([]) %}
+                {% set correct_ids = question.correct_errors|default([])|map('string')|list %}
+            {% endif %}
+
+            {% set selected_ids = selected if selected is iterable and selected is not string else [] %}
+            {% set counts = namespace(found=0,missed=0,wrong=0) %}
+
+            {% for item in candidates %}
+                {% set item_id = item.id|string %}
+                {% set selectable = mode == 'find_mistakes' or item.clickable|default(false) %}
+                {% if selectable %}
+                    {% if item_id in correct_ids and item_id in selected_ids %}
+                        {% set counts.found = counts.found + 1 %}
+                    {% elif item_id in correct_ids %}
+                        {% set counts.missed = counts.missed + 1 %}
+                    {% elif item_id in selected_ids %}
+                        {% set counts.wrong = counts.wrong + 1 %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if counts.found == correct_ids|length and counts.wrong == 0 %}
+                <p class="correct">✓ All suspicious details identified</p>
+            {% elif counts.found > 0 %}
+                <p class="partial">! Partially identified</p>
+            {% else %}
+                <p class="incorrect">✗ Investigation incomplete</p>
+            {% endif %}
+
+            <div class="answer-box">
+                <strong>Employee investigation summary</strong><br>
+                Correct findings: {{ counts.found }}<br>
+                Missed findings: {{ counts.missed }}<br>
+                Incorrect selections: {{ counts.wrong }}<br>
+                Total correct findings: {{ correct_ids|length }}
+            </div>
+
+            {% for item in candidates %}
+                {% set item_id = item.id|string %}
+                {% set selectable = mode == 'find_mistakes' or item.clickable|default(false) %}
+                {% if selectable %}
+                    {% if item_id in correct_ids and item_id in selected_ids %}
+                        <div class="mistake-found">
+                            <span class="result-label label-found">✓ CORRECTLY IDENTIFIED</span><br>
+                            {{ item.text|default(item.value|default(item.id)) }}
                         </div>
+                    {% elif item_id in correct_ids %}
+                        <div class="mistake-missed">
+                            <span class="result-label label-missed">✗ MISSED FINDING</span><br>
+                            {{ item.text|default(item.value|default(item.id)) }}
+                        </div>
+                    {% elif item_id in selected_ids %}
+                        <div class="mistake-wrong">
+                            <span class="result-label label-wrong">! INCORRECT SELECTION</span><br>
+                            {{ item.text|default(item.value|default(item.id)) }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
 
-                    {% endfor %}
+        {% else %}
 
+            {% set is_correct = selected == question.correct %}
+
+            {% if is_correct %}
+                <p class="correct">✓ Correct answer</p>
+            {% else %}
+                <p class="incorrect">✗ Incorrect answer</p>
+            {% endif %}
+
+            {% if question.comparison and question.emails %}
+
+                <h4>Email comparison</h4>
+
+                {% for email in question.emails %}
+                <div class="email-review {% if loop.index0 == question.correct %}legitimate{% else %}suspicious{% endif %}">
+                    <h4>{{ email.label|default('Email ' ~ loop.index) }}</h4>
+                    <p><strong>From:</strong> {{ email.sender|default('') }}</p>
+                    <p><strong>Address:</strong> {{ email.sender_email|default('') }}</p>
+                    <p><strong>Time:</strong> {{ email.timestamp|default('') }}</p>
+                    <p><strong>Subject:</strong> {{ email.subject|default('') }}</p>
+                    <p>{{ email.body|default('') }}</p>
+                    {% if email.link %}
+                        <p><strong>Link:</strong> {{ email.link }}</p>
+                    {% endif %}
+                    {% if email.attachment %}
+                        <p><strong>Attachment:</strong> {{ email.attachment }}</p>
+                    {% endif %}
+                    {% if loop.index0 == question.correct %}
+                        <strong class="correct">✓ Legitimate email</strong>
+                    {% else %}
+                        <strong class="incorrect">✗ Suspicious email</strong>
+                    {% endif %}
                 </div>
+                {% endfor %}
 
-            </details>
+            {% endif %}
 
-        {% endfor %}
+            <div class="answer-box selected-option">
+                <strong>Employee selected:</strong><br>
+                {% if selected is integer and selected >= 0 and selected < question.options|length %}
+                    {{ 'ABCD'[selected] }}. {{ question.options[selected] }}
+                {% else %}
+                    No valid answer recorded.
+                {% endif %}
+            </div>
 
+            <div class="answer-box correct-option">
+                <strong>Correct answer:</strong><br>
+                {% if question.correct is integer and question.correct >= 0 and question.correct < question.options|length %}
+                    <span class="correct">{{ 'ABCD'[question.correct] }}. {{ question.options[question.correct] }}</span>
+                {% else %}
+                    Correct answer unavailable.
+                {% endif %}
+            </div>
+
+        {% endif %}
+
+        <div class="explanation">
+            <strong>Explanation:</strong><br>
+            {{ question.explanation|default('No explanation available.') }}
         </div>
 
-        <div class="empty-search" id="empty-search">
-            No employee submissions match your search.
-        </div>
+    </div>
 
-    {% else %}
+    {% endfor %}
 
-        <div class="empty">
-            No completed employee assessments found yet.
-        </div>
+</div>
+</details>
 
-    {% endif %}
+{% endfor %}
+
+</div>
+
+<div class="empty-search" id="empty-search">
+    No employee submissions match your search.
+</div>
+
+{% else %}
+
+<div class="empty">
+    No completed employee assessments found yet.
+</div>
+
+{% endif %}
 
 </main>
 
-<footer>
-    Fuji Silvertech • Phishing Awareness Administration
-</footer>
+<footer>Fuji Silvertech • Phishing Awareness Administration</footer>
 
 <script>
-    // Animated dashboard numbers
+document.querySelectorAll('.count-up').forEach(element => {
+    const target = Number(element.dataset.value) || 0;
+    const start = performance.now();
 
-    document.querySelectorAll('.count-up').forEach(element => {
+    function animate(now) {
+        const progress = Math.min((now - start) / 1200, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = target * eased;
+        element.textContent = Number.isInteger(target)
+            ? Math.round(value)
+            : value.toFixed(1);
 
-        const target = Number(element.dataset.value) || 0;
-        const duration = 1200;
-        const startTime = performance.now();
-
-        function animateNumber(now) {
-
-            const progress = Math.min(
-                (now - startTime) / duration,
-                1
-            );
-
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const value = target * eased;
-
-            element.textContent =
-                Number.isInteger(target)
-                    ? Math.round(value)
-                    : value.toFixed(1);
-
-            if (progress < 1) {
-                requestAnimationFrame(animateNumber);
-            }
-        }
-
-        requestAnimationFrame(animateNumber);
-    });
-
-
-    // Animate employee score bars
-
-    const scoreObserver = new IntersectionObserver(entries => {
-
-        entries.forEach(entry => {
-
-            if (entry.isIntersecting) {
-
-                const bar = entry.target;
-                const score = Math.max(
-                    0,
-                    Math.min(100, Number(bar.dataset.score) || 0)
-                );
-
-                bar.style.width = score + '%';
-
-                scoreObserver.unobserve(bar);
-            }
-
-        });
-
-    }, { threshold: 0.2 });
-
-    document.querySelectorAll('.score-fill').forEach(bar => {
-        scoreObserver.observe(bar);
-    });
-
-
-    // Employee email search
-
-    const search = document.getElementById('search');
-    const attempts = [...document.querySelectorAll('.attempt')];
-    const emptySearch = document.getElementById('empty-search');
-
-    if (search) {
-
-        search.addEventListener('input', function () {
-
-            const value = this.value.trim().toLowerCase();
-            let visible = 0;
-
-            attempts.forEach(item => {
-
-                const email = item.querySelector('summary')
-                    .innerText.toLowerCase();
-
-                const match = email.includes(value);
-
-                item.style.display = match ? '' : 'none';
-
-                if (match) visible++;
-
-            });
-
-            if (emptySearch) {
-                emptySearch.style.display =
-                    visible === 0 ? 'block' : 'none';
-            }
-
-        });
-
+        if (progress < 1) requestAnimationFrame(animate);
     }
+
+    requestAnimationFrame(animate);
+});
+
+const scoreObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const bar = entry.target;
+            const score = Math.max(0, Math.min(100, Number(bar.dataset.score) || 0));
+            bar.style.width = score + '%';
+            scoreObserver.unobserve(bar);
+        }
+    });
+});
+
+document.querySelectorAll('.score-fill').forEach(bar => scoreObserver.observe(bar));
+
+const search = document.getElementById('search');
+const attempts = [...document.querySelectorAll('.attempt')];
+const emptySearch = document.getElementById('empty-search');
+
+if (search) {
+    search.addEventListener('input', function() {
+        const value = this.value.trim().toLowerCase();
+        let visible = 0;
+
+        attempts.forEach(item => {
+            const match = item.querySelector('summary').innerText.toLowerCase().includes(value);
+            item.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        if (emptySearch) {
+            emptySearch.style.display = visible === 0 ? 'block' : 'none';
+        }
+    });
+}
 </script>
 
 </body>
