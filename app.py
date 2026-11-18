@@ -1,3 +1,4 @@
+
 import os
 import sqlite3
 import secrets
@@ -15,7 +16,10 @@ from flask import (
 )
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "CHANGE_ME_LONG_RANDOM_SECRET")
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "CHANGE_ME_LONG_RANDOM_SECRET"
+)
 
 DB = os.environ.get("DATABASE_PATH", "responses.sqlite3")
 CORP = "fujisilvertech.com"
@@ -33,9 +37,14 @@ ADMINS = {OWNER} | {
 
 ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
 
+# Load question bank
 with open("questions.json", encoding="utf-8") as f:
     Q = json.load(f)
 
+
+# --------------------------------------------------
+# DATABASE
+# --------------------------------------------------
 
 def conn():
     c = sqlite3.connect(DB)
@@ -58,12 +67,228 @@ with conn() as c:
 
     columns = {
         row["name"]
-        for row in c.execute("PRAGMA table_info(attempts)").fetchall()
+        for row in c.execute(
+            "PRAGMA table_info(attempts)"
+        ).fetchall()
     }
 
     if "questions_snapshot" not in columns:
-        c.execute("ALTER TABLE attempts ADD COLUMN questions_snapshot TEXT")
+        c.execute(
+            "ALTER TABLE attempts ADD COLUMN questions_snapshot TEXT"
+        )
 
+
+# --------------------------------------------------
+# QUESTION HELPERS
+# --------------------------------------------------
+
+def is_mistake_question(question):
+    return question.get("mode") == "find_mistakes"
+
+
+def make_attempt_questions():
+    """
+    Copy the question bank and randomize only
+    multiple-choice answer positions.
+
+    Find-the-mistakes questions retain their
+    original mistake IDs.
+    """
+
+    attempt_questions = json.loads(json.dumps(Q))
+
+    mc_questions = [
+        question
+        for question in attempt_questions
+        if not is_mistake_question(question)
+    ]
+
+    positions = [0, 1, 2, 3] * (
+        len(mc_questions) // 4
+    )
+
+    positions += list(range(
+        len(positions),
+        len(mc_questions)
+    ))
+
+    positions = [position % 4 for position in positions]
+
+    random.shuffle(positions)
+
+    for question, new_position in zip(
+        mc_questions,
+        positions
+    ):
+        options = question.get("options", [])
+        old_position = question.get("correct")
+
+        if (
+            not isinstance(options, list)
+            or not options
+            or type(old_position) is not int
+            or old_position not in range(len(options))
+        ):
+            raise ValueError(
+                "Invalid multiple-choice question: "
+                + question.get("title", "Unknown question")
+            )
+
+        correct_option = options[old_position]
+
+        other_options = [
+            option
+            for index, option in enumerate(options)
+            if index != old_position
+        ]
+
+        random.shuffle(other_options)
+
+        question["options"] = other_options
+        question["options"].insert(
+            new_position,
+            correct_option
+        )
+
+        question["correct"] = new_position
+
+    return attempt_questions
+
+
+# --------------------------------------------------
+# ANSWER VALIDATION AND SCORING
+# --------------------------------------------------
+
+def validate_and_score(answers, questions):
+    """
+    Multiple-choice:
+        Answer is an integer option index.
+
+    Find-the-mistakes:
+        Answer is a list of selected mistake IDs.
+
+    Returns:
+        Validated answers and total percentage score.
+    """
+
+    if not isinstance(answers, list):
+        raise ValueError("Invalid answer format.")
+
+    if len(answers) != len(questions):
+        raise ValueError("Please answer every question.")
+
+    validated_answers = []
+    question_scores = []
+
+    for index, question in enumerate(questions):
+        answer = answers[index]
+
+        # ------------------------------------------
+        # FIND THE MISTAKES QUESTION
+        # ------------------------------------------
+
+        if is_mistake_question(question):
+
+            mistakes = question.get("mistakes", [])
+
+            if not isinstance(mistakes, list) or not mistakes:
+                raise ValueError(
+                    "A phishing question has no mistake list."
+                )
+
+            correct_ids = {
+                str(item["id"])
+                for item in mistakes
+                if isinstance(item, dict) and "id" in item
+            }
+
+            if not correct_ids:
+                raise ValueError(
+                    "Invalid mistake IDs in question data."
+                )
+
+            if (
+                not isinstance(answer, list)
+                or not answer
+                or any(not isinstance(item, str) for item in answer)
+                or len(answer) != len(set(answer))
+            ):
+                raise ValueError(
+                    "Please select suspicious details for every phishing question."
+                )
+
+            selected_ids = set(answer)
+
+            if not selected_ids.issubset(correct_ids):
+                raise ValueError(
+                    "Invalid mistake selection."
+                )
+
+            correct_selections = len(
+                selected_ids.intersection(correct_ids)
+            )
+
+            incorrect_selections = len(
+                selected_ids - correct_ids
+            )
+
+            # Correct selections earn credit.
+            # Incorrect selections reduce credit.
+            raw_score = max(
+                0,
+                correct_selections - incorrect_selections
+            )
+
+            question_score = min(
+                1,
+                raw_score / len(correct_ids)
+            )
+
+            validated_answers.append(
+                sorted(selected_ids)
+            )
+
+            question_scores.append(question_score)
+
+        # ------------------------------------------
+        # MULTIPLE-CHOICE QUESTION
+        # ------------------------------------------
+
+        else:
+
+            options = question.get("options", [])
+            correct = question.get("correct")
+
+            if (
+                type(answer) is not int
+                or not isinstance(options, list)
+                or answer not in range(len(options))
+                or type(correct) is not int
+                or correct not in range(len(options))
+            ):
+                raise ValueError(
+                    "Please select a valid answer for every question."
+                )
+
+            validated_answers.append(answer)
+
+            question_scores.append(
+                1 if answer == correct else 0
+            )
+
+    if not question_scores:
+        raise ValueError("No questions were found.")
+
+    percentage = round(
+        sum(question_scores) * 100 / len(question_scores)
+    )
+
+    return validated_answers, percentage
+
+
+# --------------------------------------------------
+# AUTHENTICATION
+# --------------------------------------------------
 
 def corp(email):
     return (
@@ -89,79 +314,93 @@ def admin(fn):
             or not session.get("is_admin")
         ):
             abort(403)
+
         return fn(*args, **kwargs)
+
     return wrapper
 
 
-def make_attempt_questions():
-    attempt_questions = json.loads(json.dumps(Q))
-
-    positions = [0, 1, 2, 3] * (len(attempt_questions) // 4)
-    positions += list(range(len(positions), len(attempt_questions)))
-    positions = [p % 4 for p in positions]
-    random.shuffle(positions)
-
-    for question, new_position in zip(attempt_questions, positions):
-        old_position = question["correct"]
-        options = list(question["options"])
-        correct_option = options.pop(old_position)
-
-        random.shuffle(options)
-        options.insert(new_position, correct_option)
-
-        question["options"] = options
-        question["correct"] = new_position
-
-    return attempt_questions
-
+# --------------------------------------------------
+# HOME / LOGIN
+# --------------------------------------------------
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+
     msg = ""
 
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
+
+        email = request.form.get(
+            "email", ""
+        ).strip().lower()
 
         if not email or email.count("@") != 1:
+
             msg = "Please enter a valid email address."
 
         elif email in ADMINS:
-            admin_key = request.form.get("admin_key", "")
+
+            admin_key = request.form.get(
+                "admin_key", ""
+            )
 
             if not ADMIN_ACCESS_KEY or not secrets.compare_digest(
-                admin_key, ADMIN_ACCESS_KEY
+                admin_key,
+                ADMIN_ACCESS_KEY
             ):
                 msg = "Invalid administrator access key."
+
             else:
                 session.clear()
                 session["email"] = email
                 session["is_admin"] = True
+
                 return redirect("/admin")
 
         elif corp(email):
+
             session.clear()
             session["email"] = email
             session["is_admin"] = False
+
             return redirect("/quiz")
 
         else:
-            msg = "Only @fujisilvertech.com employee emails are accepted."
 
-    return render_template("home.html", msg=msg)
+            msg = (
+                "Only @fujisilvertech.com employee emails "
+                "are accepted."
+            )
 
+    return render_template(
+        "home.html",
+        msg=msg
+    )
+
+
+# --------------------------------------------------
+# START QUIZ
+# --------------------------------------------------
 
 @app.route("/quiz")
 @signed
 def quiz():
+
     if not corp(session["email"]):
         abort(403)
 
     attempt_questions = make_attempt_questions()
 
     with conn() as c:
+
         cursor = c.execute(
             """
-            INSERT INTO attempts(email, started, questions_snapshot)
+            INSERT INTO attempts(
+                email,
+                started,
+                questions_snapshot
+            )
             VALUES (?, ?, ?)
             """,
             (
@@ -170,6 +409,7 @@ def quiz():
                 json.dumps(attempt_questions)
             )
         )
+
         attempt_id = cursor.lastrowid
 
     session["attempt"] = attempt_id
@@ -177,85 +417,141 @@ def quiz():
     return render_template(
         "quiz.html",
         questions=attempt_questions,
-        email=session["email"]
+        email=session["email"],
+        attempt_id=attempt_id
     )
 
 
+# --------------------------------------------------
+# SUBMIT QUIZ
+# --------------------------------------------------
+
 @app.route("/submit", methods=["POST"])
 def submit():
+
     email = session.get("email")
 
     if not email:
-        return jsonify(error="Your session has expired. Please sign in again."), 401
+        return jsonify(
+            error="Your session has expired. Please sign in again."
+        ), 401
 
     if not corp(email):
-        return jsonify(error="You are not authorized."), 403
+        return jsonify(
+            error="You are not authorized."
+        ), 403
 
     data = request.get_json(silent=True) or {}
+
     answers = data.get("answers", [])
+
     attempt_id = session.get("attempt")
 
     if not attempt_id:
-        return jsonify(error="Assessment attempt not found."), 403
+        return jsonify(
+            error="Assessment attempt not found."
+        ), 403
 
     with conn() as c:
+
         row = c.execute(
             """
-            SELECT started, questions_snapshot
+            SELECT
+                started,
+                questions_snapshot
             FROM attempts
-            WHERE id=? AND email=? AND completed IS NULL
+            WHERE id=?
+            AND email=?
+            AND completed IS NULL
             """,
-            (attempt_id, email)
+            (
+                attempt_id,
+                email
+            )
         ).fetchone()
 
         if not row:
-            return jsonify(error="Assessment attempt not found."), 403
+            return jsonify(
+                error="Assessment attempt not found."
+            ), 403
 
-        attempt_questions = json.loads(row["questions_snapshot"] or "[]")
-
-        if (
-            not isinstance(answers, list)
-            or len(answers) != len(attempt_questions)
-            or any(type(x) is not int or x not in range(4) for x in answers)
-        ):
-            return jsonify(error="Please answer every question."), 400
-
-        score = sum(
-            answers[i] == attempt_questions[i]["correct"]
-            for i in range(len(attempt_questions))
+        attempt_questions = json.loads(
+            row["questions_snapshot"] or "[]"
         )
+
+        if not attempt_questions:
+            return jsonify(
+                error="Question data not found."
+            ), 500
+
+        try:
+
+            validated_answers, score = validate_and_score(
+                answers,
+                attempt_questions
+            )
+
+        except ValueError as error:
+
+            return jsonify(
+                error=str(error)
+            ), 400
 
         now = datetime.now(timezone.utc)
+
         duration = int(
-            (now - datetime.fromisoformat(row["started"])).total_seconds()
+            (
+                now - datetime.fromisoformat(row["started"])
+            ).total_seconds()
         )
 
-        c.execute("""
+        c.execute(
+            """
             UPDATE attempts
-            SET completed=?, duration=?, score=?, answers=?
+            SET
+                completed=?,
+                duration=?,
+                score=?,
+                answers=?
             WHERE id=?
-        """, (
-            now.isoformat(),
-            duration,
-            score * 100 // len(attempt_questions),
-            json.dumps(answers),
-            attempt_id
-        ))
+            """,
+            (
+                now.isoformat(),
+                duration,
+                score,
+                json.dumps(validated_answers),
+                attempt_id
+            )
+        )
 
-    return jsonify(success=True, url="/result/" + str(attempt_id))
+    return jsonify(
+        success=True,
+        url="/result/" + str(attempt_id)
+    )
 
+
+# --------------------------------------------------
+# RESULT PAGE
+# --------------------------------------------------
 
 @app.route("/result/<int:attempt_id>")
 @signed
 def result(attempt_id):
+
     with conn() as c:
+
         row = c.execute(
             """
             SELECT *
             FROM attempts
-            WHERE id=? AND email=? AND completed IS NOT NULL
+            WHERE id=?
+            AND email=?
+            AND completed IS NOT NULL
             """,
-            (attempt_id, session["email"])
+            (
+                attempt_id,
+                session["email"]
+            )
         ).fetchone()
 
     if not row:
@@ -265,37 +561,58 @@ def result(attempt_id):
         row["questions_snapshot"] or "[]"
     ) or Q
 
+    answers = json.loads(
+        row["answers"] or "[]"
+    )
+
     return render_template(
         "result.html",
         r=row,
         q=attempt_questions,
-        a=json.loads(row["answers"] or "[]")
+        a=answers
     )
 
+
+# --------------------------------------------------
+# ADMIN DASHBOARD
+# --------------------------------------------------
 
 @app.route("/admin")
 @admin
 def dashboard():
+
     with conn() as c:
-        db_rows = c.execute("""
+
+        db_rows = c.execute(
+            """
             SELECT *
             FROM attempts
             WHERE completed IS NOT NULL
             ORDER BY completed DESC
-        """).fetchall()
+            """
+        ).fetchall()
 
     rows = []
 
     for row in db_rows:
+
         item = dict(row)
-        item["answer_list"] = json.loads(item["answers"] or "[]")
+
+        item["answer_list"] = json.loads(
+            item["answers"] or "[]"
+        )
+
         item["question_list"] = json.loads(
             item.get("questions_snapshot") or "[]"
         ) or Q
+
         rows.append(item)
 
     average = (
-        round(sum(row["score"] for row in rows) / len(rows), 1)
+        round(
+            sum(row["score"] for row in rows) / len(rows),
+            1
+        )
         if rows else 0
     )
 
@@ -307,33 +624,48 @@ def dashboard():
     )
 
 
+# --------------------------------------------------
+# CSV EXPORT
+# --------------------------------------------------
+
 @app.route("/admin/export")
 @admin
 def export():
+
     output = io.StringIO()
     writer = csv.writer(output)
 
     writer.writerow([
-        "Email", "Attempt", "Started",
-        "Completed", "Duration", "Score"
+        "Email",
+        "Attempt",
+        "Started",
+        "Completed",
+        "Duration (seconds)",
+        "Score (%)",
+        "Answers"
     ])
 
     with conn() as c:
-        rows = c.execute("""
+
+        rows = c.execute(
+            """
             SELECT *
             FROM attempts
             WHERE completed IS NOT NULL
             ORDER BY completed DESC
-        """).fetchall()
+            """
+        ).fetchall()
 
     for row in rows:
+
         writer.writerow([
             row["email"],
             row["id"],
             row["started"],
             row["completed"],
             row["duration"],
-            row["score"]
+            row["score"],
+            row["answers"]
         ])
 
     return Response(
@@ -346,13 +678,24 @@ def export():
     )
 
 
+# --------------------------------------------------
+# LOGOUT
+# --------------------------------------------------
+
 @app.route("/logout")
 def logout():
+
     session.clear()
+
     return redirect("/")
 
 
+# --------------------------------------------------
+# RUN APPLICATION
+# --------------------------------------------------
+
 if __name__ == "__main__":
+
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 5000))
