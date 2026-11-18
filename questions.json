@@ -2,158 +2,262 @@
 [
   {
     "category": "PHISHING INVESTIGATION",
-    "mode": "find_mistakes",
-    "title": "Find the Mistakes: Fake Microsoft Email",
+    "mode": "multiple_choice",
+    "title": "Investigation 01: Microsoft Security Alert",
     "sender": "Microsoft 365 Security",
     "sender_initial": "M",
     "sender_email": "security@micros0ft-account.example",
     "timestamp": "Today, 9:15 AM",
-    "subject": "URGENT: Your Microsoft Account Will Be Suspended",
-    "scenario": "Dear Employee,\n\nWe detected unusual activity on your Microsoft 365 account. Your account will be permanently suspended in 15 minutes unless you verify your details.\n\nClick here to secure your account:\nhttps://microsoft.com/security\n\nActual destination: https://micros0ft-login.example/verify\n\nPlease enter your password and MFA code. Do not contact IT during this process.\n\nRegards,\nMicrosoft Security Team",
-    "display_link": "https://microsoft.com/security",
+    "subject": "Two Microsoft Security Notifications",
+    "scenario": "EMAIL A\nFrom: Microsoft 365 Security <no-reply@accountprotection.microsoft.com>\nSubject: Unusual sign-in activity detected\n\nWe noticed a sign-in attempt from a new device. If this was you, no action is required. If you do not recognise this activity, visit your Microsoft account directly by typing the official address into your browser. We will never ask you to share your password or MFA code by email.\n\n-----------------------------\n\nEMAIL B\nFrom: Microsoft 365 Security <security@micros0ft-account.example>\nSubject: URGENT: Account Access Will Be Restricted\n\nAn unusual sign-in has been detected. Your account will be disabled in 15 minutes. Use the verification link below to restore access. You must provide your password and MFA code. Do not contact IT until verification is complete.\n\nVerification link: https://micros0ft-login.example/verify",
+    "display_link": "https://micros0ft-login.example/verify",
     "actual_link": "https://micros0ft-login.example/verify",
-    "email_note": "TASK: Inspect the sender, domain, link and message. Identify the suspicious elements.",
-    "options": [],
-    "mistakes": [
-      {
-        "id": "m1",
-        "text": "Sender address uses micros0ft with a zero instead of the letter o."
-      },
-      {
-        "id": "m2",
-        "text": "Actual destination uses an unrelated micros0ft-login.example domain."
-      },
-      {
-        "id": "m3",
-        "text": "Threatens permanent account suspension within 15 minutes."
-      },
-      {
-        "id": "m4",
-        "text": "Requests the employee's password and MFA code."
-      },
-      {
-        "id": "m5",
-        "text": "Tells the employee not to contact IT."
-      }
+    "email_note": "TASK: Compare both messages. Identify the legitimate Microsoft notification and the phishing email.",
+    "options": [
+      "Email A is legitimate; Email B is phishing.",
+      "Email B is legitimate; Email A is phishing.",
+      "Both emails are legitimate.",
+      "Both emails are phishing."
     ],
-    "explanation": "The sender uses a zero instead of the letter o in micros0ft. The destination is an unrelated domain, the message creates urgency, requests passwords and MFA codes, and discourages contacting IT.",
+    "correct": 0,
+    "explanation": "Email A uses a Microsoft-owned account protection domain and directs users to access their account independently. Email B uses a lookalike domain, creates artificial urgency, requests passwords and MFA codes, and discourages contacting IT.",
     "evidence_type": "email",
-    "evidence_caption": "Find the suspicious mistakes in this email."
+    "evidence_caption": "Compare the sender, language and security instructions."
   },
   {
     "category": "PHISHING INVESTIGATION",
-    "mode": "find_mistakes",
-    "title": "Find the Mistakes: Fake Company Domain",
+    "mode": "multiple_choice",
+    "title": "Investigation 02: HR Salary Revision",
     "sender": "Fuji Silvertech HR",
     "sender_initial": "H",
     "sender_email": "hr@fujisilvertech-careers.example",
     "timestamp": "Today, 10:30 AM",
-    "subject": "Important: Salary Revision Confirmation",
-    "scenario": "Dear Employee,\n\nYour revised salary details are ready. All employees must confirm their salary information today.\n\nOpen the employee portal:\nhttps://fujisilvertech.com\n\nActual destination: https://fujisilvertech-careers.example/salary\n\nReply-To: salary-confirm@external-mail.example\n\nPlease download the attached salary form and enter your employee ID, password and bank details.\n\nFailure to respond may delay your salary revision.",
+    "subject": "Two Salary Revision Notifications",
+    "scenario": "EMAIL A\nFrom: HR Department <hr@fujisilvertech.com>\nSubject: Annual Salary Revision – Employee Notification\n\nDear Employee,\n\nThe annual salary revision process is underway. Employees can review their updated compensation details through the company's usual employee portal. For any clarification, contact HR through the official internal directory. Please do not share passwords or banking credentials by email.\n\n-----------------------------\n\nEMAIL B\nFrom: Fuji Silvertech HR <hr@fujisilvertech-careers.example>\nSubject: Confidential Salary Revision – Confirmation Required\n\nYour revised salary will be released today. To avoid a delay, download the attached salary confirmation form and submit your employee ID, password and bank account details.\n\nPortal: https://fujisilvertech.com\nActual destination: https://fujisilvertech-careers.example/salary\nReply-To: salary-confirm@external-mail.example\n\nFailure to respond may postpone your salary revision.",
     "display_link": "https://fujisilvertech.com",
     "actual_link": "https://fujisilvertech-careers.example/salary",
-    "email_note": "TASK: Examine the email carefully. Find every suspicious domain, address and request.",
-    "options": [],
-    "mistakes": [
-      {
-        "id": "h1",
-        "text": "Sender uses fujisilvertech-careers.example instead of the official company domain."
-      },
-      {
-        "id": "h2",
-        "text": "Displayed company portal link redirects to a different domain."
-      },
-      {
-        "id": "h3",
-        "text": "Reply-To address belongs to an external email domain."
-      },
-      {
-        "id": "h4",
-        "text": "Attachment requests employee ID, password and bank details."
-      },
-      {
-        "id": "h5",
-        "text": "Uses salary delay as pressure to make employees respond."
-      }
+    "email_note": "TASK: Compare the two HR emails. Which one should employees trust?",
+    "options": [
+      "Email A is legitimate; Email B is phishing.",
+      "Email B is legitimate; Email A is phishing.",
+      "Both emails are legitimate.",
+      "Both emails are phishing."
     ],
-    "explanation": "The sender domain is not the official company domain, the displayed link differs from the actual destination, the Reply-To address is external, and the attachment requests sensitive credentials and bank information.",
+    "correct": 0,
+    "explanation": "Email A uses the company email domain and directs employees to normal internal channels. Email B uses an unofficial domain, mismatched link destination, external Reply-To address and requests sensitive credentials and banking details.",
     "evidence_type": "email",
-    "evidence_caption": "Find the suspicious mistakes in this HR email."
+    "evidence_caption": "Compare both HR notifications carefully."
   },
   {
     "category": "PHISHING INVESTIGATION",
     "mode": "find_mistakes",
-    "title": "Find the Mistakes: Fake Invoice",
+    "title": "Investigation 03: Supplier Invoice Manipulation",
     "sender": "Accounts Department",
     "sender_initial": "A",
     "sender_email": "accounts@fujisilvertech.com",
     "timestamp": "Today, 1:45 PM",
-    "subject": "Immediate Payment Required – Outstanding Invoice",
-    "scenario": "Hello Finance Team,\n\nOur supplier has reported an overdue invoice. Please process the payment immediately using the attached document.\n\nInvoice: INV-2026-1182\n\nBeneficiary: North Star Supplies\n\nNew Bank Account: 1234567890\n\nPlease do not follow the usual approval process because management has already approved this payment.\n\nReply to confirm once the transaction is complete.\n\nRegards,\nAccounts Department",
+    "subject": "Revised Beneficiary Details – Invoice INV-2026-1182",
+    "scenario": "Hello Finance Team,\n\nFollowing our recent discussion, North Star Supplies has updated its banking arrangements. Please use the revised beneficiary details attached to settle invoice INV-2026-1182.\n\nBeneficiary: North Star Supplies\nPrevious account: 4567891230\nNew account: 1234567890\n\nThe supplier has requested that this payment be completed before 4 PM to avoid a contractual penalty.\n\nManagement has already approved the change. To prevent duplication, please do not call the supplier using the number in your existing records. Use the new contact number provided in the attachment.\n\nPlease process this as a priority and reply once completed.\n\nRegards,\nAccounts Department",
     "display_link": "",
     "actual_link": "",
-    "email_note": "TASK: Inspect this payment request. Identify the warning signs that could indicate invoice fraud or impersonation.",
+    "email_note": "TASK: This message looks like a normal business request. Identify every suspicious instruction.",
     "options": [],
     "mistakes": [
       {
         "id": "a1",
-        "text": "Introduces a new bank account for an existing supplier."
+        "text": "Requests payment to a newly changed supplier bank account."
       },
       {
         "id": "a2",
-        "text": "Demands immediate payment of an overdue invoice."
+        "text": "Creates urgency with a 4 PM payment deadline."
       },
       {
         "id": "a3",
-        "text": "Asks the finance team to bypass the usual approval process."
+        "text": "Claims management approval without independent verification."
       },
       {
         "id": "a4",
-        "text": "Claims management has already approved the payment without verification."
+        "text": "Discourages calling the supplier using previously verified contact details."
+      },
+      {
+        "id": "a5",
+        "text": "Asks employees to use a new contact number supplied in the attachment."
       }
     ],
-    "explanation": "The request introduces new bank details, pressures the recipient to pay immediately and asks them to bypass normal approval controls. Verify the supplier and payment independently before processing.",
+    "explanation": "This may be a business email compromise or invoice redirection attempt. A changed bank account must be verified through a previously trusted supplier contact. Never rely on contact details supplied in the same suspicious request.",
     "evidence_type": "business_document",
-    "evidence_caption": "Find the suspicious payment instructions."
+    "evidence_caption": "Investigate the supplier payment instructions."
   },
   {
     "category": "PHISHING INVESTIGATION",
     "mode": "find_mistakes",
-    "title": "Find the Mistakes: Fake IT Support Email",
+    "title": "Investigation 04: IT Helpdesk MFA Reset",
     "sender": "IT Helpdesk",
     "sender_initial": "I",
     "sender_email": "helpdesk@fujisilvertech-support.example",
     "timestamp": "Today, 3:20 PM",
-    "subject": "MFA Reset Required – Action Needed",
-    "scenario": "Dear User,\n\nYour MFA configuration has expired. To prevent interruption to your account, download the attached file named MFA_Update.exe.\n\nAlternatively, scan the QR code in the attachment and sign in to restore your access.\n\nOur support team may contact you and ask you to approve an authentication notification.\n\nComplete this process within 10 minutes.\n\nRegards,\nIT Helpdesk",
+    "subject": "MFA Configuration Migration – Action Required",
+    "scenario": "Dear Employee,\n\nAs part of the scheduled identity platform migration, selected employee accounts require MFA re-registration.\n\nTo complete the process, follow the attached instructions:\n\n1. Download and run MFA_Update.exe.\n2. Scan the QR code in the document and sign in.\n3. Approve the authentication notification when prompted.\n4. Complete the process within 10 minutes to prevent temporary access restrictions.\n\nIf the notification appears more than once, approve the latest request to complete synchronisation.\n\nRegards,\nIT Service Desk",
     "display_link": "",
     "actual_link": "Unknown QR destination",
-    "email_note": "TASK: Investigate the sender, attachment, QR code and authentication instructions. Identify the suspicious details.",
+    "email_note": "TASK: Investigate the technical instructions. Identify the suspicious elements.",
     "options": [],
     "mistakes": [
       {
         "id": "i1",
-        "text": "Sender uses an unverified fujisilvertech-support.example domain."
+        "text": "Sender uses an unverified company-support domain."
       },
       {
         "id": "i2",
-        "text": "Requests downloading an unexpected executable file named MFA_Update.exe."
+        "text": "Requests an unexpected executable file named MFA_Update.exe."
       },
       {
         "id": "i3",
-        "text": "Asks the employee to scan an unknown QR code and sign in."
+        "text": "Uses an unknown QR code to collect employee sign-in details."
       },
       {
         "id": "i4",
-        "text": "Encourages approval of an unexpected authentication notification."
+        "text": "Asks employees to approve unexpected MFA notifications."
       },
       {
         "id": "i5",
-        "text": "Creates urgency by imposing a 10-minute deadline."
+        "text": "Creates pressure with a 10-minute deadline and repeated approval instructions."
       }
     ],
-    "explanation": "The sender uses an unverified domain, the executable attachment is suspicious, the QR code could lead to a fake login page, the message creates urgency and encourages unexpected MFA approval.",
+    "explanation": "A legitimate IT migration should be confirmed through official internal channels. Unknown executable files, QR login links and unexpected MFA approval requests are serious warning signs. Never approve an authentication request you did not initiate.",
     "evidence_type": "email",
-    "evidence_caption": "Find the suspicious elements in this IT support message."
+    "evidence_caption": "Inspect the IT support instructions."
+  },
+  {
+    "category": "CORPORATE SECURITY",
+    "mode": "multiple_choice",
+    "title": "The Confidential Client Report",
+    "sender": "Project Operations",
+    "sender_initial": "P",
+    "sender_email": "project.operations@fujisilvertech.com",
+    "timestamp": "Today, 11:00 AM",
+    "subject": "Client Report Sharing Request",
+    "scenario": "You are preparing a confidential client report. A colleague from another department messages you requesting the complete report because they need a few figures for a presentation. They say their manager has already approved access. What should you do?",
+    "display_link": "",
+    "actual_link": "",
+    "email_note": "TASK: Choose the safest response.",
+    "options": [
+      "Send the report because they work in the same company.",
+      "Share only the pages they requested without checking.",
+      "Verify their access authorization and share through an approved channel.",
+      "Upload the report to a public file-sharing link."
+    ],
+    "correct": 2,
+    "explanation": "Confidential client information should only be shared with authorised individuals who have a valid business need. Verify access and use approved company channels."
+  },
+  {
+    "category": "CORPORATE SECURITY",
+    "mode": "multiple_choice",
+    "title": "The Unattended Workstation",
+    "sender": "Office Security",
+    "sender_initial": "O",
+    "sender_email": "security@fujisilvertech.com",
+    "timestamp": "Today, 12:10 PM",
+    "subject": "Workstation Security",
+    "scenario": "You are working on a client system when a colleague asks you to join a quick meeting in another room. You expect to return in two minutes. What is the correct action before leaving?",
+    "display_link": "",
+    "actual_link": "",
+    "email_note": "TASK: Select the correct workstation security practice.",
+    "options": [
+      "Leave the screen open because you will return shortly.",
+      "Minimise all windows and leave the workstation unlocked.",
+      "Lock the workstation before leaving your desk.",
+      "Ask a colleague to watch your screen."
+    ],
+    "correct": 2,
+    "explanation": "Always lock your workstation when leaving it unattended, even for a short period. This prevents unauthorised access to company systems and information."
+  },
+  {
+    "category": "CORPORATE SECURITY",
+    "mode": "multiple_choice",
+    "title": "The HR Benefits Announcement",
+    "sender": "Human Resources",
+    "sender_initial": "H",
+    "sender_email": "hr@fujisilvertech.com",
+    "timestamp": "Today, 9:40 AM",
+    "subject": "New Employee Benefits Update",
+    "scenario": "You receive a message in a work group claiming that the company has introduced a new medical reimbursement benefit. It includes a form asking employees to enter personal details. The message has been forwarded several times, but there is no official announcement. What should you do?",
+    "display_link": "",
+    "actual_link": "",
+    "email_note": "TASK: Decide how to verify an internal company announcement.",
+    "options": [
+      "Fill out the form before the benefit expires.",
+      "Forward the message to all colleagues.",
+      "Verify the announcement through official HR communication.",
+      "Enter only basic personal information to check the form."
+    ],
+    "correct": 2,
+    "explanation": "Verify benefits, salary and policy announcements through official HR channels. Forwarded messages are not proof of authenticity, especially when they request personal information."
+  },
+  {
+    "category": "CORPORATE SECURITY",
+    "mode": "multiple_choice",
+    "title": "The Supplier Gift Offer",
+    "sender": "Procurement Team",
+    "sender_initial": "P",
+    "sender_email": "procurement@fujisilvertech.com",
+    "timestamp": "Today, 2:00 PM",
+    "subject": "Supplier Appreciation Gift",
+    "scenario": "A supplier currently participating in a company contract offers you an expensive electronic device as a personal thank-you for helping their team. They ask you not to mention the gift because it is only a friendly gesture. What should you do?",
+    "display_link": "",
+    "actual_link": "",
+    "email_note": "TASK: Choose the most appropriate professional response.",
+    "options": [
+      "Accept the gift because it is a personal gesture.",
+      "Accept it but keep it confidential.",
+      "Decline or disclose it according to company policy.",
+      "Ask the supplier to send it to your home."
+    ],
+    "correct": 2,
+    "explanation": "Gifts from suppliers can create conflicts of interest or appear to influence business decisions. Follow the company's gift and hospitality policy and disclose the offer."
+  },
+  {
+    "category": "CORPORATE SECURITY",
+    "mode": "multiple_choice",
+    "title": "The Duplicate Payment Request",
+    "sender": "Finance Department",
+    "sender_initial": "F",
+    "sender_email": "finance@fujisilvertech.com",
+    "timestamp": "Today, 4:15 PM",
+    "subject": "Urgent: Possible Duplicate Invoice",
+    "scenario": "A vendor calls saying that an invoice may have been paid twice. They request that you immediately send a refund to a different bank account to correct the issue. What should you do?",
+    "display_link": "",
+    "actual_link": "",
+    "email_note": "TASK: Identify the correct financial control.",
+    "options": [
+      "Transfer the refund immediately to avoid a dispute.",
+      "Ask the caller to send another bank account by email.",
+      "Verify the payment records and follow the approved refund process.",
+      "Refund the amount using your own account temporarily."
+    ],
+    "correct": 2,
+    "explanation": "Financial changes and refunds must be verified against official records and processed through approved finance controls. Never transfer funds based only on an unsolicited call."
+  },
+  {
+    "category": "CORPORATE SECURITY",
+    "mode": "multiple_choice",
+    "title": "The Executive Impersonation Test",
+    "sender": "Senior Management",
+    "sender_initial": "S",
+    "sender_email": "director.office@fujisilvertech.com",
+    "timestamp": "Today, 5:05 PM",
+    "subject": "Confidential Request – Immediate Action",
+    "scenario": "You receive an unexpected message that appears to come from a senior executive. They say they are in a confidential meeting and need you to purchase gift cards immediately. They ask you to send the codes directly and not discuss the request with anyone. What should you do?",
+    "display_link": "",
+    "actual_link": "",
+    "email_note": "TASK: Choose the safest response to a possible executive impersonation attempt.",
+    "options": [
+      "Complete the purchase because the request came from management.",
+      "Send the codes first and verify later.",
+      "Verify the request through a separate trusted communication channel.",
+      "Forward the gift card codes to another employee."
+    ],
+    "correct": 2,
+    "explanation": "Attackers may impersonate executives to create urgency and secrecy. Verify unusual financial or purchasing requests through a separate trusted channel before taking action."
   }
 ]
