@@ -68,6 +68,11 @@
             font-weight: bold;
         }
 
+        .partial {
+            color: #a87500;
+            font-weight: bold;
+        }
+
         .explanation {
             background: #fff8e8;
             padding: 12px;
@@ -109,6 +114,33 @@
 
         .selected-option {
             border-left: 4px solid #398bd0;
+        }
+
+        .mistake-found {
+            background: #e8f6ee;
+            border-left: 4px solid #198754;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .mistake-missed {
+            background: #fff0f0;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .mistake-wrong {
+            background: #fff4df;
+            border-left: 4px solid #e0a800;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            line-height: 1.6;
         }
 
         @media(max-width:600px) {
@@ -220,13 +252,12 @@
                 {% for question in r.question_list %}
 
                     {% set i = loop.index0 %}
-                    {% set selected = r.answer_list[i] if i < r.answer_list|length else -1 %}
-                    {% set is_correct = selected == question.correct %}
+                    {% set selected = r.answer_list[i] if i < r.answer_list|length else none %}
 
                     <div class="attempt-question">
 
                         <p class="question-category">
-                            {{ question.category }}
+                            {{ question.category|default('AWARENESS ASSESSMENT') }}
                         </p>
 
                         <h4>
@@ -234,7 +265,107 @@
                             {{ question.title }}
                         </h4>
 
-                        {% if selected >= 0 and selected < question.options|length %}
+                        {% if question.mode|default('multiple_choice') == 'find_mistakes' %}
+
+                            {% set correct_ids = question.mistakes | map(attribute='id') | map('string') | list %}
+                            {% set selected_ids = selected if selected is iterable and selected is not string else [] %}
+                            {% set found_count = namespace(value=0) %}
+                            {% set missed_count = namespace(value=0) %}
+                            {% set wrong_count = namespace(value=0) %}
+
+                            {% for mistake in question.mistakes %}
+
+                                {% if mistake.id|string in selected_ids %}
+                                    {% set found_count.value = found_count.value + 1 %}
+                                {% else %}
+                                    {% set missed_count.value = missed_count.value + 1 %}
+                                {% endif %}
+
+                            {% endfor %}
+
+                            {% for selected_id in selected_ids %}
+
+                                {% if selected_id not in correct_ids %}
+                                    {% set wrong_count.value = wrong_count.value + 1 %}
+                                {% endif %}
+
+                            {% endfor %}
+
+                            {% if found_count.value == correct_ids|length and wrong_count.value == 0 %}
+
+                                <p class="correct">
+                                    ✓ All suspicious details identified
+                                </p>
+
+                            {% elif found_count.value > 0 %}
+
+                                <p class="partial">
+                                    ! Partially identified
+                                </p>
+
+                            {% else %}
+
+                                <p class="incorrect">
+                                    ✗ No suspicious details identified
+                                </p>
+
+                            {% endif %}
+
+                            <div class="answer-box">
+                                <strong>Employee identification:</strong>
+                                <br>
+                                {{ found_count.value }} out of
+                                {{ correct_ids|length }} suspicious details identified.
+                                <br>
+                                Missed: {{ missed_count.value }}
+                                | Incorrect selections: {{ wrong_count.value }}
+                            </div>
+
+                            <h4>Suspicious detail review</h4>
+
+                            {% for mistake in question.mistakes %}
+
+                                {% if mistake.id|string in selected_ids %}
+
+                                    <div class="mistake-found">
+                                        <strong class="correct">
+                                            ✓ Employee identified this
+                                        </strong>
+                                        <br>
+                                        {{ mistake.text }}
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="mistake-missed">
+                                        <strong class="incorrect">
+                                            ✗ Employee missed this
+                                        </strong>
+                                        <br>
+                                        {{ mistake.text }}
+                                    </div>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                            {% if wrong_count.value > 0 %}
+
+                                <div class="mistake-wrong">
+                                    <strong class="partial">
+                                        Incorrect selections
+                                    </strong>
+                                    <br>
+                                    The employee selected
+                                    {{ wrong_count.value }} detail(s)
+                                    that were not marked as suspicious.
+                                </div>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            {% set is_correct = selected == question.correct %}
 
                             {% if is_correct %}
 
@@ -250,30 +381,35 @@
 
                             {% endif %}
 
-                            <div class="answer-box selected-option">
-                                <strong>Employee selected:</strong>
+                            {% if selected is integer and selected >= 0 and selected < question.options|length %}
+
+                                <div class="answer-box selected-option">
+                                    <strong>Employee selected:</strong>
+                                    <br>
+                                    {{ 'ABCD'[selected] }}.
+                                    {{ question.options[selected] }}
+                                </div>
+
+                            {% else %}
+
+                                <div class="answer-box">
+                                    <strong>Employee selected:</strong>
+                                    No valid answer recorded.
+                                </div>
+
+                            {% endif %}
+
+                            <div class="answer-box correct-option">
+                                <strong>Correct answer:</strong>
                                 <br>
-                                {{ 'ABCD'[selected] }}.
-                                {{ question.options[selected] }}
+
+                                <span class="correct">
+                                    {{ 'ABCD'[question.correct] }}.
+                                    {{ question.options[question.correct] }}
+                                </span>
                             </div>
 
-                        {% else %}
-
-                            <p class="incorrect">
-                                No valid answer recorded
-                            </p>
-
                         {% endif %}
-
-                        <div class="answer-box correct-option">
-                            <strong>Correct answer:</strong>
-                            <br>
-
-                            <span class="correct">
-                                {{ 'ABCD'[question.correct] }}.
-                                {{ question.options[question.correct] }}
-                            </span>
-                        </div>
 
                         <div class="explanation">
                             <strong>Explanation:</strong>
