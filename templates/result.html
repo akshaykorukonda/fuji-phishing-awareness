@@ -8,38 +8,299 @@
     <link rel="stylesheet" href="/static/style.css">
 
     <style>
-        .result-header { text-align:center; padding:25px 10px; }
-        .score { font-size:52px; font-weight:bold; color:#176db2; margin:18px 0; }
-        .question-result { background:#fff; border:1px solid #ddd; border-radius:12px; padding:20px; margin:18px 0; }
-        .question-result.correct { border-left:5px solid #198754; }
-        .question-result.incorrect { border-left:5px solid #dc3545; }
-        .question-result.partial { border-left:5px solid #e0a800; }
-        .status { font-weight:bold; margin-bottom:12px; }
-        .correct-text { color:#198754; }
-        .incorrect-text { color:#dc3545; }
-        .partial-text { color:#a87500; }
-        .answer { padding:14px; background:#f5f6f8; border-radius:8px; margin:12px 0; line-height:1.7; }
-        .mistake-item { padding:12px; border-radius:8px; margin:8px 0; line-height:1.5; background:#f5f6f8; }
-        .mistake-item.found { background:#e8f6ee; border-left:4px solid #198754; }
-        .mistake-item.missed { background:#fff0f0; border-left:4px solid #dc3545; }
-        .mistake-item.wrong { background:#fff4df; border-left:4px solid #e0a800; }
-        .explanation { background:#fff8e8; padding:15px; border-radius:8px; line-height:1.7; margin-top:12px; }
-        .result-actions { text-align:center; margin:30px 0; }
-        .result-actions a { display:inline-block; padding:14px 25px; background:#075b78; color:white; text-decoration:none; border-radius:7px; font-weight:bold; }
-        .result-actions a:hover { background:#06465c; }
-        .result-summary { background:#edf7ff; border-radius:12px; padding:18px; text-align:center; margin:20px 0; }
-        .legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:13px; }
-        .email-review { border:1px solid #ddd; border-radius:10px; padding:15px; margin:12px 0; background:#fafafa; }
-        .email-review h4 { margin-top:0; }
-        .email-review p { line-height:1.6; overflow-wrap:anywhere; }
-        .email-review.correct-email { border-left:4px solid #198754; }
-        .email-review.wrong-email { border-left:4px solid #dc3545; }
-        .option-review { padding:11px; margin:8px 0; border-radius:7px; background:#f5f6f8; }
-        .option-review.selected-correct { background:#e8f6ee; border-left:4px solid #198754; }
-        .option-review.selected-wrong { background:#fff0f0; border-left:4px solid #dc3545; }
-        @media(max-width:600px) {
-            .score { font-size:40px; }
-            .question-result { padding:15px; }
+        :root {
+            --blue: #2785c7;
+            --teal: #0c9f9a;
+            --navy: #174b68;
+            --light-blue: #eef8ff;
+            --light-teal: #e9f9f6;
+            --green: #16865b;
+            --red: #d94b58;
+            --yellow: #bd861c;
+            --text: #263f50;
+            --muted: #718797;
+            --border: #e0edf3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(135deg, #f4faff, #eefaf9);
+            color: var(--text);
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+        }
+
+        header {
+            background: rgba(255,255,255,.96);
+            padding: 15px 6%;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 3px 15px rgba(35,90,120,.05);
+        }
+
+        header img {
+            max-height: 55px;
+            max-width: 190px;
+            object-fit: contain;
+        }
+
+        main.card {
+            width: min(1050px, 94%);
+            margin: 35px auto;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 15px 45px rgba(35,90,120,.08);
+        }
+
+        .result-header {
+            text-align: center;
+            padding: 35px 15px 25px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: #087f80;
+            background: #e5f8f5;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        h1 {
+            color: var(--navy);
+            font-size: clamp(26px, 4vw, 37px);
+            margin: 17px 0 8px;
+        }
+
+        .result-header > p:last-child {
+            color: var(--muted);
+        }
+
+        .score {
+            font-size: clamp(48px, 9vw, 76px);
+            font-weight: 800;
+            letter-spacing: -3px;
+            margin: 18px 0;
+            background: linear-gradient(100deg, #2589ce, #0ba99b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .result-summary {
+            background: linear-gradient(110deg, #eef8ff, #edfbf8);
+            border: 1px solid #d9edf2;
+            border-radius: 17px;
+            padding: 24px;
+            text-align: center;
+            margin: 20px 0 25px;
+        }
+
+        .result-summary h3 {
+            color: var(--navy);
+            margin-top: 0;
+        }
+
+        .result-summary p {
+            color: #60798a;
+            line-height: 1.7;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 18px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .correct-text { color: var(--green); }
+        .incorrect-text { color: var(--red); }
+        .partial-text { color: var(--yellow); }
+
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 30px 0;
+        }
+
+        .question-result {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 23px;
+            margin: 20px 0;
+            box-shadow: 0 5px 18px rgba(35,90,120,.035);
+            transition: transform .2s, box-shadow .2s;
+            overflow-wrap: anywhere;
+        }
+
+        .question-result:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 24px rgba(35,90,120,.08);
+        }
+
+        .question-result.correct { border-left: 5px solid var(--green); }
+        .question-result.incorrect { border-left: 5px solid var(--red); }
+        .question-result.partial { border-left: 5px solid var(--yellow); }
+
+        .question-result h3 {
+            color: var(--navy);
+            line-height: 1.5;
+            margin-top: 0;
+        }
+
+        .status {
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: .5px;
+            margin: 16px 0;
+        }
+
+        .answer {
+            padding: 16px;
+            background: #f3f9fd;
+            border: 1px solid #e1eff6;
+            border-radius: 11px;
+            margin: 13px 0;
+            line-height: 1.8;
+        }
+
+        .mistake-item {
+            padding: 14px;
+            border-radius: 10px;
+            margin: 9px 0;
+            line-height: 1.6;
+            background: #f4f8fa;
+        }
+
+        .mistake-item.found {
+            background: #eaf8f0;
+            border-left: 4px solid var(--green);
+        }
+
+        .mistake-item.missed {
+            background: #fff0f1;
+            border-left: 4px solid var(--red);
+        }
+
+        .mistake-item.wrong {
+            background: #fff8e9;
+            border-left: 4px solid var(--yellow);
+        }
+
+        .explanation {
+            background: linear-gradient(110deg, #eff8ff, #effbf9);
+            border: 1px solid #dceef1;
+            padding: 18px;
+            border-radius: 12px;
+            line-height: 1.8;
+            margin-top: 14px;
+        }
+
+        .explanation strong {
+            color: var(--navy);
+        }
+
+        .email-review {
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 18px;
+            margin: 13px 0;
+            background: #f8fbfd;
+        }
+
+        .email-review h4 {
+            margin-top: 0;
+            color: var(--navy);
+        }
+
+        .email-review p {
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .email-review.correct-email {
+            border-left: 5px solid var(--green);
+            background: #f3fbf6;
+        }
+
+        .email-review.wrong-email {
+            border-left: 5px solid var(--red);
+            background: #fff7f7;
+        }
+
+        .option-review {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 9px;
+            background: #f3f8fb;
+        }
+
+        .option-review.selected-correct {
+            background: #eaf8f0;
+            border-left: 4px solid var(--green);
+        }
+
+        .option-review.selected-wrong {
+            background: #fff0f1;
+            border-left: 4px solid var(--red);
+        }
+
+        .result-actions {
+            text-align: center;
+            margin: 38px 0 15px;
+        }
+
+        .result-actions a {
+            display: inline-block;
+            padding: 15px 32px;
+            background: linear-gradient(110deg, #2589c9, #0c9f9a);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 800;
+            box-shadow: 0 7px 18px rgba(24,145,160,.2);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .result-actions a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(24,145,160,.3);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            main.card {
+                padding: 17px;
+                margin: 18px auto;
+                border-radius: 15px;
+            }
+
+            .result-header { padding: 25px 5px; }
+            .question-result { padding: 16px; }
+            .result-summary { padding: 17px; }
+            .legend { gap: 10px; }
+            .email-review { padding: 13px; }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
         }
     </style>
 </head>
@@ -53,7 +314,7 @@
 <main class="card">
 
     <div class="result-header">
-        <p class="tag">ASSESSMENT COMPLETE</p>
+        <p class="tag">✓ ASSESSMENT COMPLETE</p>
         <h1>Your Assessment Results</h1>
 
         <div class="score">{{ r.score }} / 100</div>
@@ -63,11 +324,15 @@
 
     <div class="result-summary">
         <h3>Assessment Review</h3>
-        <p>Review your answers below to understand which workplace messages were suspicious and how to respond safely.</p>
+        <p>
+            Review your answers below to understand which workplace messages
+            were suspicious and how to respond safely.
+        </p>
 
         <div class="legend">
             <span class="correct-text">✓ Correctly identified</span>
             <span class="incorrect-text">✗ Incorrect answer</span>
+            <span class="partial-text">! Partially identified</span>
         </div>
     </div>
 
@@ -135,27 +400,46 @@
                 </div>
 
                 {% if mode == 'find_mistakes' %}
+
                     {% for mistake in candidates %}
                         {% if mistake.id|string in selected_ids and mistake.id|string in correct_ids %}
-                            <div class="mistake-item found">✓ Correctly identified<br>{{ mistake.text }}</div>
+                            <div class="mistake-item found">
+                                ✓ Correctly identified<br>{{ mistake.text }}
+                            </div>
                         {% elif mistake.id|string in selected_ids %}
-                            <div class="mistake-item wrong">! Incorrect selection<br>{{ mistake.text }}</div>
+                            <div class="mistake-item wrong">
+                                ! Incorrect selection<br>{{ mistake.text }}
+                            </div>
                         {% elif mistake.id|string in correct_ids %}
-                            <div class="mistake-item missed">✗ You missed this<br>{{ mistake.text }}</div>
+                            <div class="mistake-item missed">
+                                ✗ You missed this<br>{{ mistake.text }}
+                            </div>
                         {% endif %}
                     {% endfor %}
+
                 {% else %}
+
                     {% for part in x.sender_parts|default([]) + x.email_parts|default([]) %}
                         {% if part.clickable %}
                             {% if part.id|string in selected_ids and part.id|string in correct_ids %}
-                                <div class="mistake-item found">✓ Correctly identified<br>{{ part.text|default(part.value|default(part.id)) }}</div>
+                                <div class="mistake-item found">
+                                    ✓ Correctly identified<br>
+                                    {{ part.text|default(part.value|default(part.id)) }}
+                                </div>
                             {% elif part.id|string in selected_ids %}
-                                <div class="mistake-item wrong">! Incorrect selection<br>{{ part.text|default(part.value|default(part.id)) }}</div>
+                                <div class="mistake-item wrong">
+                                    ! Incorrect selection<br>
+                                    {{ part.text|default(part.value|default(part.id)) }}
+                                </div>
                             {% elif part.id|string in correct_ids %}
-                                <div class="mistake-item missed">✗ You missed this<br>{{ part.text|default(part.value|default(part.id)) }}</div>
+                                <div class="mistake-item missed">
+                                    ✗ You missed this<br>
+                                    {{ part.text|default(part.value|default(part.id)) }}
+                                </div>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
+
                 {% endif %}
 
             {% else %}
@@ -180,6 +464,7 @@
                             {% endif %}">
 
                             <h4>{{ email.label|default('Email ' ~ loop.index) }}</h4>
+
                             <p><strong>From:</strong> {{ email.sender|default('') }}</p>
                             <p><strong>Address:</strong> {{ email.sender_email|default('') }}</p>
                             <p><strong>Time:</strong> {{ email.timestamp|default('') }}</p>
@@ -215,6 +500,7 @@
 
                 <div class="answer">
                     <strong>Correct answer:</strong><br>
+
                     {% if x.correct is integer and x.correct >= 0 and x.correct < x.options|length %}
                         <span class="correct-text">
                             {{ 'ABCD'[x.correct] }}. {{ x.options[x.correct] }}
@@ -238,7 +524,7 @@
     {% endfor %}
 
     <div class="result-actions">
-        <a href="/logout">Finish and Sign Out</a>
+        <a href="/logout">Finish and Sign Out →</a>
     </div>
 
 </main>
