@@ -6,8 +6,9 @@ import json
 import io
 import csv
 import random
+import logging
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from functools import wraps
 
 from flask import (
@@ -26,20 +27,29 @@ from flask import (
 # 1. FLASK INITIALIZATION
 # =========================================================
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("phishing_assessment")
+
 app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY")
 
 if not app.secret_key:
     app.secret_key = "development-only-change-this-secret-key"
+    logger.warning(
+        "WARNING: Using development SECRET_KEY. "
+        "Set a strong SECRET_KEY in Render."
+    )
 
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = (
-    os.environ.get("RENDER", "").lower() == "true"
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=(
+        os.environ.get("RENDER", "").lower() == "true"
+    ),
+    PERMANENT_SESSION_LIFETIME=timedelta(days=1),
+    MAX_CONTENT_LENGTH=2 * 1024 * 1024
 )
-
-app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 
 # =========================================================
 # 2. CONFIGURATION
@@ -52,9 +62,11 @@ DB = os.environ.get(
     os.path.join(BASE_DIR, "responses.sqlite3")
 )
 
-CORP = "fujisilvertech.com"
+QUESTION_FILE = os.path.join(BASE_DIR, "questions.json")
 
+CORP = "fujisilvertech.com"
 PASS_MARK = 80
+REQUIRED_SETS = ("A", "B", "C")
 
 OWNER = os.environ.get(
     "INITIAL_ADMIN_EMAIL",
@@ -71,41 +83,55 @@ ADMINS.update(
 
 ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
 
-QUESTION_FILE = os.path.join(
-    BASE_DIR,
-    "questions.json"
-)
-
-REQUIRED_SETS = ("A", "B", "C")
-
 # =========================================================
-# 3. LOAD AND VALIDATE QUESTION SETS
+# 3. QUESTION HELPERS
 # =========================================================
+
+def is_multi_select_question(question):
+    return question.get("mode") in (
+        "find_mistakes",
+        "click_errors"
+    )
+
+
+def get_correct_ids(question):
+
+    correct = question.get("correct_ids")
+
+    if correct is None:
+        correct = question.get("correct", [])
+
+    if isinstance(correct, (str, int)):
+        correct = [correct]
+
+    if not isinstance(correct, list):
+        return set()
+
+    return {
+        str(item)
+        for item in correct
+    }
+
 
 def load_questions():
 
     if not os.path.exists(QUESTION_FILE):
         raise FileNotFoundError(
-            "questions.json was not found. "
-            "Place it in the same folder as app.py."
+            "questions.json was not found beside app.py."
         )
 
-    with open(
-        QUESTION_FILE,
-        "r",
-        encoding="utf-8"
-    ) as file:
+    with open(QUESTION_FILE, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    if not isinstance(data, dict) or "sets" not in data:
+    if (
+        not isinstance(data, dict)
+        or not isinstance(data.get("sets"), dict)
+    ):
         raise ValueError(
-            "questions.json must contain a 'sets' object."
+            'questions.json must contain a "sets" object.'
         )
 
     sets = data["sets"]
-
-    if not isinstance(sets, dict):
-        raise ValueError("'sets' must be a JSON object.")
 
     for set_name in REQUIRED_SETS:
 
@@ -118,36 +144,52 @@ def load_questions():
 
         for index, question in enumerate(questions):
 
+            label = f"Set {set_name}, Q{index + 1}"
+
             if not isinstance(question, dict):
                 raise ValueError(
-                    f"Set {set_name}, question {index + 1} is invalid."
+                    f"{label} must be a JSON object."
                 )
 
             options = question.get("options")
-            correct = question.get("correct")
-
-            if not isinstance(options, list) or len(options) < 2:
-                raise ValueError(
-                    f"Set {set_name}, question {index + 1} "
-                    "must contain at least two options."
-                )
 
             if (
-                isinstance(correct, bool)
-                or not isinstance(correct, int)
-                or correct < 0
-                or correct >= len(options)
+                not isinstance(options, list)
+                or len(options) < 2
             ):
                 raise ValueError(
-                    f"Invalid correct answer in Set {set_name}, "
-                    f"question {index + 1}."
+                    f"{label} needs at least two options."
                 )
 
-            if not all(isinstance(option, str) for option in options):
+            if not all(
+                isinstance(option, str)
+                for option in options
+            ):
                 raise ValueError(
-                    f"All options must be text in Set {set_name}, "
-                    f"question {index + 1}."
+                    f"{label} has invalid options. "
+                    "All options must be text."
                 )
+
+            if is_multi_select_question(question):
+
+                if not get_correct_ids(question):
+                    raise ValueError(
+                        f"{label} needs a non-empty correct_ids list."
+                    )
+
+            else:
+
+                correct = question.get("correct")
+
+                if (
+                    isinstance(correct, bool)
+                    or not isinstance(correct, int)
+                    or correct < 0
+                    or correct >= len(options)
+                ):
+                    raise ValueError(
+                        f"{label} has an invalid correct answer index."
+                    )
 
     return {
         name: sets[name]
@@ -170,61 +212,77 @@ def get_db():
 
     connection.row_factory = sqlite3.Row
 
+    connection.execute(
+        "PRAGMA busy_timeout = 30000"
+    )
+
     return connection
 
 
 def init_db():
 
+    db_directory = os.path.dirname(DB)
+
+    if db_directory:
+        os.makedirs(db_directory, exist_ok=True)
+
     connection = get_db()
 
-    connection.execute("""
-        CREATE TABLE IF NOT EXISTS attempts (
-            id TEXT PRIMARY KEY,
-            email TEXT NOT NULL,
-            started TEXT,
-            completed TEXT,
-            duration INTEGER DEFAULT 0,
-            score INTEGER DEFAULT 0,
-            answers TEXT,
-            questions_snapshot TEXT,
-            set_number TEXT
-        )
-    """)
+    try:
 
-    columns = {
-        row["name"]
-        for row in connection.execute(
-            "PRAGMA table_info(attempts)"
-        ).fetchall()
-    }
-
-    migrations = {
-        "questions_snapshot": "TEXT",
-        "answers": "TEXT",
-        "set_number": "TEXT",
-        "duration": "INTEGER DEFAULT 0",
-        "score": "INTEGER DEFAULT 0"
-    }
-
-    for column, column_type in migrations.items():
-
-        if column not in columns:
-            connection.execute(
-                f"ALTER TABLE attempts ADD COLUMN {column} {column_type}"
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS attempts (
+                id TEXT PRIMARY KEY,
+                email TEXT NOT NULL,
+                started TEXT,
+                completed TEXT,
+                duration INTEGER DEFAULT 0,
+                score INTEGER DEFAULT 0,
+                answers TEXT,
+                questions_snapshot TEXT,
+                set_number TEXT
             )
+        """)
 
-    connection.execute("""
-        CREATE INDEX IF NOT EXISTS idx_attempts_email
-        ON attempts(email)
-    """)
+        columns = {
+            row["name"]
+            for row in connection.execute(
+                "PRAGMA table_info(attempts)"
+            ).fetchall()
+        }
 
-    connection.execute("""
-        CREATE INDEX IF NOT EXISTS idx_attempts_completed
-        ON attempts(completed)
-    """)
+        migrations = {
+            "questions_snapshot": "TEXT",
+            "answers": "TEXT",
+            "set_number": "TEXT",
+            "duration": "INTEGER DEFAULT 0",
+            "score": "INTEGER DEFAULT 0"
+        }
 
-    connection.commit()
-    connection.close()
+        for column, column_type in migrations.items():
+
+            if column not in columns:
+                connection.execute(
+                    f"ALTER TABLE attempts ADD COLUMN "
+                    f"{column} {column_type}"
+                )
+
+        connection.execute("""
+            CREATE INDEX IF NOT EXISTS idx_attempts_email
+            ON attempts(email)
+        """)
+
+        connection.execute("""
+            CREATE INDEX IF NOT EXISTS idx_attempts_completed
+            ON attempts(completed)
+        """)
+
+        connection.commit()
+
+        logger.info("Database initialized: %s", DB)
+
+    finally:
+        connection.close()
 
 
 init_db()
@@ -234,29 +292,29 @@ init_db()
 # =========================================================
 
 def current_time():
-
     return datetime.now(timezone.utc).isoformat()
 
 
 def corp(email):
 
+    if not isinstance(email, str):
+        return False
+
     email = email.strip().lower()
 
-    return (
-        "@" in email
-        and email.endswith("@" + CORP)
-    )
+    return email.endswith("@" + CORP)
 
 
 def signed():
-
     return bool(session.get("email"))
 
 
 def admin_required():
 
+    email = session.get("email", "").strip().lower()
+
     return (
-        session.get("email", "").lower() in ADMINS
+        email in ADMINS
         and session.get("is_admin") is True
     )
 
@@ -308,27 +366,15 @@ def is_passed(score):
         return False
 
 
-def get_owned_attempt(attempt_id, email):
+def make_attempt_questions(set_number):
 
-    connection = get_db()
-
-    attempt = connection.execute("""
-        SELECT *
-        FROM attempts
-        WHERE id = ?
-        AND email = ?
-    """, (
-        attempt_id,
-        email
-    )).fetchone()
-
-    connection.close()
-
-    return attempt
+    return json.loads(
+        json.dumps(QUESTION_SETS[set_number])
+    )
 
 
 # =========================================================
-# 6. QUESTION HELPERS
+# 6. QUESTION SANITIZATION
 # =========================================================
 
 ANSWER_FIELDS = {
@@ -344,10 +390,6 @@ ANSWER_FIELDS = {
 
 
 def sanitize_question(question):
-    """
-    Remove correct answers and explanations before
-    sending questions to the employee's browser.
-    """
 
     if isinstance(question, list):
 
@@ -370,42 +412,6 @@ def sanitize_question(question):
         return clean
 
     return question
-
-
-def is_multi_select_question(question):
-
-    return question.get("mode") in (
-        "find_mistakes",
-        "click_errors"
-    )
-
-
-def get_correct_ids(question):
-
-    correct = question.get("correct_ids")
-
-    if correct is None:
-        correct = question.get("correct", [])
-
-    if isinstance(correct, str):
-        correct = [correct]
-
-    return {
-        str(item)
-        for item in (correct or [])
-    }
-
-
-def make_attempt_questions(set_number):
-
-    questions = json.loads(
-        json.dumps(QUESTION_SETS[set_number])
-    )
-
-    # Keep question and option order unchanged.
-    # This preserves the original correct-answer indexes.
-
-    return questions
 
 
 # =========================================================
@@ -504,13 +510,11 @@ def home():
     if request.method == "POST":
 
         email = request.form.get(
-            "email",
-            ""
+            "email", ""
         ).strip().lower()
 
         password = request.form.get(
-            "admin_key",
-            ""
+            "admin_key", ""
         )
 
         if not email:
@@ -532,13 +536,11 @@ def home():
             ):
 
                 session.clear()
-
                 session["email"] = email
                 session["is_admin"] = True
+                session.permanent = True
 
-                return redirect(
-                    url_for("admin")
-                )
+                return redirect(url_for("admin"))
 
             else:
 
@@ -547,13 +549,11 @@ def home():
         elif corp(email):
 
             session.clear()
-
             session["email"] = email
             session["is_admin"] = False
+            session.permanent = True
 
-            return redirect(
-                url_for("quiz")
-            )
+            return redirect(url_for("quiz"))
 
         else:
 
@@ -579,86 +579,116 @@ def quiz():
     if admin_required():
         return redirect(url_for("admin"))
 
+    email = session["email"].strip().lower()
+
     connection = get_db()
 
-    # Resume an existing incomplete attempt.
+    try:
 
-    attempt = connection.execute("""
-        SELECT *
-        FROM attempts
-        WHERE email = ?
-        AND completed IS NULL
-        ORDER BY started DESC
-        LIMIT 1
-    """, (
-        session["email"],
-    )).fetchone()
+        attempt = connection.execute("""
+            SELECT *
+            FROM attempts
+            WHERE LOWER(email) = ?
+            AND completed IS NULL
+            ORDER BY started DESC
+            LIMIT 1
+        """, (email,)).fetchone()
 
-    if attempt:
+        if attempt:
 
-        attempt_id = attempt["id"]
+            attempt_id = attempt["id"]
+            set_number = attempt["set_number"] or "A"
 
-        set_number = (
-            attempt["set_number"] or "A"
-        )
-
-        questions = safe_json(
-            attempt["questions_snapshot"],
-            []
-        )
-
-        if not questions:
-
-            connection.close()
-
-            return (
-                "The saved quiz question data is missing. "
-                "Please contact the administrator.",
-                500
+            questions = safe_json(
+                attempt["questions_snapshot"],
+                []
             )
 
-    else:
+            if not questions:
 
-        # Assign one random set to a new attempt.
+                logger.error(
+                    "Missing question snapshot for attempt %s",
+                    attempt_id
+                )
 
-        set_number = random.choice(
-            list(REQUIRED_SETS)
-        )
+                return (
+                    "Saved quiz data is missing. "
+                    "Please contact the administrator.",
+                    500
+                )
 
-        attempt_id = secrets.token_urlsafe(16)
+            logger.info(
+                "Resuming attempt %s for %s",
+                attempt_id,
+                email
+            )
 
-        questions = make_attempt_questions(
-            set_number
-        )
+        else:
 
-        started = current_time()
+            set_number = random.choice(
+                list(REQUIRED_SETS)
+            )
 
-        connection.execute("""
-            INSERT INTO attempts (
-                id,
+            attempt_id = secrets.token_urlsafe(24)
+
+            questions = make_attempt_questions(set_number)
+
+            started = current_time()
+
+            connection.execute("""
+                INSERT INTO attempts (
+                    id,
+                    email,
+                    started,
+                    completed,
+                    duration,
+                    score,
+                    answers,
+                    questions_snapshot,
+                    set_number
+                )
+                VALUES (?, ?, ?, NULL, 0, 0, NULL, ?, ?)
+            """, (
+                attempt_id,
                 email,
                 started,
-                completed,
-                duration,
-                score,
-                answers,
-                questions_snapshot,
+                json.dumps(questions),
+                set_number
+            ))
+
+            connection.commit()
+
+            verified = connection.execute("""
+                SELECT id
+                FROM attempts
+                WHERE id = ?
+                AND LOWER(email) = ?
+            """, (
+                attempt_id,
+                email
+            )).fetchone()
+
+            if not verified:
+
+                logger.error(
+                    "New attempt could not be verified: %s",
+                    attempt_id
+                )
+
+                return "Unable to create quiz attempt.", 500
+
+            logger.info(
+                "Created attempt %s for %s, Set %s",
+                attempt_id,
+                email,
                 set_number
             )
-            VALUES (?, ?, ?, NULL, 0, 0, NULL, ?, ?)
-        """, (
-            attempt_id,
-            session["email"],
-            started,
-            json.dumps(questions),
-            set_number
-        ))
 
-        connection.commit()
-
-    connection.close()
+    finally:
+        connection.close()
 
     session["attempt_id"] = attempt_id
+    session.permanent = True
 
     participant_questions = [
         sanitize_question(question)
@@ -688,16 +718,49 @@ def submit():
             "error": "Administrators cannot submit employee quizzes."
         }), 403
 
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+
+        return jsonify({
+            "success": False,
+            "error": "Invalid submission data."
+        }), 400
 
     answers = data.get("answers")
 
-    attempt_id = session.get("attempt_id")
+    email = session.get(
+        "email", ""
+    ).strip().lower()
 
-    if not attempt_id:
-        attempt_id = data.get("attempt_id")
+    session_attempt_id = session.get("attempt_id")
+    received_attempt_id = data.get("attempt_id")
 
-    if not attempt_id:
+    # Use the attempt ID sent by quiz.html.
+    # If it is missing, use the ID stored in the session.
+    attempt_id = received_attempt_id or session_attempt_id
+
+    logger.info("========== QUIZ SUBMISSION ==========")
+    logger.info("Employee: %s", email)
+    logger.info(
+        "Session attempt ID present: %s",
+        bool(session_attempt_id)
+    )
+    logger.info(
+        "Request attempt ID present: %s",
+        bool(received_attempt_id)
+    )
+    logger.info("Database: %s", DB)
+
+    if (
+        not attempt_id
+        or not isinstance(attempt_id, str)
+        or len(attempt_id) > 200
+    ):
+
+        logger.warning(
+            "Submission rejected: missing or invalid attempt ID"
+        )
 
         return jsonify({
             "success": False,
@@ -706,58 +769,91 @@ def submit():
 
     connection = get_db()
 
-    attempt = connection.execute("""
-        SELECT *
-        FROM attempts
-        WHERE id = ?
-        AND email = ?
-    """, (
-        attempt_id,
-        session["email"]
-    )).fetchone()
+    try:
 
-    if not attempt:
+        attempt = connection.execute("""
+            SELECT *
+            FROM attempts
+            WHERE id = ?
+            AND LOWER(email) = ?
+        """, (
+            attempt_id,
+            email
+        )).fetchone()
 
-        connection.close()
+        if not attempt:
 
-        return jsonify({
-            "success": False,
-            "error": "Quiz attempt not found."
-        }), 404
-
-    # Prevent a second submission from changing the result.
-
-    if attempt["completed"]:
-
-        connection.close()
-
-        return jsonify({
-            "success": True,
-            "url": url_for(
-                "result",
-                attempt_id=attempt_id
+            logger.error(
+                "ATTEMPT NOT FOUND. Attempt ID: %s, Email: %s",
+                attempt_id,
+                email
             )
-        })
 
-    questions = safe_json(
-        attempt["questions_snapshot"],
-        []
-    )
+            id_exists = connection.execute("""
+                SELECT email
+                FROM attempts
+                WHERE id = ?
+            """, (attempt_id,)).fetchone()
 
-    if not questions:
+            employee_attempt = connection.execute("""
+                SELECT id
+                FROM attempts
+                WHERE LOWER(email) = ?
+                AND completed IS NULL
+                ORDER BY started DESC
+                LIMIT 1
+            """, (email,)).fetchone()
 
-        connection.close()
+            logger.error(
+                "Attempt ID exists in DB: %s",
+                bool(id_exists)
+            )
 
-        return jsonify({
-            "success": False,
-            "error": "Question data is missing."
-        }), 500
+            logger.error(
+                "Employee has another incomplete attempt: %s",
+                bool(employee_attempt)
+            )
 
-    # Support a list or a dictionary from JavaScript.
+            return jsonify({
+                "success": False,
+                "error": (
+                    "Your quiz session could not be matched with "
+                    "the saved assessment. Please refresh the quiz "
+                    "page and try again. If the problem continues, "
+                    "contact the administrator."
+                )
+            }), 404
 
-    if isinstance(answers, dict):
+        logger.info(
+            "Attempt found successfully: %s",
+            attempt_id
+        )
 
-        try:
+        if attempt["completed"]:
+
+            session.pop("attempt_id", None)
+
+            return jsonify({
+                "success": True,
+                "url": url_for(
+                    "result",
+                    attempt_id=attempt_id
+                )
+            })
+
+        questions = safe_json(
+            attempt["questions_snapshot"],
+            []
+        )
+
+        if not questions:
+
+            return jsonify({
+                "success": False,
+                "error": "Question data is missing."
+            }), 500
+
+        if isinstance(answers, dict):
 
             answers = [
                 answers.get(
@@ -767,97 +863,118 @@ def submit():
                 for index in range(len(questions))
             ]
 
-        except (KeyError, TypeError):
+        try:
 
-            connection.close()
+            percentage, reviewed_answers = validate_and_score(
+                questions,
+                answers
+            )
+
+        except ValueError as error:
 
             return jsonify({
                 "success": False,
-                "error": "Some quiz answers are missing."
+                "error": str(error)
             }), 400
 
-    try:
+        started = attempt["started"]
 
-        percentage, reviewed_answers = validate_and_score(
-            questions,
-            answers
-        )
+        try:
 
-    except ValueError as error:
+            start_datetime = datetime.fromisoformat(started)
 
-        connection.close()
+            if start_datetime.tzinfo is None:
 
-        return jsonify({
-            "success": False,
-            "error": str(error)
-        }), 400
+                start_datetime = start_datetime.replace(
+                    tzinfo=timezone.utc
+                )
 
-    started = attempt["started"]
-
-    try:
-
-        start_datetime = datetime.fromisoformat(
-            started
-        )
-
-        duration = max(
-            0,
-            int(
-                (
-                    datetime.now(timezone.utc)
-                    - start_datetime
-                ).total_seconds()
+            duration = max(
+                0,
+                int(
+                    (
+                        datetime.now(timezone.utc)
+                        - start_datetime
+                    ).total_seconds()
+                )
             )
+
+        except (ValueError, TypeError):
+
+            duration = 0
+
+        completed = current_time()
+
+        cursor = connection.execute("""
+            UPDATE attempts
+            SET completed = ?,
+                duration = ?,
+                score = ?,
+                answers = ?
+            WHERE id = ?
+            AND LOWER(email) = ?
+            AND completed IS NULL
+        """, (
+            completed,
+            duration,
+            percentage,
+            json.dumps(reviewed_answers),
+            attempt_id,
+            email
+        ))
+
+        connection.commit()
+
+        if cursor.rowcount == 0:
+
+            existing = connection.execute("""
+                SELECT completed
+                FROM attempts
+                WHERE id = ?
+                AND LOWER(email) = ?
+            """, (
+                attempt_id,
+                email
+            )).fetchone()
+
+            if existing and existing["completed"]:
+
+                session.pop("attempt_id", None)
+
+                return jsonify({
+                    "success": True,
+                    "url": url_for(
+                        "result",
+                        attempt_id=attempt_id
+                    )
+                })
+
+            return jsonify({
+                "success": False,
+                "error": (
+                    "Unable to save your assessment. "
+                    "Please try again."
+                )
+            }), 409
+
+        session.pop("attempt_id", None)
+
+        logger.info(
+            "Submission successful. Attempt: %s, Score: %s%%",
+            attempt_id,
+            percentage
         )
-
-    except (ValueError, TypeError):
-
-        duration = 0
-
-    completed = current_time()
-
-    # Conditional update prevents duplicate submissions.
-
-    cursor = connection.execute("""
-        UPDATE attempts
-        SET completed = ?,
-            duration = ?,
-            score = ?,
-            answers = ?
-        WHERE id = ?
-        AND email = ?
-        AND completed IS NULL
-    """, (
-        completed,
-        duration,
-        percentage,
-        json.dumps(reviewed_answers),
-        attempt_id,
-        session["email"]
-    ))
-
-    connection.commit()
-
-    if cursor.rowcount == 0:
-
-        connection.close()
 
         return jsonify({
-            "success": False,
-            "error": "This assessment has already been submitted."
-        }), 409
+            "success": True,
+            "url": url_for(
+                "result",
+                attempt_id=attempt_id
+            )
+        })
 
-    connection.close()
-
-    session.pop("attempt_id", None)
-
-    return jsonify({
-        "success": True,
-        "url": url_for(
-            "result",
-            attempt_id=attempt_id
-        )
-    })
+    finally:
+        connection.close()
 
 
 # =========================================================
@@ -870,18 +987,21 @@ def result(attempt_id):
 
     connection = get_db()
 
-    attempt = connection.execute("""
-        SELECT *
-        FROM attempts
-        WHERE id = ?
-        AND email = ?
-        AND completed IS NOT NULL
-    """, (
-        attempt_id,
-        session["email"]
-    )).fetchone()
+    try:
 
-    connection.close()
+        attempt = connection.execute("""
+            SELECT *
+            FROM attempts
+            WHERE id = ?
+            AND LOWER(email) = ?
+            AND completed IS NOT NULL
+        """, (
+            attempt_id,
+            session["email"].strip().lower()
+        )).fetchone()
+
+    finally:
+        connection.close()
 
     if not attempt:
         abort(404)
@@ -904,17 +1024,19 @@ def admin():
 
     connection = get_db()
 
-    attempts = connection.execute("""
-        SELECT *
-        FROM attempts
-        WHERE completed IS NOT NULL
-        ORDER BY completed DESC
-    """).fetchall()
+    try:
 
-    connection.close()
+        attempts = connection.execute("""
+            SELECT *
+            FROM attempts
+            WHERE completed IS NOT NULL
+            ORDER BY completed DESC
+        """).fetchall()
+
+    finally:
+        connection.close()
 
     rows = []
-
     total_score = 0
 
     for attempt in attempts:
@@ -933,9 +1055,9 @@ def admin():
 
         total_score += score
 
-        set_number = (
-            attempt["set_number"] or "Legacy"
-        )
+        set_number = attempt["set_number"] or "Legacy"
+
+        passed = is_passed(score)
 
         rows.append({
             "id": attempt["id"],
@@ -945,18 +1067,14 @@ def admin():
             "duration": attempt["duration"],
             "score": score,
             "set_number": set_number,
-            "passed": is_passed(score),
+            "passed": passed,
             "status": (
                 "PASSED"
-                if is_passed(score)
+                if passed
                 else "NOT PASSED"
             ),
-
             "answers": answers,
             "questions": questions,
-
-            # Template compatibility aliases.
-
             "question_list": questions,
             "answer_list": answers
         })
@@ -985,17 +1103,19 @@ def export_csv():
 
     connection = get_db()
 
-    attempts = connection.execute("""
-        SELECT *
-        FROM attempts
-        WHERE completed IS NOT NULL
-        ORDER BY completed DESC
-    """).fetchall()
+    try:
 
-    connection.close()
+        attempts = connection.execute("""
+            SELECT *
+            FROM attempts
+            WHERE completed IS NOT NULL
+            ORDER BY completed DESC
+        """).fetchall()
+
+    finally:
+        connection.close()
 
     output = io.StringIO()
-
     writer = csv.writer(output)
 
     writer.writerow([
@@ -1056,9 +1176,7 @@ def logout():
 
     session.clear()
 
-    return redirect(
-        url_for("home")
-    )
+    return redirect(url_for("home"))
 
 
 # =========================================================
@@ -1072,13 +1190,13 @@ def health():
         "status": "ok",
         "application": "Fuji Silvertech Phishing Awareness",
         "pass_mark": PASS_MARK,
-        "question_sets": list(REQUIRED_SETS)
+        "question_sets": list(REQUIRED_SETS),
+        "database_configured": bool(DB)
     })
 
 
 # =========================================================
 # 16. LOCAL DEVELOPMENT
-# Render uses gunicorn app:app
 # =========================================================
 
 if __name__ == "__main__":
