@@ -148,6 +148,11 @@
             font-weight: 800;
         }
 
+        .completion-icon.failed-icon {
+            background: #fff0f1;
+            color: #d94b58;
+        }
+
         .passing-info {
             text-align: center;
             color: var(--muted);
@@ -212,7 +217,9 @@
 <body>
 
 <header>
-    <img src="/static/img/fuji-logo.png" alt="Fuji Silvertech">
+    <img src="/static/img/fuji-logo.png"
+         alt="Fuji Silvertech"
+         onerror="this.style.display='none'">
 </header>
 
 <main class="card">
@@ -223,7 +230,7 @@
 
         <h1>Your Assessment Results</h1>
 
-        <div class="score">{{ r.score }} / 100</div>
+        <div class="score">{{ "%.0f"|format(r.score|float) }} / 100</div>
 
         {% if r.score|float >= 80 %}
 
@@ -233,7 +240,7 @@
 
             <p>
                 Congratulations! You have successfully passed
-                the phishing awareness assessment.
+                the Fuji Silvertech Phishing Awareness Assessment.
             </p>
 
         {% else %}
@@ -253,15 +260,32 @@
 
     <div class="result-summary">
 
-        <div class="completion-icon">✓</div>
+        {% if r.score|float >= 80 %}
 
-        <h3>Assessment Submission</h3>
+            <div class="completion-icon">✓</div>
 
-        <p>
-            Your assessment has been submitted successfully.
-            Thank you for participating in the Fuji Silvertech
-            Phishing Awareness Assessment.
-        </p>
+            <h3>Well Done!</h3>
+
+            <p>
+                Your assessment has been submitted successfully.
+                You have demonstrated the required level of phishing
+                awareness. Thank you for participating.
+            </p>
+
+        {% else %}
+
+            <div class="completion-icon failed-icon">!</div>
+
+            <h3>Assessment Submitted</h3>
+
+            <p>
+                Your responses have been recorded successfully.
+                Please review phishing awareness practices and
+                follow any further instructions provided by your
+                organization's security team.
+            </p>
+
+        {% endif %}
 
     </div>
 
