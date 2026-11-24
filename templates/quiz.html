@@ -1,1700 +1,1149 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Phishing Awareness Assessment | Fuji Silvertech</title>
-
-<link rel="stylesheet" href="/static/style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-
-<style>
-* { box-sizing: border-box; }
-
-:root {
-    --blue: #1686c5;
-    --blue-dark: #12649a;
-    --teal: #08a8a5;
-    --text: #173b57;
-    --muted: #71899d;
-    --border: #d9eaf3;
-}
-
-body {
-    margin: 0;
-    background: linear-gradient(140deg, #f4faff, #eefafa);
-    color: var(--text);
-    font-family: Arial, sans-serif;
-    overflow-x: hidden;
-}
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 15px 5%;
-    background: linear-gradient(110deg, #fff, #e9f7ff, #e5faf6);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 4px 18px rgba(30,110,150,.07);
-}
-
-header img {
-    width: 145px;
-    max-height: 48px;
-    object-fit: contain;
-}
-
-.header-label {
-    color: #078e99;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1.3px;
-    text-align: right;
-}
-
-main {
-    width: 100%;
-    max-width: 1050px;
-    margin: auto;
-    padding: 28px 20px 55px;
-}
-
-.top-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.set-label {
-    background: #e0f5f5;
-    color: #078c8e;
-    padding: 8px 14px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .7px;
-}
-
-.question-number {
-    color: #6b8499;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.progress-container {
-    background: #dfeef5;
-    height: 9px;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 26px;
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #1686c5, #08b8a5);
-    border-radius: 20px;
-    transition: width .45s ease;
-}
-
-.quiz-card {
-    background: white;
-    border: 1px solid #dcecf4;
-    border-radius: 21px;
-    padding: 28px;
-    box-shadow: 0 9px 32px rgba(35,100,140,.07);
-    animation: fadeIn .4s ease;
-}
-
-.category {
-    display: inline-block;
-    color: #078f91;
-    background: #e7f8f6;
-    padding: 7px 12px;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .8px;
-    margin-bottom: 13px;
-}
-
-.question-title {
-    font-size: 23px;
-    line-height: 1.45;
-    color: #174c72;
-    margin: 0 0 13px;
-}
-
-.scenario {
-    background: linear-gradient(110deg, #f0f8ff, #effaf8);
-    border-left: 4px solid #12a7ac;
-    border-radius: 10px;
-    padding: 15px 17px;
-    line-height: 1.7;
-    color: #4e6c83;
-    margin: 18px 0;
-}
-
-.email-note {
-    color: #71899d;
-    font-size: 13px;
-    margin: 12px 0;
-}
-
-.email-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 17px;
-    margin: 20px 0;
-}
-
-.email-card {
-    border: 1px solid #d9e9f2;
-    border-radius: 14px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 4px 15px rgba(30,100,140,.05);
-    min-width: 0;
-}
-
-.email-card-header {
-    background: linear-gradient(110deg, #eef8ff, #eaf9f7);
-    padding: 14px 16px;
-    border-bottom: 1px solid #dcecf3;
-}
-
-.email-card-header h3 {
-    margin: 0;
-    color: #175477;
-    font-size: 15px;
-}
-
-.email-card-body {
-    padding: 15px 16px;
-}
-
-.email-meta {
-    font-size: 12px;
-    color: #607b91;
-    line-height: 1.8;
-    overflow-wrap: anywhere;
-}
-
-.email-meta strong {
-    color: #355c76;
-}
-
-.email-subject {
-    color: #174c72;
-    font-weight: 800;
-    margin: 13px 0;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-
-.email-message {
-    color: #526e82;
-    font-size: 13px;
-    line-height: 1.8;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-.email-link {
-    background: #f1f8fc;
-    border: 1px solid #e0edf4;
-    border-radius: 8px;
-    padding: 10px;
-    margin-top: 12px;
-    color: #087db4;
-    font-size: 12px;
-    overflow-wrap: anywhere;
-}
-
-.attachment {
-    margin-top: 10px;
-    padding: 9px 11px;
-    background: #fff8e9;
-    border: 1px solid #f3e6c8;
-    border-radius: 8px;
-    color: #89691f;
-    font-size: 12px;
-    overflow-wrap: anywhere;
-}
-
-.options-title {
-    color: #315c77;
-    font-size: 14px;
-    font-weight: 800;
-    margin: 23px 0 12px;
-}
-
-.options {
-    display: grid;
-    gap: 11px;
-}
-
-.option {
-    display: flex;
-    align-items: flex-start;
-    gap: 13px;
-    border: 1px solid #dceaf2;
-    border-radius: 12px;
-    padding: 15px;
-    cursor: pointer;
-    transition: .2s;
-    background: #fff;
-}
-
-.option:hover {
-    border-color: #70c8d1;
-    background: #f5fcfc;
-    transform: translateY(-2px);
-}
-
-.option.selected {
-    border: 2px solid #159fc0;
-    background: #eef9ff;
-    padding: 14px;
-}
-
-.option input {
-    margin-top: 3px;
-    accent-color: #078fa9;
-    width: 17px;
-    height: 17px;
-    flex-shrink: 0;
-}
-
-.option-letter {
-    color: #0b8e9c;
-    font-weight: 800;
-    min-width: 22px;
-}
-
-.option-text {
-    color: #3f6077;
-    font-size: 14px;
-    line-height: 1.65;
-}
-
-.navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-top: 25px;
-}
-
-.nav-btn {
-    border: none;
-    border-radius: 10px;
-    padding: 13px 23px;
-    font-weight: 800;
-    cursor: pointer;
-    font-size: 13px;
-    transition: .2s;
-}
-
-.nav-btn:disabled {
-    opacity: .45;
-    cursor: not-allowed;
-}
-
-.previous-btn {
-    background: #edf5fa;
-    color: #47718c;
-}
-
-.next-btn {
-    background: linear-gradient(120deg, #1686c5, #08a8a5);
-    color: white;
-}
-
-.submit-btn {
-    background: linear-gradient(120deg, #078f9d, #08b5a2);
-    color: white;
-}
-
-.nav-btn:not(:disabled):hover {
-    transform: translateY(-2px);
-}
-
-.question-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 23px;
-    padding-top: 20px;
-    border-top: 1px solid #e3eef4;
-}
-
-.question-dot {
-    width: 34px;
-    height: 34px;
-    border: 1px solid #d8e7ef;
-    border-radius: 9px;
-    background: white;
-    color: #71899d;
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.question-dot.active {
-    background: #e5f6ff;
-    border-color: #159bc1;
-    color: #087ca7;
-}
-
-.question-dot.answered {
-    background: #e7f8f3;
-    border-color: #71cbb6;
-    color: #087e6d;
-}
-
-.question-dot.active.answered {
-    border: 2px solid #079e9d;
-}
-
-.footer-note {
-    text-align: center;
-    color: #91a5b5;
-    font-size: 12px;
-    margin-top: 24px;
-    line-height: 1.6;
-}
-
-/* 3D SCENE */
-
-.scene-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: linear-gradient(135deg, rgba(226,246,255,.97), rgba(225,250,244,.97));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    transition: opacity .4s ease;
-}
-
-.scene-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.scene-box {
-    width: 100%;
-    max-width: 850px;
-    background: white;
-    border: 1px solid #d7eaf2;
-    border-radius: 22px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(25,100,140,.15);
-}
-
-.scene-top {
-    padding: 18px 22px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.scene-top span {
-    color: #0a9296;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.3px;
-}
-
-.scene-top button {
-    border: none;
-    background: #edf7fa;
-    color: #4d758b;
-    padding: 9px 13px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.scene-canvas {
-    height: 320px;
-    position: relative;
-    background: linear-gradient(180deg, #e7f7ff, #d9f3ee);
-}
-
-.scene-canvas canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-.scene-bottom {
-    text-align: center;
-    padding: 20px 24px 25px;
-}
-
-.scene-bottom h2 {
-    color: #155477;
-    margin: 0 0 9px;
-    font-size: 22px;
-}
-
-.scene-bottom p {
-    color: #668195;
-    margin: 0;
-    line-height: 1.7;
-    font-size: 14px;
-}
-
-.scene-progress {
-    height: 5px;
-    background: #e7f0f4;
-}
-
-.scene-progress-fill {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #1597cb, #0ab5a4);
-}
-
-.confirm-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    background: rgba(20,55,75,.45);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-}
-
-.confirm-overlay.visible {
-    display: flex;
-}
-
-.confirm-box {
-    width: 100%;
-    max-width: 430px;
-    background: white;
-    border-radius: 18px;
-    padding: 27px;
-    box-shadow: 0 15px 50px rgba(0,0,0,.15);
-    text-align: center;
-}
-
-.confirm-box h2 {
-    color: #174d75;
-    margin-top: 0;
-}
-
-.confirm-box p {
-    color: #617c90;
-    line-height: 1.7;
-}
-
-.confirm-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 22px;
-}
-
-.error-message {
-    display: none;
-    margin-top: 15px;
-    color: #b94350;
-    background: #fff0f1;
-    padding: 12px;
-    border-radius: 9px;
-    font-size: 13px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@media(max-width:650px) {
-    header { padding: 12px 15px; }
-    header img { width: 115px; }
-    main { padding: 20px 12px 40px; }
-    .quiz-card { padding: 19px 15px; }
-    .question-title { font-size: 19px; }
-    .email-grid { grid-template-columns: 1fr; }
-    .navigation { flex-wrap: wrap; }
-    .nav-btn { padding: 12px 15px; }
-    .scene-canvas { height: 240px; }
-    .scene-bottom h2 { font-size: 19px; }
-}
-</style>
-</head>
-
-<body>
-
-<header>
-    <img src="/static/img/fuji-logo.png"
-         alt="Fuji Silvertech"
-         onerror="this.style.display='none'">
-
-    <div class="header-label">
-        PHISHING AWARENESS ASSESSMENT
-    </div>
-</header>
-
-<main>
-
-    <div class="top-info">
-        <span class="set-label">
-            ASSESSMENT SET {{ set_number }}
-        </span>
-
-        <span class="question-number" id="question-counter">
-            Question 1 of 10
-        </span>
-    </div>
-
-    <div class="progress-container">
-        <div class="progress-bar" id="progress-bar"></div>
-    </div>
-
-    <section class="quiz-card" id="quiz-card">
-
-        <div class="category" id="category"></div>
-
-        <h1 class="question-title" id="question-title"></h1>
-
-        <div class="scenario" id="scenario" style="display:none"></div>
-
-        <p class="email-note" id="email-note" style="display:none"></p>
-
-        <div id="email-area"></div>
-
-        <div class="options-title">
-            Select the best response:
-        </div>
-
-        <div class="options" id="options"></div>
-
-        <div class="navigation">
-
-            <button type="button"
-                    class="nav-btn previous-btn"
-                    id="previous-btn"
-                    onclick="previousQuestion()">
-                ← Previous
-            </button>
-
-            <button type="button"
-                    class="nav-btn next-btn"
-                    id="next-btn"
-                    onclick="nextQuestion()">
-                Next Question →
-            </button>
-
-            <button type="button"
-                    class="nav-btn submit-btn"
-                    id="submit-btn"
-                    onclick="openSubmitConfirmation()"
-                    style="display:none">
-                Submit Assessment
-            </button>
-
-        </div>
-
-        <div class="question-list" id="question-list"></div>
-
-    </section>
-
-    <div class="footer-note">
-        Fuji Silvertech • Phishing Awareness Programme<br>
-        Choose carefully. Your responses will be evaluated after submission.
-    </div>
-
-</main>
-
-<!-- 3D SCENE -->
-
-<div class="scene-overlay" id="scene-overlay">
-
-    <div class="scene-box">
-
-        <div class="scene-top">
-            <span>CYBER SECURITY SIMULATION</span>
-            <button type="button" onclick="skipScene()">Skip Scene →</button>
-        </div>
-
-        <div class="scene-canvas" id="scene-canvas"></div>
-
-        <div class="scene-bottom">
-            <h2 id="scene-title">Welcome to the Security Desk</h2>
-            <p id="scene-description">
-                Review the situation carefully before making your decision.
-            </p>
-        </div>
-
-        <div class="scene-progress">
-            <div class="scene-progress-fill" id="scene-progress-fill"></div>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- SUBMISSION CONFIRMATION -->
-
-<div class="confirm-overlay" id="confirm-overlay">
-
-    <div class="confirm-box">
-
-        <h2>Submit your assessment?</h2>
-
-        <p id="submit-summary">
-            Please review your responses before submitting.
-        </p>
-
-        <div class="confirm-actions">
-
-            <button type="button"
-                    class="nav-btn previous-btn"
-                    onclick="closeSubmitConfirmation()">
-                Go Back
-            </button>
-
-            <button type="button"
-                    class="nav-btn submit-btn"
-                    id="confirm-submit-btn"
-                    onclick="submitAssessment()">
-                Confirm Submission
-            </button>
-
-        </div>
-
-        <div class="error-message" id="submit-error"></div>
-
-    </div>
-
-</div>
-
-<script>
-"use strict";
-
-/* =====================================================
-   1. SERVER DATA
-===================================================== */
-
-const QUESTIONS = {{ questions | tojson }};
-const ATTEMPT_ID = {{ attempt_id | tojson }};
-
-const TOTAL_QUESTIONS = QUESTIONS.length;
-
-let currentIndex = 0;
-let selectedAnswers = {};
-
-QUESTIONS.forEach((_, index) => {
-    selectedAnswers[index] = null;
-});
-
-let isSubmitting = false;
-let isTransitioning = false;
-let sceneTimer = null;
-let sceneAnimation = null;
-let sceneRenderer = null;
-let sceneCamera = null;
-let scene = null;
-let sceneObjects = [];
-
-
-/* =====================================================
-   2. SAFE TEXT HELPER
-===================================================== */
-
-function escapeHTML(value) {
-
-    return String(value ?? "").replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-    })[character]);
-}
-
-
-function getQuestionTitle(question) {
-    return question.title || "Security Awareness Scenario";
-}
-
-
-/* =====================================================
-   3. EMAIL DISPLAY
-===================================================== */
-
-function renderEmail(email, index) {
-
-    const label = email.label || `Email ${index + 1}`;
-
-    return `
-        <div class="email-card">
-
-            <div class="email-card-header">
-                <h3>${escapeHTML(label)}</h3>
-            </div>
-
-            <div class="email-card-body">
-
-                <div class="email-meta">
-
-                    <div>
-                        <strong>From:</strong>
-                        ${escapeHTML(email.sender || "")}
-                    </div>
-
-                    <div>
-                        <strong>Email:</strong>
-                        ${escapeHTML(email.sender_email || "")}
-                    </div>
-
-                    ${email.to ? `
-                        <div>
-                            <strong>To:</strong>
-                            ${escapeHTML(email.to)}
-                        </div>
-                    ` : ""}
-
-                    ${email.reply_to ? `
-                        <div>
-                            <strong>Reply-To:</strong>
-                            ${escapeHTML(email.reply_to)}
-                        </div>
-                    ` : ""}
-
-                    ${email.timestamp ? `
-                        <div>
-                            <strong>Received:</strong>
-                            ${escapeHTML(email.timestamp)}
-                        </div>
-                    ` : ""}
-
-                </div>
-
-                <div class="email-subject">
-                    ${escapeHTML(email.subject || "")}
-                </div>
-
-                <div class="email-message">
-                    ${escapeHTML(email.body || "")}
-                </div>
-
-                ${email.link ? `
-                    <div class="email-link">
-                        <strong>Link:</strong><br>
-                        ${escapeHTML(email.link)}
-                    </div>
-                ` : ""}
-
-                ${email.attachment ? `
-                    <div class="attachment">
-                        <strong>Attachment:</strong>
-                        ${escapeHTML(email.attachment)}
-                    </div>
-                ` : ""}
-
-            </div>
-
-        </div>
-    `;
-}
-
-
-/* =====================================================
-   4. RENDER QUESTION
-===================================================== */
-
-function renderQuestion() {
-
-    const question = QUESTIONS[currentIndex];
-
-    if (!question) return;
-
-    document.getElementById("category").textContent =
-        question.category || "PHISHING AWARENESS";
-
-    document.getElementById("question-title").textContent =
-        getQuestionTitle(question);
-
-    document.getElementById("question-counter").textContent =
-        `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
-
-    document.getElementById("progress-bar").style.width =
-        ((currentIndex + 1) / TOTAL_QUESTIONS * 100) + "%";
-
-    const scenarioElement = document.getElementById("scenario");
-
-    if (question.scenario) {
-        scenarioElement.style.display = "block";
-        scenarioElement.textContent = question.scenario;
-    } else {
-        scenarioElement.style.display = "none";
-        scenarioElement.textContent = "";
+import os
+import sqlite3
+import secrets
+import json
+import io
+import csv
+import random
+import logging
+
+from datetime import datetime, timezone
+from functools import wraps
+
+from flask import (
+    Flask,
+    request,
+    session,
+    redirect,
+    render_template,
+    abort,
+    Response,
+    jsonify,
+    url_for
+)
+
+# =========================================================
+# 1. FLASK INITIALIZATION
+# =========================================================
+
+app = Flask(__name__)
+
+app.secret_key = os.environ.get("SECRET_KEY")
+
+if not app.secret_key:
+    app.secret_key = "development-only-change-this-secret-key"
+
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = (
+    os.environ.get("RENDER", "").lower() == "true"
+)
+
+app.config["PERMANENT_SESSION_LIFETIME"] = 86400
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("phishing_assessment")
+
+# =========================================================
+# 2. CONFIGURATION
+# =========================================================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB = os.environ.get(
+    "DATABASE_PATH",
+    os.path.join(BASE_DIR, "responses.sqlite3")
+)
+
+CORP = "fujisilvertech.com"
+PASS_MARK = 80
+
+OWNER = os.environ.get(
+    "INITIAL_ADMIN_EMAIL",
+    "Akshay.Korukonda@smartims.com"
+).strip().lower()
+
+ADMINS = {OWNER}
+
+ADMINS.update(
+    email.strip().lower()
+    for email in os.environ.get("ADMIN_EMAILS", "").split(",")
+    if email.strip()
+)
+
+ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
+
+QUESTION_FILE = os.path.join(BASE_DIR, "questions.json")
+
+REQUIRED_SETS = ("A", "B", "C")
+
+# =========================================================
+# 3. LOAD QUESTION SETS
+# =========================================================
+
+def load_questions():
+
+    if not os.path.exists(QUESTION_FILE):
+        raise FileNotFoundError(
+            "questions.json was not found beside app.py."
+        )
+
+    with open(QUESTION_FILE, "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    if not isinstance(data, dict) or "sets" not in data:
+        raise ValueError("questions.json must contain a sets object.")
+
+    sets = data["sets"]
+
+    if not isinstance(sets, dict):
+        raise ValueError("The sets value must be an object.")
+
+    for set_name in REQUIRED_SETS:
+
+        questions = sets.get(set_name)
+
+        if not isinstance(questions, list) or len(questions) != 10:
+            raise ValueError(
+                f"Set {set_name} must contain exactly 10 questions."
+            )
+
+        for index, question in enumerate(questions):
+
+            if not isinstance(question, dict):
+                raise ValueError(
+                    f"Invalid question in Set {set_name}, Q{index + 1}."
+                )
+
+            options = question.get("options")
+            correct = question.get("correct")
+
+            if not isinstance(options, list) or len(options) < 2:
+                raise ValueError(
+                    f"Set {set_name}, Q{index + 1} needs at least two options."
+                )
+
+            if not all(isinstance(option, str) for option in options):
+                raise ValueError(
+                    f"Set {set_name}, Q{index + 1} has invalid options."
+                )
+
+            if (
+                isinstance(correct, bool)
+                or not isinstance(correct, int)
+                or correct < 0
+                or correct >= len(options)
+            ):
+                raise ValueError(
+                    f"Invalid correct answer in Set {set_name}, Q{index + 1}."
+                )
+
+    return {
+        name: sets[name]
+        for name in REQUIRED_SETS
     }
 
-    const emailNoteElement = document.getElementById("email-note");
 
-    if (question.email_note) {
-        emailNoteElement.style.display = "block";
-        emailNoteElement.textContent = question.email_note;
-    } else {
-        emailNoteElement.style.display = "none";
-        emailNoteElement.textContent = "";
+QUESTION_SETS = load_questions()
+
+# =========================================================
+# 4. DATABASE
+# =========================================================
+
+def get_db():
+
+    connection = sqlite3.connect(DB, timeout=30)
+
+    connection.row_factory = sqlite3.Row
+
+    connection.execute("PRAGMA busy_timeout = 30000")
+
+    return connection
+
+
+def init_db():
+
+    db_directory = os.path.dirname(DB)
+
+    if db_directory:
+        os.makedirs(db_directory, exist_ok=True)
+
+    connection = get_db()
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS attempts (
+            id TEXT PRIMARY KEY,
+            email TEXT NOT NULL,
+            started TEXT,
+            completed TEXT,
+            duration INTEGER DEFAULT 0,
+            score INTEGER DEFAULT 0,
+            answers TEXT,
+            questions_snapshot TEXT,
+            set_number TEXT
+        )
+    """)
+
+    columns = {
+        row["name"]
+        for row in connection.execute(
+            "PRAGMA table_info(attempts)"
+        ).fetchall()
     }
 
-    renderEmailArea(question);
-    renderOptions(question);
-    renderQuestionNavigation();
+    migrations = {
+        "questions_snapshot": "TEXT",
+        "answers": "TEXT",
+        "set_number": "TEXT",
+        "duration": "INTEGER DEFAULT 0",
+        "score": "INTEGER DEFAULT 0"
+    }
 
-    const card = document.getElementById("quiz-card");
+    for column, column_type in migrations.items():
 
-    card.style.animation = "none";
-    void card.offsetWidth;
-    card.style.animation = "fadeIn .4s ease";
+        if column not in columns:
+            connection.execute(
+                f"ALTER TABLE attempts ADD COLUMN {column} {column_type}"
+            )
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_attempts_email
+        ON attempts(email)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_attempts_completed
+        ON attempts(completed)
+    """)
+
+    connection.commit()
+    connection.close()
+
+    logger.info("Database initialized: %s", DB)
+
+
+init_db()
+
+# =========================================================
+# 5. GENERAL HELPERS
+# =========================================================
+
+def current_time():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def corp(email):
+
+    email = email.strip().lower()
+
+    return (
+        "@" in email
+        and email.endswith("@" + CORP)
+    )
+
+
+def signed():
+    return bool(session.get("email"))
+
+
+def admin_required():
+
+    return (
+        session.get("email", "").lower() in ADMINS
+        and session.get("is_admin") is True
+    )
+
+
+def login_required(function):
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+
+        if not signed():
+            return redirect(url_for("home"))
+
+        return function(*args, **kwargs)
+
+    return wrapper
+
+
+def admin_only(function):
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+
+        if not signed():
+            return redirect(url_for("home"))
+
+        if not admin_required():
+            abort(403)
+
+        return function(*args, **kwargs)
+
+    return wrapper
+
+
+def safe_json(value, fallback):
+
+    try:
+        return json.loads(value) if value else fallback
+
+    except (TypeError, ValueError):
+        return fallback
+
+
+def is_passed(score):
+
+    try:
+        return float(score or 0) >= PASS_MARK
+
+    except (ValueError, TypeError):
+        return False
+
+
+def make_attempt_questions(set_number):
+
+    return json.loads(
+        json.dumps(QUESTION_SETS[set_number])
+    )
+
+
+# =========================================================
+# 6. QUESTION SANITIZATION
+# =========================================================
+
+ANSWER_FIELDS = {
+    "correct",
+    "correct_ids",
+    "correct_mistakes",
+    "correct_errors",
+    "explanation",
+    "answer_key",
+    "correct_answer",
+    "correct_answers"
 }
 
 
-/* =====================================================
-   5. EMAIL AREA
-===================================================== */
+def sanitize_question(question):
 
-function renderEmailArea(question) {
+    if isinstance(question, list):
 
-    const area = document.getElementById("email-area");
+        return [
+            sanitize_question(item)
+            for item in question
+        ]
 
-    area.innerHTML = "";
+    if isinstance(question, dict):
 
-    if (question.comparison && Array.isArray(question.emails)) {
+        clean = {}
 
-        area.innerHTML = `
-            <div class="email-grid">
-                ${question.emails.map((email, index) =>
-                    renderEmail(email, index)
-                ).join("")}
-            </div>
-        `;
+        for key, value in question.items():
 
-        return;
+            if key.lower() in ANSWER_FIELDS:
+                continue
+
+            clean[key] = sanitize_question(value)
+
+        return clean
+
+    return question
+
+
+def is_multi_select_question(question):
+
+    return question.get("mode") in (
+        "find_mistakes",
+        "click_errors"
+    )
+
+
+def get_correct_ids(question):
+
+    correct = question.get("correct_ids")
+
+    if correct is None:
+        correct = question.get("correct", [])
+
+    if isinstance(correct, str):
+        correct = [correct]
+
+    return {
+        str(item)
+        for item in (correct or [])
     }
 
-    // Supports the new single-email question structure
-    if (question.email && typeof question.email === "object") {
-
-        area.innerHTML = `
-            <div class="email-grid">
-                ${renderEmail(question.email, 0)}
-            </div>
-        `;
 
-        return;
-    }
-
-    // Supports the existing single-email question structure
-    if (
-        question.sender ||
-        question.sender_email ||
-        question.subject ||
-        question.display_link
-    ) {
+# =========================================================
+# 7. ANSWER VALIDATION AND SCORING
+# =========================================================
 
-        const email = {
-            label: "Message under review",
-            sender: question.sender,
-            sender_email: question.sender_email,
-            to: question.to,
-            reply_to: question.reply_to,
-            timestamp: question.timestamp,
-            subject: question.subject,
-            body: question.scenario,
-            link: question.display_link,
-            attachment: question.attachment
-        };
+def validate_and_score(questions, answers):
 
-        area.innerHTML = `
-            <div class="email-grid">
-                ${renderEmail(email, 0)}
-            </div>
-        `;
-    }
-}
+    if not isinstance(answers, list):
+        raise ValueError("Answers must be a list.")
 
+    if len(answers) != len(questions):
+        raise ValueError(
+            "The number of answers does not match the quiz."
+        )
 
-/* =====================================================
-   6. RENDER OPTIONS
-===================================================== */
+    score = 0
+    reviewed_answers = []
 
-function renderOptions(question) {
+    for index, question in enumerate(questions):
 
-    const container = document.getElementById("options");
+        answer = answers[index]
 
-    container.innerHTML = "";
+        if is_multi_select_question(question):
 
-    const options = Array.isArray(question.options)
-        ? question.options
-        : [];
+            if answer is None:
+                answer = []
 
-    const selected = selectedAnswers[currentIndex];
+            if not isinstance(answer, list):
+                raise ValueError(
+                    f"Invalid answer format for question {index + 1}."
+                )
 
-    options.forEach((option, index) => {
+            correct_ids = get_correct_ids(question)
 
-        const label = document.createElement("label");
+            selected_ids = {
+                str(item)
+                for item in answer
+            }
 
-        label.className = "option";
+            is_correct = selected_ids == correct_ids
 
-        if (selected === index) {
-            label.classList.add("selected");
-        }
+            reviewed_answers.append(
+                sorted(selected_ids)
+            )
 
-        if (selected !== null || isTransitioning) {
-            label.style.pointerEvents = "none";
-            label.style.opacity = "0.8";
-        }
+        else:
 
-        label.innerHTML = `
-            <input
-                type="radio"
-                name="answer"
-                value="${index}"
-                ${selected === index ? "checked" : ""}
-                ${selected !== null || isTransitioning ? "disabled" : ""}
-            >
+            options = question.get("options", [])
 
-            <span class="option-letter">
-                ${String.fromCharCode(65 + index)}.
-            </span>
+            if answer is None:
 
-            <span class="option-text">
-                ${escapeHTML(option)}
-            </span>
-        `;
+                is_correct = False
+                reviewed_answers.append(None)
 
-        const input = label.querySelector("input");
+            else:
 
-        input.addEventListener("change", function() {
-            selectAnswer(index);
-        });
+                if (
+                    isinstance(answer, bool)
+                    or not isinstance(answer, int)
+                ):
+                    raise ValueError(
+                        f"Invalid answer for question {index + 1}."
+                    )
 
-        container.appendChild(label);
-    });
-}
+                if answer < 0 or answer >= len(options):
+                    raise ValueError(
+                        f"Answer out of range for question {index + 1}."
+                    )
 
+                is_correct = (
+                    answer == question.get("correct")
+                )
 
-/* =====================================================
-   7. SELECT ANSWER - INSTANT AUTO ADVANCE
-===================================================== */
+                reviewed_answers.append(answer)
 
-function selectAnswer(index) {
+        if is_correct:
+            score += 1
 
-    if (isTransitioning || isSubmitting) {
-        return;
-    }
+    percentage = round(
+        (score / len(questions)) * 100
+    ) if questions else 0
 
-    if (selectedAnswers[currentIndex] !== null) {
-        return;
-    }
+    return percentage, reviewed_answers
 
-    // Save the answer
-    selectedAnswers[currentIndex] = index;
 
-    // Lock the selected answer
-    isTransitioning = true;
+# =========================================================
+# 8. HOME / LOGIN
+# =========================================================
 
-    renderQuestionNavigation();
-    renderOptions(QUESTIONS[currentIndex]);
+@app.route("/", methods=["GET", "POST"])
+def home():
 
-    // No delay or outcome animation
-    isTransitioning = false;
+    error = None
 
-    if (currentIndex < TOTAL_QUESTIONS - 1) {
+    if request.method == "POST":
 
-        // Immediately move to the next question
-        currentIndex++;
+        email = request.form.get(
+            "email", ""
+        ).strip().lower()
 
-        renderQuestion();
+        password = request.form.get(
+            "admin_key", ""
+        )
 
-    } else {
+        if not email:
 
-        // Last question: show submission confirmation
-        openSubmitConfirmation();
-    }
-}
+            error = "Please enter your email address."
 
+        elif email in ADMINS:
 
-/* =====================================================
-   8. QUESTION NAVIGATION
-===================================================== */
+            if not ADMIN_ACCESS_KEY:
 
-function renderQuestionNavigation() {
+                error = (
+                    "Admin access is not configured. "
+                    "Please configure ADMIN_ACCESS_KEY in Render."
+                )
 
-    const previousButton = document.getElementById("previous-btn");
-    const nextButton = document.getElementById("next-btn");
-    const submitButton = document.getElementById("submit-btn");
+            elif secrets.compare_digest(password, ADMIN_ACCESS_KEY):
 
-    previousButton.disabled =
-        currentIndex === 0 || isTransitioning;
+                session.clear()
 
-    if (currentIndex === TOTAL_QUESTIONS - 1) {
+                session["email"] = email
+                session["is_admin"] = True
+                session.permanent = True
 
-        nextButton.style.display = "none";
-        submitButton.style.display = "inline-block";
+                return redirect(url_for("admin"))
 
-    } else {
+            else:
 
-        nextButton.style.display = "inline-block";
-        submitButton.style.display = "none";
-    }
+                error = "Invalid administrator access key."
 
-    nextButton.disabled = isTransitioning;
+        elif corp(email):
 
-    const list = document.getElementById("question-list");
+            session.clear()
 
-    list.innerHTML = "";
+            session["email"] = email
+            session["is_admin"] = False
+            session.permanent = True
 
-    QUESTIONS.forEach((_, index) => {
+            return redirect(url_for("quiz"))
 
-        const button = document.createElement("button");
+        else:
 
-        button.type = "button";
-        button.className = "question-dot";
-        button.textContent = index + 1;
+            error = (
+                "Access restricted. "
+                "Please use your authorized corporate email."
+            )
 
-        if (index === currentIndex) {
-            button.classList.add("active");
-        }
+    return render_template("home.html", error=error)
 
-        if (selectedAnswers[index] !== null) {
-            button.classList.add("answered");
-        }
 
-        button.disabled = isTransitioning;
+# =========================================================
+# 9. QUIZ PAGE
+# =========================================================
 
-        button.addEventListener("click", () => {
+@app.route("/quiz")
+@login_required
+def quiz():
 
-            if (isTransitioning) return;
+    if admin_required():
+        return redirect(url_for("admin"))
 
-            currentIndex = index;
+    email = session["email"].strip().lower()
 
-            renderQuestion();
+    connection = get_db()
 
-            showIntroScene();
-        });
+    # Resume the employee's existing incomplete attempt.
 
-        list.appendChild(button);
-    });
-}
+    attempt = connection.execute("""
+        SELECT *
+        FROM attempts
+        WHERE LOWER(email) = ?
+        AND completed IS NULL
+        ORDER BY started DESC
+        LIMIT 1
+    """, (email,)).fetchone()
 
+    if attempt:
 
-function previousQuestion() {
+        attempt_id = attempt["id"]
 
-    if (isTransitioning || currentIndex <= 0) {
-        return;
-    }
+        set_number = attempt["set_number"] or "A"
 
-    currentIndex--;
+        questions = safe_json(
+            attempt["questions_snapshot"],
+            []
+        )
 
-    renderQuestion();
+        if not questions:
 
-    showIntroScene();
-}
+            connection.close()
 
+            logger.error(
+                "Missing question snapshot for attempt %s",
+                attempt_id
+            )
 
-function nextQuestion() {
+            return (
+                "Saved quiz data is missing. Please contact the administrator.",
+                500
+            )
 
-    if (
-        isTransitioning ||
-        currentIndex >= TOTAL_QUESTIONS - 1
-    ) {
-        return;
-    }
+        logger.info(
+            "Resuming attempt %s for %s",
+            attempt_id,
+            email
+        )
 
-    currentIndex++;
+    else:
 
-    renderQuestion();
+        set_number = random.choice(list(REQUIRED_SETS))
 
-    showIntroScene();
-}
+        attempt_id = secrets.token_urlsafe(24)
 
+        questions = make_attempt_questions(set_number)
 
-/* =====================================================
-   9. SUBMISSION CONFIRMATION
-===================================================== */
+        started = current_time()
 
-function openSubmitConfirmation() {
+        connection.execute("""
+            INSERT INTO attempts (
+                id,
+                email,
+                started,
+                completed,
+                duration,
+                score,
+                answers,
+                questions_snapshot,
+                set_number
+            )
+            VALUES (?, ?, ?, NULL, 0, 0, NULL, ?, ?)
+        """, (
+            attempt_id,
+            email,
+            started,
+            json.dumps(questions),
+            set_number
+        ))
 
-    const answered = Object.values(selectedAnswers).filter(
-        answer => answer !== null
-    ).length;
+        connection.commit()
 
-    const unanswered = TOTAL_QUESTIONS - answered;
+        # Verify the newly created attempt exists.
 
-    const summary = document.getElementById("submit-summary");
+        verified = connection.execute("""
+            SELECT id
+            FROM attempts
+            WHERE id = ?
+            AND email = ?
+        """, (attempt_id, email)).fetchone()
 
-    if (unanswered > 0) {
+        if not verified:
 
-        summary.textContent =
-            `You have answered ${answered} of ${TOTAL_QUESTIONS} questions. ` +
-            `${unanswered} question(s) are unanswered and will count as incorrect. ` +
-            `Do you want to submit?`;
+            connection.close()
 
-    } else {
+            logger.error(
+                "New attempt could not be verified: %s",
+                attempt_id
+            )
 
-        summary.textContent =
-            `You have answered all ${TOTAL_QUESTIONS} questions. ` +
-            `Are you ready to submit your assessment?`;
-    }
+            return "Unable to create quiz attempt.", 500
 
-    document.getElementById("submit-error").style.display = "none";
+        logger.info(
+            "Created attempt %s for %s, Set %s",
+            attempt_id,
+            email,
+            set_number
+        )
 
-    document.getElementById("confirm-overlay").classList.add("visible");
-}
+    connection.close()
 
+    # Store the attempt ID in the employee's session.
 
-function closeSubmitConfirmation() {
+    session["attempt_id"] = attempt_id
+    session.permanent = True
 
-    if (isSubmitting) return;
+    participant_questions = [
+        sanitize_question(question)
+        for question in questions
+    ]
 
-    document.getElementById("confirm-overlay").classList.remove("visible");
-}
+    return render_template(
+        "quiz.html",
+        questions=participant_questions,
+        attempt_id=attempt_id,
+        set_number=set_number
+    )
 
 
-/* =====================================================
-   10. SUBMIT ASSESSMENT
-===================================================== */
+# =========================================================
+# 10. SUBMIT QUIZ
+# =========================================================
 
-async function submitAssessment() {
+@app.route("/submit", methods=["POST"])
+@login_required
+def submit():
 
-    if (isSubmitting) return;
+    if admin_required():
 
-    isSubmitting = true;
+        return jsonify({
+            "success": False,
+            "error": "Administrators cannot submit employee quizzes."
+        }), 403
 
-    const submitButton = document.getElementById("confirm-submit-btn");
-    const errorElement = document.getElementById("submit-error");
+    data = request.get_json(silent=True) or {}
 
-    submitButton.disabled = true;
-    submitButton.textContent = "Submitting...";
+    answers = data.get("answers")
 
-    errorElement.style.display = "none";
+    email = session.get("email", "").strip().lower()
 
-    const answers = QUESTIONS.map((_, index) => {
+    session_attempt_id = session.get("attempt_id")
 
-        const answer = selectedAnswers[index];
+    received_attempt_id = data.get("attempt_id")
 
-        return answer === undefined ? null : answer;
+    # Prefer the session ID but allow the page's ID as a fallback.
+    attempt_id = session_attempt_id or received_attempt_id
 
-    });
+    logger.info("========== QUIZ SUBMISSION ==========")
+    logger.info("Employee: %s", email)
+    logger.info("Session attempt ID present: %s", bool(session_attempt_id))
+    logger.info("Request attempt ID present: %s", bool(received_attempt_id))
+    logger.info("Database: %s", DB)
 
-    try {
+    if not attempt_id:
 
-        const response = await fetch("/submit", {
+        logger.warning("Submission rejected: missing attempt ID")
 
-            method: "POST",
+        return jsonify({
+            "success": False,
+            "error": "Quiz session expired. Please log in again."
+        }), 401
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+    connection = get_db()
 
-            body: JSON.stringify({
-                attempt_id: ATTEMPT_ID,
-                answers: answers
+    # Find the attempt belonging to this employee.
+
+    attempt = connection.execute("""
+        SELECT *
+        FROM attempts
+        WHERE id = ?
+        AND LOWER(email) = ?
+    """, (
+        attempt_id,
+        email
+    )).fetchone()
+
+    # Diagnostic information if the attempt cannot be found.
+
+    if not attempt:
+
+        logger.error(
+            "ATTEMPT NOT FOUND. Attempt ID: %s, Email: %s",
+            attempt_id,
+            email
+        )
+
+        # Check whether this ID exists for another email.
+        id_exists = connection.execute("""
+            SELECT email
+            FROM attempts
+            WHERE id = ?
+        """, (attempt_id,)).fetchone()
+
+        # Check whether this employee has an unfinished attempt.
+        employee_attempt = connection.execute("""
+            SELECT id
+            FROM attempts
+            WHERE LOWER(email) = ?
+            AND completed IS NULL
+            ORDER BY started DESC
+            LIMIT 1
+        """, (email,)).fetchone()
+
+        logger.error(
+            "Attempt ID exists in DB: %s",
+            bool(id_exists)
+        )
+
+        logger.error(
+            "Employee has another incomplete attempt: %s",
+            bool(employee_attempt)
+        )
+
+        connection.close()
+
+        return jsonify({
+            "success": False,
+            "error": (
+                "Your quiz session could not be matched with the saved "
+                "assessment. Please refresh the quiz page and try again. "
+                "If the problem continues, contact the administrator."
+            )
+        }), 404
+
+    logger.info(
+        "Attempt found successfully: %s",
+        attempt_id
+    )
+
+    # Already submitted? Send the employee to the existing result.
+
+    if attempt["completed"]:
+
+        connection.close()
+
+        session.pop("attempt_id", None)
+
+        return jsonify({
+            "success": True,
+            "url": url_for(
+                "result",
+                attempt_id=attempt_id
+            )
+        })
+
+    questions = safe_json(
+        attempt["questions_snapshot"],
+        []
+    )
+
+    if not questions:
+
+        connection.close()
+
+        return jsonify({
+            "success": False,
+            "error": "Question data is missing."
+        }), 500
+
+    # Convert dictionary answers into a list if needed.
+
+    if isinstance(answers, dict):
+
+        answers = [
+            answers.get(str(index), answers.get(index))
+            for index in range(len(questions))
+        ]
+
+    try:
+
+        percentage, reviewed_answers = validate_and_score(
+            questions,
+            answers
+        )
+
+    except ValueError as error:
+
+        connection.close()
+
+        return jsonify({
+            "success": False,
+            "error": str(error)
+        }), 400
+
+    # Calculate quiz duration.
+
+    started = attempt["started"]
+
+    try:
+
+        start_datetime = datetime.fromisoformat(started)
+
+        if start_datetime.tzinfo is None:
+            start_datetime = start_datetime.replace(
+                tzinfo=timezone.utc
+            )
+
+        duration = max(
+            0,
+            int(
+                (
+                    datetime.now(timezone.utc)
+                    - start_datetime
+                ).total_seconds()
+            )
+        )
+
+    except (ValueError, TypeError):
+
+        duration = 0
+
+    completed = current_time()
+
+    # Save result only if this attempt has not already been submitted.
+
+    cursor = connection.execute("""
+        UPDATE attempts
+        SET completed = ?,
+            duration = ?,
+            score = ?,
+            answers = ?
+        WHERE id = ?
+        AND LOWER(email) = ?
+        AND completed IS NULL
+    """, (
+        completed,
+        duration,
+        percentage,
+        json.dumps(reviewed_answers),
+        attempt_id,
+        email
+    ))
+
+    connection.commit()
+
+    if cursor.rowcount == 0:
+
+        # Another request may have submitted it at the same time.
+
+        existing = connection.execute("""
+            SELECT completed
+            FROM attempts
+            WHERE id = ?
+            AND LOWER(email) = ?
+        """, (attempt_id, email)).fetchone()
+
+        connection.close()
+
+        if existing and existing["completed"]:
+
+            session.pop("attempt_id", None)
+
+            return jsonify({
+                "success": True,
+                "url": url_for(
+                    "result",
+                    attempt_id=attempt_id
+                )
             })
 
-        });
+        return jsonify({
+            "success": False,
+            "error": "Unable to save your assessment. Please try again."
+        }), 409
 
-        const data = await response.json();
+    connection.close()
 
-        if (!response.ok || !data.success) {
+    session.pop("attempt_id", None)
 
-            throw new Error(
-                data.error || "Unable to submit assessment."
-            );
+    logger.info(
+        "Submission successful. Attempt: %s, Score: %s%%",
+        attempt_id,
+        percentage
+    )
+
+    return jsonify({
+        "success": True,
+        "url": url_for(
+            "result",
+            attempt_id=attempt_id
+        )
+    })
+
+
+# =========================================================
+# 11. RESULT PAGE
+# =========================================================
+
+@app.route("/result/<attempt_id>")
+@login_required
+def result(attempt_id):
+
+    connection = get_db()
+
+    attempt = connection.execute("""
+        SELECT *
+        FROM attempts
+        WHERE id = ?
+        AND LOWER(email) = ?
+        AND completed IS NOT NULL
+    """, (
+        attempt_id,
+        session["email"].strip().lower()
+    )).fetchone()
+
+    connection.close()
+
+    if not attempt:
+        abort(404)
+
+    return render_template(
+        "result.html",
+        r=attempt,
+        passed=is_passed(attempt["score"]),
+        pass_mark=PASS_MARK
+    )
+
+
+# =========================================================
+# 12. ADMIN DASHBOARD
+# =========================================================
+
+@app.route("/admin")
+@admin_only
+def admin():
+
+    connection = get_db()
+
+    attempts = connection.execute("""
+        SELECT *
+        FROM attempts
+        WHERE completed IS NOT NULL
+        ORDER BY completed DESC
+    """).fetchall()
+
+    connection.close()
+
+    rows = []
+
+    total_score = 0
+
+    for attempt in attempts:
+
+        questions = safe_json(
+            attempt["questions_snapshot"],
+            []
+        )
+
+        answers = safe_json(
+            attempt["answers"],
+            []
+        )
+
+        score = attempt["score"] or 0
+
+        total_score += score
+
+        set_number = attempt["set_number"] or "Legacy"
+
+        rows.append({
+            "id": attempt["id"],
+            "email": attempt["email"],
+            "started": attempt["started"],
+            "completed": attempt["completed"],
+            "duration": attempt["duration"],
+            "score": score,
+            "set_number": set_number,
+            "passed": is_passed(score),
+            "status": (
+                "PASSED"
+                if is_passed(score)
+                else "NOT PASSED"
+            ),
+            "answers": answers,
+            "questions": questions,
+            "question_list": questions,
+            "answer_list": answers
+        })
+
+    avg = round(
+        total_score / len(rows),
+        1
+    ) if rows else 0
+
+    return render_template(
+        "admin.html",
+        rows=rows,
+        avg=avg,
+        questions=QUESTION_SETS,
+        pass_mark=PASS_MARK
+    )
+
+
+# =========================================================
+# 13. CSV EXPORT
+# =========================================================
+
+@app.route("/admin/export")
+@admin_only
+def export_csv():
+
+    connection = get_db()
+
+    attempts = connection.execute("""
+        SELECT *
+        FROM attempts
+        WHERE completed IS NOT NULL
+        ORDER BY completed DESC
+    """).fetchall()
+
+    connection.close()
+
+    output = io.StringIO()
+
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "Employee Email",
+        "Assigned Set",
+        "Started",
+        "Completed",
+        "Duration (Seconds)",
+        "Score (%)",
+        "Pass/Fail",
+        "Answers"
+    ])
+
+    for attempt in attempts:
+
+        answers = safe_json(
+            attempt["answers"],
+            []
+        )
+
+        score = attempt["score"] or 0
+
+        status = (
+            "PASSED"
+            if is_passed(score)
+            else "NOT PASSED"
+        )
+
+        writer.writerow([
+            attempt["email"],
+            attempt["set_number"] or "Legacy",
+            attempt["started"],
+            attempt["completed"],
+            attempt["duration"],
+            score,
+            status,
+            json.dumps(answers)
+        ])
+
+    csv_data = "\ufeff" + output.getvalue()
+
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition":
+                "attachment; filename=phishing_assessment_report.csv"
         }
+    )
 
-        if (!data.url) {
-            throw new Error("Result page URL was not returned.");
-        }
 
-        window.location.href = data.url;
+# =========================================================
+# 14. LOGOUT
+# =========================================================
 
-    } catch (error) {
+@app.route("/logout")
+def logout():
 
-        isSubmitting = false;
+    session.clear()
 
-        submitButton.disabled = false;
-        submitButton.textContent = "Confirm Submission";
+    return redirect(url_for("home"))
 
-        errorElement.textContent =
-            error.message || "Something went wrong. Please try again.";
 
-        errorElement.style.display = "block";
-    }
-}
+# =========================================================
+# 15. HEALTH CHECK
+# =========================================================
 
+@app.route("/health")
+def health():
 
-/* =====================================================
-   11. THREE.JS SCENE
-===================================================== */
+    return jsonify({
+        "status": "ok",
+        "application": "Fuji Silvertech Phishing Awareness",
+        "pass_mark": PASS_MARK,
+        "question_sets": list(REQUIRED_SETS),
+        "database_configured": bool(DB)
+    })
 
-function stopSceneAnimation() {
 
-    if (sceneTimer) {
-        clearTimeout(sceneTimer);
-        sceneTimer = null;
-    }
+# =========================================================
+# 16. LOCAL DEVELOPMENT
+# =========================================================
 
-    if (sceneAnimation) {
-        cancelAnimationFrame(sceneAnimation);
-        sceneAnimation = null;
-    }
+if __name__ == "__main__":
 
-    if (sceneRenderer) {
-
-        sceneRenderer.dispose();
-
-        if (sceneRenderer.domElement.parentNode) {
-            sceneRenderer.domElement.parentNode.removeChild(
-                sceneRenderer.domElement
-            );
-        }
-
-        sceneRenderer = null;
-    }
-
-    scene = null;
-    sceneCamera = null;
-    sceneObjects = [];
-}
-
-
-function createScene() {
-
-    stopSceneAnimation();
-
-    const container = document.getElementById("scene-canvas");
-
-    container.innerHTML = "";
-
-    if (typeof THREE === "undefined") {
-
-        container.innerHTML = `
-            <div style="
-                height:100%;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                text-align:center;
-                padding:25px;
-                color:#52768c;
-            ">
-                Security simulation
-            </div>
-        `;
-
-        return;
-    }
-
-    const width = container.clientWidth || 800;
-    const height = container.clientHeight || 320;
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdff3f7);
-
-    sceneCamera = new THREE.PerspectiveCamera(
-        45, width / height, 0.1, 100
-    );
-
-    sceneCamera.position.set(0, 4.5, 9);
-    sceneCamera.lookAt(0, 1.2, 0);
-
-    sceneRenderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: false
-    });
-
-    sceneRenderer.setSize(width, height);
-    sceneRenderer.setPixelRatio(
-        Math.min(window.devicePixelRatio || 1, 2)
-    );
-
-    sceneRenderer.shadowMap.enabled = true;
-
-    container.appendChild(sceneRenderer.domElement);
-
-    const ambient = new THREE.HemisphereLight(
-        0xffffff, 0x8aaab7, 2
-    );
-
-    scene.add(ambient);
-
-    const light = new THREE.DirectionalLight(0xffffff, 2);
-
-    light.position.set(4, 8, 5);
-    light.castShadow = true;
-
-    scene.add(light);
-
-    const floor = new THREE.Mesh(
-        new THREE.BoxGeometry(12, .25, 8),
-        new THREE.MeshStandardMaterial({
-            color: 0xb9dce5,
-            roughness: .85
-        })
-    );
-
-    floor.position.y = -.2;
-    floor.receiveShadow = true;
-
-    scene.add(floor);
-
-    const deskMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8bb6c9
-    });
-
-    const desk = new THREE.Mesh(
-        new THREE.BoxGeometry(3.3, .22, 1.6),
-        deskMaterial
-    );
-
-    desk.position.set(0, 1.1, 0);
-    desk.castShadow = true;
-
-    scene.add(desk);
-
-    const legMaterial = new THREE.MeshStandardMaterial({
-        color: 0x557d92
-    });
-
-    for (const x of [-1.35, 1.35]) {
-        for (const z of [-.55, .55]) {
-
-            const leg = new THREE.Mesh(
-                new THREE.BoxGeometry(.13, 1.1, .13),
-                legMaterial
-            );
-
-            leg.position.set(x, .45, z);
-
-            scene.add(leg);
-        }
-    }
-
-    const monitor = new THREE.Mesh(
-        new THREE.BoxGeometry(1.7, 1.05, .12),
-        new THREE.MeshStandardMaterial({
-            color: 0x244c65,
-            roughness: .4
-        })
-    );
-
-    monitor.position.set(0, 2, -.45);
-
-    scene.add(monitor);
-
-    const screen = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.48, .82),
-        new THREE.MeshStandardMaterial({
-            color: 0x8ee4df,
-            emissive: 0x1b777c,
-            emissiveIntensity: .35
-        })
-    );
-
-    screen.position.set(0, 2, -.375);
-
-    scene.add(screen);
-
-    const stand = new THREE.Mesh(
-        new THREE.BoxGeometry(.16, .65, .16),
-        legMaterial
-    );
-
-    stand.position.set(0, 1.58, -.45);
-
-    scene.add(stand);
-
-    const keyboard = new THREE.Mesh(
-        new THREE.BoxGeometry(1.15, .06, .4),
-        new THREE.MeshStandardMaterial({
-            color: 0x345f78
-        })
-    );
-
-    keyboard.position.set(0, 1.25, .55);
-
-    scene.add(keyboard);
-
-    const chair = new THREE.Mesh(
-        new THREE.BoxGeometry(1.1, .25, .9),
-        new THREE.MeshStandardMaterial({
-            color: 0x4c8e9b
-        })
-    );
-
-    chair.position.set(0, .55, 1.7);
-
-    scene.add(chair);
-
-    const chairBack = new THREE.Mesh(
-        new THREE.BoxGeometry(1.1, 1.2, .18),
-        new THREE.MeshStandardMaterial({
-            color: 0x3f8290
-        })
-    );
-
-    chairBack.position.set(0, 1.15, 2.05);
-
-    scene.add(chairBack);
-
-    const message = new THREE.Group();
-
-    const messageBody = new THREE.Mesh(
-        new THREE.BoxGeometry(1.1, .72, .12),
-        new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            emissive: 0x77cdd4,
-            emissiveIntensity: .15
-        })
-    );
-
-    message.add(messageBody);
-
-    const envelopeLine = new THREE.Mesh(
-        new THREE.BoxGeometry(.75, .04, .04),
-        new THREE.MeshStandardMaterial({
-            color: 0x159ab4
-        })
-    );
-
-    envelopeLine.position.y = -.05;
-    envelopeLine.position.z = .08;
-
-    message.add(envelopeLine);
-
-    message.position.set(-2.6, 2.8, .5);
-
-    scene.add(message);
-
-    sceneObjects.push(message);
-
-    const shield = new THREE.Group();
-
-    const shieldShape = new THREE.Mesh(
-        new THREE.CylinderGeometry(.65, .55, .14, 6),
-        new THREE.MeshStandardMaterial({
-            color: 0x1cabb0,
-            metalness: .25,
-            roughness: .35
-        })
-    );
-
-    shieldShape.rotation.x = Math.PI / 2;
-
-    shield.add(shieldShape);
-
-    shield.position.set(2.6, 2.7, .4);
-
-    scene.add(shield);
-
-    sceneObjects.push(shield);
-
-    const particleGeometry = new THREE.BufferGeometry();
-    const particlePositions = [];
-
-    for (let i = 0; i < 80; i++) {
-
-        particlePositions.push(
-            (Math.random() - .5) * 9,
-            Math.random() * 5,
-            (Math.random() - .5) * 5
-        );
-    }
-
-    particleGeometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(particlePositions, 3)
-    );
-
-    const particles = new THREE.Points(
-        particleGeometry,
-        new THREE.PointsMaterial({
-            color: 0x3eabb5,
-            size: .045,
-            transparent: true,
-            opacity: .65
-        })
-    );
-
-    scene.add(particles);
-
-    sceneObjects.push(particles);
-
-    const animate = () => {
-
-        if (!sceneRenderer || !scene) return;
-
-        sceneAnimation = requestAnimationFrame(animate);
-
-        const elapsed = performance.now() * .001;
-
-        message.position.y =
-            2.8 + Math.sin(elapsed * 1.6) * .17;
-
-        message.rotation.y =
-            Math.sin(elapsed * .7) * .18;
-
-        shield.position.y =
-            2.7 + Math.sin(elapsed * 1.3 + 1) * .17;
-
-        shield.rotation.y =
-            Math.sin(elapsed * .6) * .2;
-
-        particles.rotation.y = elapsed * .025;
-
-        sceneRenderer.render(scene, sceneCamera);
-    };
-
-    animate();
-}
-
-
-/* =====================================================
-   12. SCENE CONTROLS
-===================================================== */
-
-function showScene(title, description, duration = 4500) {
-
-    const overlay = document.getElementById("scene-overlay");
-
-    document.getElementById("scene-title").textContent = title;
-
-    document.getElementById("scene-description").textContent =
-        description;
-
-    const progress = document.getElementById("scene-progress-fill");
-
-    progress.style.transition = "none";
-    progress.style.width = "0%";
-
-    overlay.classList.remove("hidden");
-
-    createScene();
-
-    requestAnimationFrame(() => {
-
-        progress.style.transition =
-            `width ${duration}ms linear`;
-
-        progress.style.width = "100%";
-    });
-
-    sceneTimer = setTimeout(() => {
-        skipScene();
-    }, duration);
-}
-
-
-function skipScene() {
-
-    if (sceneTimer) {
-        clearTimeout(sceneTimer);
-        sceneTimer = null;
-    }
-
-    document.getElementById("scene-overlay").classList.add("hidden");
-
-    stopSceneAnimation();
-}
-
-
-function showIntroScene() {
-
-    showScene(
-        `Investigation ${String(currentIndex + 1).padStart(2, "0")}`,
-        "A new message has arrived. Examine the details carefully and choose the safest response.",
-        4500
-    );
-}
-
-
-/* =====================================================
-   13. START QUIZ
-===================================================== */
-
-function startQuiz() {
-
-    if (!Array.isArray(QUESTIONS) || QUESTIONS.length !== 10) {
-
-        document.getElementById("quiz-card").innerHTML = `
-            <h2>Assessment unavailable</h2>
-            <p>The question data could not be loaded correctly.
-            Please contact the administrator.</p>
-        `;
-
-        skipScene();
-
-        return;
-    }
-
-    renderQuestion();
-    showIntroScene();
-}
-
-
-/* =====================================================
-   14. INITIALIZE
-===================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-    startQuiz();
-});
-
-
-/* =====================================================
-   15. KEYBOARD ACCESSIBILITY
-===================================================== */
-
-document.addEventListener("keydown", event => {
-
-    if (
-        event.target &&
-        ["INPUT", "TEXTAREA"].includes(event.target.tagName)
-    ) {
-        return;
-    }
-
-    if (event.key === "ArrowRight") {
-
-        if (!isTransitioning && currentIndex < TOTAL_QUESTIONS - 1) {
-            nextQuestion();
-        }
-
-    } else if (event.key === "ArrowLeft") {
-
-        if (!isTransitioning && currentIndex > 0) {
-            previousQuestion();
-        }
-
-    } else if (event.key === "Escape") {
-
-        skipScene();
-    }
-});
-
-</script>
-
-</body>
-</html>
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False
+    )
