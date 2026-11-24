@@ -39,7 +39,6 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = (
     os.environ.get("RENDER", "").lower() == "true"
 )
-
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 
@@ -94,12 +93,16 @@ def load_questions():
         data = json.load(file)
 
     if not isinstance(data, dict) or "sets" not in data:
-        raise ValueError("questions.json must contain a sets object.")
+        raise ValueError(
+            "questions.json must contain a sets object."
+        )
 
     sets = data["sets"]
 
     if not isinstance(sets, dict):
-        raise ValueError("The sets value must be an object.")
+        raise ValueError(
+            "The sets value must be an object."
+        )
 
     for set_name in REQUIRED_SETS:
 
@@ -155,9 +158,7 @@ QUESTION_SETS = load_questions()
 def get_db():
 
     connection = sqlite3.connect(DB, timeout=30)
-
     connection.row_factory = sqlite3.Row
-
     connection.execute("PRAGMA busy_timeout = 30000")
 
     return connection
@@ -491,10 +492,12 @@ def home():
                     "Please configure ADMIN_ACCESS_KEY in Render."
                 )
 
-            elif secrets.compare_digest(password, ADMIN_ACCESS_KEY):
+            elif secrets.compare_digest(
+                password,
+                ADMIN_ACCESS_KEY
+            ):
 
                 session.clear()
-
                 session["email"] = email
                 session["is_admin"] = True
                 session.permanent = True
@@ -508,7 +511,6 @@ def home():
         elif corp(email):
 
             session.clear()
-
             session["email"] = email
             session["is_admin"] = False
             session.permanent = True
@@ -522,7 +524,10 @@ def home():
                 "Please use your authorized corporate email."
             )
 
-    return render_template("home.html", error=error)
+    return render_template(
+        "home.html",
+        error=error
+    )
 
 
 # =========================================================
@@ -540,8 +545,6 @@ def quiz():
 
     connection = get_db()
 
-    # Resume the employee's existing incomplete attempt.
-
     attempt = connection.execute("""
         SELECT *
         FROM attempts
@@ -554,7 +557,6 @@ def quiz():
     if attempt:
 
         attempt_id = attempt["id"]
-
         set_number = attempt["set_number"] or "A"
 
         questions = safe_json(
@@ -584,7 +586,9 @@ def quiz():
 
     else:
 
-        set_number = random.choice(list(REQUIRED_SETS))
+        set_number = random.choice(
+            list(REQUIRED_SETS)
+        )
 
         attempt_id = secrets.token_urlsafe(24)
 
@@ -615,14 +619,15 @@ def quiz():
 
         connection.commit()
 
-        # Verify the newly created attempt exists.
-
         verified = connection.execute("""
             SELECT id
             FROM attempts
             WHERE id = ?
             AND email = ?
-        """, (attempt_id, email)).fetchone()
+        """, (
+            attempt_id,
+            email
+        )).fetchone()
 
         if not verified:
 
@@ -643,8 +648,6 @@ def quiz():
         )
 
     connection.close()
-
-    # Store the attempt ID in the employee's session.
 
     session["attempt_id"] = attempt_id
     session.permanent = True
@@ -681,13 +684,15 @@ def submit():
 
     answers = data.get("answers")
 
-    email = session.get("email", "").strip().lower()
+    email = session.get(
+        "email", ""
+    ).strip().lower()
 
     session_attempt_id = session.get("attempt_id")
-
     received_attempt_id = data.get("attempt_id")
 
-    # Prefer the session ID but allow the page's ID as a fallback.
+    # Prefer the session attempt ID, falling back to the page ID.
+
     attempt_id = session_attempt_id or received_attempt_id
 
     logger.info("========== QUIZ SUBMISSION ==========")
@@ -698,7 +703,9 @@ def submit():
 
     if not attempt_id:
 
-        logger.warning("Submission rejected: missing attempt ID")
+        logger.warning(
+            "Submission rejected: missing attempt ID"
+        )
 
         return jsonify({
             "success": False,
@@ -706,8 +713,6 @@ def submit():
         }), 401
 
     connection = get_db()
-
-    # Find the attempt belonging to this employee.
 
     attempt = connection.execute("""
         SELECT *
@@ -719,8 +724,6 @@ def submit():
         email
     )).fetchone()
 
-    # Diagnostic information if the attempt cannot be found.
-
     if not attempt:
 
         logger.error(
@@ -729,14 +732,12 @@ def submit():
             email
         )
 
-        # Check whether this ID exists for another email.
         id_exists = connection.execute("""
             SELECT email
             FROM attempts
             WHERE id = ?
         """, (attempt_id,)).fetchone()
 
-        # Check whether this employee has an unfinished attempt.
         employee_attempt = connection.execute("""
             SELECT id
             FROM attempts
@@ -772,12 +773,9 @@ def submit():
         attempt_id
     )
 
-    # Already submitted? Send the employee to the existing result.
-
     if attempt["completed"]:
 
         connection.close()
-
         session.pop("attempt_id", None)
 
         return jsonify({
@@ -802,12 +800,13 @@ def submit():
             "error": "Question data is missing."
         }), 500
 
-    # Convert dictionary answers into a list if needed.
-
     if isinstance(answers, dict):
 
         answers = [
-            answers.get(str(index), answers.get(index))
+            answers.get(
+                str(index),
+                answers.get(index)
+            )
             for index in range(len(questions))
         ]
 
@@ -826,8 +825,6 @@ def submit():
             "success": False,
             "error": str(error)
         }), 400
-
-    # Calculate quiz duration.
 
     started = attempt["started"]
 
@@ -856,8 +853,6 @@ def submit():
 
     completed = current_time()
 
-    # Save result only if this attempt has not already been submitted.
-
     cursor = connection.execute("""
         UPDATE attempts
         SET completed = ?,
@@ -880,14 +875,15 @@ def submit():
 
     if cursor.rowcount == 0:
 
-        # Another request may have submitted it at the same time.
-
         existing = connection.execute("""
             SELECT completed
             FROM attempts
             WHERE id = ?
             AND LOWER(email) = ?
-        """, (attempt_id, email)).fetchone()
+        """, (
+            attempt_id,
+            email
+        )).fetchone()
 
         connection.close()
 
@@ -928,7 +924,7 @@ def submit():
 
 
 # =========================================================
-# 11. RESULT PAGE
+# 11. RESULT PAGE - CORRECTED ROUTE
 # =========================================================
 
 @app.route("/result/<attempt_id>")
@@ -981,7 +977,6 @@ def admin():
     connection.close()
 
     rows = []
-
     total_score = 0
 
     for attempt in attempts:
