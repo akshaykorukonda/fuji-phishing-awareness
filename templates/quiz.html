@@ -8,13 +8,10 @@
 <title>Phishing Awareness Assessment | Fuji Silvertech</title>
 
 <link rel="stylesheet" href="/static/style.css">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 :root {
     --blue: #1686c5;
@@ -23,7 +20,6 @@
     --text: #173b57;
     --muted: #71899d;
     --border: #d9eaf3;
-    --background: #f3faff;
 }
 
 body {
@@ -266,7 +262,6 @@ main {
     border: 2px solid #159fc0;
     background: #eef9ff;
     padding: 14px;
-    box-shadow: 0 4px 13px rgba(20,145,180,.08);
 }
 
 .option input {
@@ -287,21 +282,6 @@ main {
     color: #3f6077;
     font-size: 14px;
     line-height: 1.65;
-}
-
-.selection-note {
-    display: none;
-    color: #078b8d;
-    background: #eaf9f6;
-    border: 1px solid #d0efea;
-    padding: 12px 14px;
-    border-radius: 9px;
-    margin-top: 14px;
-    font-size: 13px;
-}
-
-.selection-note.visible {
-    display: block;
 }
 
 .navigation {
@@ -335,17 +315,15 @@ main {
 .next-btn {
     background: linear-gradient(120deg, #1686c5, #08a8a5);
     color: white;
-    box-shadow: 0 5px 15px rgba(8,145,175,.16);
-}
-
-.nav-btn:not(:disabled):hover {
-    transform: translateY(-2px);
 }
 
 .submit-btn {
     background: linear-gradient(120deg, #078f9d, #08b5a2);
     color: white;
-    box-shadow: 0 5px 15px rgba(8,145,175,.18);
+}
+
+.nav-btn:not(:disabled):hover {
+    transform: translateY(-2px);
 }
 
 .question-list {
@@ -381,7 +359,6 @@ main {
 }
 
 .question-dot.active.answered {
-    background: #dff5f2;
     border: 2px solid #079e9d;
 }
 
@@ -547,54 +524,16 @@ main {
 }
 
 @media(max-width:650px) {
-    header {
-        padding: 12px 15px;
-    }
-
-    header img {
-        width: 115px;
-    }
-
-    main {
-        padding: 20px 12px 40px;
-    }
-
-    .quiz-card {
-        padding: 19px 15px;
-    }
-
-    .question-title {
-        font-size: 19px;
-    }
-
-    .email-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .navigation {
-        flex-wrap: wrap;
-    }
-
-    .nav-btn {
-        padding: 12px 15px;
-    }
-
-    .scene-canvas {
-        height: 240px;
-    }
-
-    .scene-bottom h2 {
-        font-size: 19px;
-    }
-}
-
-@media(prefers-reduced-motion:reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-    }
+    header { padding: 12px 15px; }
+    header img { width: 115px; }
+    main { padding: 20px 12px 40px; }
+    .quiz-card { padding: 19px 15px; }
+    .question-title { font-size: 19px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .navigation { flex-wrap: wrap; }
+    .nav-btn { padding: 12px 15px; }
+    .scene-canvas { height: 240px; }
+    .scene-bottom h2 { font-size: 19px; }
 }
 </style>
 </head>
@@ -602,11 +541,10 @@ main {
 <body>
 
 <header>
-    <img
-        src="/static/img/fuji-logo.png"
-        alt="Fuji Silvertech"
-        onerror="this.style.display='none'"
-    >
+    <img src="/static/img/fuji-logo.png"
+         alt="Fuji Silvertech"
+         onerror="this.style.display='none'">
+
     <div class="header-label">
         PHISHING AWARENESS ASSESSMENT
     </div>
@@ -646,37 +584,27 @@ main {
 
         <div class="options" id="options"></div>
 
-        <div class="selection-note" id="selection-note">
-            Your selection has been recorded for this question.
-        </div>
-
         <div class="navigation">
 
-            <button
-                type="button"
-                class="nav-btn previous-btn"
-                id="previous-btn"
-                onclick="previousQuestion()"
-            >
+            <button type="button"
+                    class="nav-btn previous-btn"
+                    id="previous-btn"
+                    onclick="previousQuestion()">
                 ← Previous
             </button>
 
-            <button
-                type="button"
-                class="nav-btn next-btn"
-                id="next-btn"
-                onclick="nextQuestion()"
-            >
+            <button type="button"
+                    class="nav-btn next-btn"
+                    id="next-btn"
+                    onclick="nextQuestion()">
                 Next Question →
             </button>
 
-            <button
-                type="button"
-                class="nav-btn submit-btn"
-                id="submit-btn"
-                onclick="openSubmitConfirmation()"
-                style="display:none"
-            >
+            <button type="button"
+                    class="nav-btn submit-btn"
+                    id="submit-btn"
+                    onclick="openSubmitConfirmation()"
+                    style="display:none">
                 Submit Assessment
             </button>
 
@@ -735,20 +663,16 @@ main {
 
         <div class="confirm-actions">
 
-            <button
-                type="button"
-                class="nav-btn previous-btn"
-                onclick="closeSubmitConfirmation()"
-            >
+            <button type="button"
+                    class="nav-btn previous-btn"
+                    onclick="closeSubmitConfirmation()">
                 Go Back
             </button>
 
-            <button
-                type="button"
-                class="nav-btn submit-btn"
-                id="confirm-submit-btn"
-                onclick="submitAssessment()"
-            >
+            <button type="button"
+                    class="nav-btn submit-btn"
+                    id="confirm-submit-btn"
+                    onclick="submitAssessment()">
                 Confirm Submission
             </button>
 
@@ -773,12 +697,6 @@ const ATTEMPT_ID = {{ attempt_id | tojson }};
 const TOTAL_QUESTIONS = QUESTIONS.length;
 
 let currentIndex = 0;
-
-/*
- Answers are stored by question index.
- Unanswered questions remain null.
-*/
-
 let selectedAnswers = {};
 
 QUESTIONS.forEach((_, index) => {
@@ -786,19 +704,18 @@ QUESTIONS.forEach((_, index) => {
 });
 
 let isSubmitting = false;
+let isTransitioning = false;
+let transitionTimer = null;
 let sceneTimer = null;
 let sceneAnimation = null;
 let sceneRenderer = null;
 let sceneCamera = null;
 let scene = null;
 let sceneObjects = [];
-let sceneStart = 0;
-let sceneDuration = 5500;
-let sceneFrame = 0;
 
 
 /* =====================================================
-   2. SAFE TEXT HELPERS
+   2. SAFE TEXT HELPER
 ===================================================== */
 
 function escapeHTML(value) {
@@ -814,14 +731,7 @@ function escapeHTML(value) {
 
 
 function getQuestionTitle(question) {
-
     return question.title || "Security Awareness Scenario";
-}
-
-
-function getQuestionScenario(question) {
-
-    return question.scenario || "";
 }
 
 
@@ -832,16 +742,6 @@ function getQuestionScenario(question) {
 function renderEmail(email, index) {
 
     const label = email.label || `Email ${index + 1}`;
-
-    const sender = email.sender || "";
-    const senderEmail = email.sender_email || "";
-    const recipient = email.to || "";
-    const replyTo = email.reply_to || "";
-    const timestamp = email.timestamp || "";
-    const subject = email.subject || "";
-    const body = email.body || "";
-    const link = email.link || "";
-    const attachment = email.attachment || "";
 
     return `
         <div class="email-card">
@@ -856,56 +756,56 @@ function renderEmail(email, index) {
 
                     <div>
                         <strong>From:</strong>
-                        ${escapeHTML(sender)}
+                        ${escapeHTML(email.sender || "")}
                     </div>
 
                     <div>
                         <strong>Email:</strong>
-                        ${escapeHTML(senderEmail)}
+                        ${escapeHTML(email.sender_email || "")}
                     </div>
 
-                    ${recipient ? `
+                    ${email.to ? `
                         <div>
                             <strong>To:</strong>
-                            ${escapeHTML(recipient)}
+                            ${escapeHTML(email.to)}
                         </div>
                     ` : ""}
 
-                    ${replyTo ? `
+                    ${email.reply_to ? `
                         <div>
                             <strong>Reply-To:</strong>
-                            ${escapeHTML(replyTo)}
+                            ${escapeHTML(email.reply_to)}
                         </div>
                     ` : ""}
 
-                    ${timestamp ? `
+                    ${email.timestamp ? `
                         <div>
                             <strong>Received:</strong>
-                            ${escapeHTML(timestamp)}
+                            ${escapeHTML(email.timestamp)}
                         </div>
                     ` : ""}
 
                 </div>
 
                 <div class="email-subject">
-                    ${escapeHTML(subject)}
+                    ${escapeHTML(email.subject || "")}
                 </div>
 
                 <div class="email-message">
-                    ${escapeHTML(body)}
+                    ${escapeHTML(email.body || "")}
                 </div>
 
-                ${link ? `
+                ${email.link ? `
                     <div class="email-link">
                         <strong>Link:</strong><br>
-                        ${escapeHTML(link)}
+                        ${escapeHTML(email.link)}
                     </div>
                 ` : ""}
 
-                ${attachment ? `
+                ${email.attachment ? `
                     <div class="attachment">
                         <strong>Attachment:</strong>
-                        ${escapeHTML(attachment)}
+                        ${escapeHTML(email.attachment)}
                     </div>
                 ` : ""}
 
@@ -924,9 +824,7 @@ function renderQuestion() {
 
     const question = QUESTIONS[currentIndex];
 
-    if (!question) {
-        return;
-    }
+    if (!question) return;
 
     document.getElementById("category").textContent =
         question.category || "PHISHING AWARENESS";
@@ -942,15 +840,10 @@ function renderQuestion() {
 
     const scenarioElement = document.getElementById("scenario");
 
-    const scenario = getQuestionScenario(question);
-
-    if (scenario) {
-
+    if (question.scenario) {
         scenarioElement.style.display = "block";
-        scenarioElement.textContent = scenario;
-
+        scenarioElement.textContent = question.scenario;
     } else {
-
         scenarioElement.style.display = "none";
         scenarioElement.textContent = "";
     }
@@ -958,12 +851,9 @@ function renderQuestion() {
     const emailNoteElement = document.getElementById("email-note");
 
     if (question.email_note) {
-
         emailNoteElement.style.display = "block";
         emailNoteElement.textContent = question.email_note;
-
     } else {
-
         emailNoteElement.style.display = "none";
         emailNoteElement.textContent = "";
     }
@@ -971,11 +861,6 @@ function renderQuestion() {
     renderEmailArea(question);
     renderOptions(question);
     renderQuestionNavigation();
-
-    document.getElementById("selection-note").classList.toggle(
-        "visible",
-        selectedAnswers[currentIndex] !== null
-    );
 
     const card = document.getElementById("quiz-card");
 
@@ -986,7 +871,7 @@ function renderQuestion() {
 
 
 /* =====================================================
-   5. RENDER EMAIL AREA
+   5. EMAIL AREA
 ===================================================== */
 
 function renderEmailArea(question) {
@@ -1007,10 +892,6 @@ function renderEmailArea(question) {
 
         return;
     }
-
-    /*
-    Single-email question support.
-    */
 
     if (
         question.sender ||
@@ -1042,7 +923,7 @@ function renderEmailArea(question) {
 
 
 /* =====================================================
-   6. RENDER ANSWER OPTIONS
+   6. RENDER OPTIONS
 ===================================================== */
 
 function renderOptions(question) {
@@ -1067,12 +948,18 @@ function renderOptions(question) {
             label.classList.add("selected");
         }
 
+        if (selected !== null || isTransitioning) {
+            label.style.pointerEvents = "none";
+            label.style.opacity = "0.8";
+        }
+
         label.innerHTML = `
             <input
                 type="radio"
                 name="answer"
                 value="${index}"
                 ${selected === index ? "checked" : ""}
+                ${selected !== null || isTransitioning ? "disabled" : ""}
             >
 
             <span class="option-letter">
@@ -1084,20 +971,10 @@ function renderOptions(question) {
             </span>
         `;
 
-        label.addEventListener("click", function(event) {
-
-            if (event.target.tagName === "INPUT") {
-                // The change event below handles this.
-            }
-
-        });
-
         const input = label.querySelector("input");
 
         input.addEventListener("change", function() {
-
             selectAnswer(index);
-
         });
 
         container.appendChild(label);
@@ -1106,27 +983,57 @@ function renderOptions(question) {
 
 
 /* =====================================================
-   7. SELECT ANSWER
+   7. SELECT ANSWER AND AUTO-NEXT
 ===================================================== */
 
 function selectAnswer(index) {
 
+    if (isTransitioning || isSubmitting) {
+        return;
+    }
+
+    if (selectedAnswers[currentIndex] !== null) {
+        return;
+    }
+
+    // Save answer
     selectedAnswers[currentIndex] = index;
 
-    renderOptions(QUESTIONS[currentIndex]);
+    // Lock selection
+    isTransitioning = true;
 
-    document.getElementById("selection-note").classList.add(
-        "visible"
-    );
-
+    // Update question tracker
     renderQuestionNavigation();
 
-    /*
-    Neutral acknowledgement only.
-    No correct or incorrect feedback is shown.
-    */
+    // Disable options
+    renderOptions(QUESTIONS[currentIndex]);
 
+    // Neutral transition animation
     showOutcomeScene();
+
+    // Automatically go to next question
+    transitionTimer = setTimeout(() => {
+
+        isTransitioning = false;
+        transitionTimer = null;
+
+        if (currentIndex < TOTAL_QUESTIONS - 1) {
+
+            currentIndex++;
+
+            renderQuestion();
+
+            showIntroScene();
+
+        } else {
+
+            // Last question completed
+            skipScene();
+
+            openSubmitConfirmation();
+        }
+
+    }, 3000);
 }
 
 
@@ -1140,7 +1047,8 @@ function renderQuestionNavigation() {
     const nextButton = document.getElementById("next-btn");
     const submitButton = document.getElementById("submit-btn");
 
-    previousButton.disabled = currentIndex === 0;
+    previousButton.disabled =
+        currentIndex === 0 || isTransitioning;
 
     if (currentIndex === TOTAL_QUESTIONS - 1) {
 
@@ -1152,6 +1060,8 @@ function renderQuestionNavigation() {
         nextButton.style.display = "inline-block";
         submitButton.style.display = "none";
     }
+
+    nextButton.disabled = isTransitioning;
 
     const list = document.getElementById("question-list");
 
@@ -1173,7 +1083,11 @@ function renderQuestionNavigation() {
             button.classList.add("answered");
         }
 
+        button.disabled = isTransitioning;
+
         button.addEventListener("click", () => {
+
+            if (isTransitioning) return;
 
             currentIndex = index;
 
@@ -1189,7 +1103,7 @@ function renderQuestionNavigation() {
 
 function previousQuestion() {
 
-    if (currentIndex <= 0) {
+    if (isTransitioning || currentIndex <= 0) {
         return;
     }
 
@@ -1203,7 +1117,10 @@ function previousQuestion() {
 
 function nextQuestion() {
 
-    if (currentIndex >= TOTAL_QUESTIONS - 1) {
+    if (
+        isTransitioning ||
+        currentIndex >= TOTAL_QUESTIONS - 1
+    ) {
         return;
     }
 
@@ -1245,21 +1162,15 @@ function openSubmitConfirmation() {
 
     document.getElementById("submit-error").style.display = "none";
 
-    document.getElementById("confirm-overlay").classList.add(
-        "visible"
-    );
+    document.getElementById("confirm-overlay").classList.add("visible");
 }
 
 
 function closeSubmitConfirmation() {
 
-    if (isSubmitting) {
-        return;
-    }
+    if (isSubmitting) return;
 
-    document.getElementById("confirm-overlay").classList.remove(
-        "visible"
-    );
+    document.getElementById("confirm-overlay").classList.remove("visible");
 }
 
 
@@ -1269,31 +1180,17 @@ function closeSubmitConfirmation() {
 
 async function submitAssessment() {
 
-    if (isSubmitting) {
-        return;
-    }
+    if (isSubmitting) return;
 
     isSubmitting = true;
 
-    const submitButton = document.getElementById(
-        "confirm-submit-btn"
-    );
-
-    const errorElement = document.getElementById(
-        "submit-error"
-    );
+    const submitButton = document.getElementById("confirm-submit-btn");
+    const errorElement = document.getElementById("submit-error");
 
     submitButton.disabled = true;
     submitButton.textContent = "Submitting...";
 
     errorElement.style.display = "none";
-
-    /*
-    Convert answers to an ordered array.
-
-    All questions are included.
-    Unanswered questions are null.
-    */
 
     const answers = QUESTIONS.map((_, index) => {
 
@@ -1416,14 +1313,10 @@ function createScene() {
     const height = container.clientHeight || 320;
 
     scene = new THREE.Scene();
-
     scene.background = new THREE.Color(0xdff3f7);
 
     sceneCamera = new THREE.PerspectiveCamera(
-        45,
-        width / height,
-        0.1,
-        100
+        45, width / height, 0.1, 100
     );
 
     sceneCamera.position.set(0, 4.5, 9);
@@ -1444,40 +1337,27 @@ function createScene() {
     container.appendChild(sceneRenderer.domElement);
 
     const ambient = new THREE.HemisphereLight(
-        0xffffff,
-        0x8aaab7,
-        2
+        0xffffff, 0x8aaab7, 2
     );
 
     scene.add(ambient);
 
-    const light = new THREE.DirectionalLight(
-        0xffffff,
-        2
-    );
+    const light = new THREE.DirectionalLight(0xffffff, 2);
 
     light.position.set(4, 8, 5);
     light.castShadow = true;
 
     scene.add(light);
 
-    const floorGeometry = new THREE.BoxGeometry(
-        12,
-        0.25,
-        8
-    );
-
-    const floorMaterial = new THREE.MeshStandardMaterial({
-        color: 0xb9dce5,
-        roughness: .85
-    });
-
     const floor = new THREE.Mesh(
-        floorGeometry,
-        floorMaterial
+        new THREE.BoxGeometry(12, .25, 8),
+        new THREE.MeshStandardMaterial({
+            color: 0xb9dce5,
+            roughness: .85
+        })
     );
 
-    floor.position.y = -0.2;
+    floor.position.y = -.2;
     floor.receiveShadow = true;
 
     scene.add(floor);
@@ -1523,6 +1403,7 @@ function createScene() {
     );
 
     monitor.position.set(0, 2, -.45);
+
     scene.add(monitor);
 
     const screen = new THREE.Mesh(
@@ -1535,6 +1416,7 @@ function createScene() {
     );
 
     screen.position.set(0, 2, -.375);
+
     scene.add(screen);
 
     const stand = new THREE.Mesh(
@@ -1543,6 +1425,7 @@ function createScene() {
     );
 
     stand.position.set(0, 1.58, -.45);
+
     scene.add(stand);
 
     const keyboard = new THREE.Mesh(
@@ -1553,6 +1436,7 @@ function createScene() {
     );
 
     keyboard.position.set(0, 1.25, .55);
+
     scene.add(keyboard);
 
     const chair = new THREE.Mesh(
@@ -1563,6 +1447,7 @@ function createScene() {
     );
 
     chair.position.set(0, .55, 1.7);
+
     scene.add(chair);
 
     const chairBack = new THREE.Mesh(
@@ -1573,11 +1458,8 @@ function createScene() {
     );
 
     chairBack.position.set(0, 1.15, 2.05);
-    scene.add(chairBack);
 
-    /*
-    Floating message icon.
-    */
+    scene.add(chairBack);
 
     const message = new THREE.Group();
 
@@ -1610,10 +1492,6 @@ function createScene() {
 
     sceneObjects.push(message);
 
-    /*
-    Floating security shield.
-    */
-
     const shield = new THREE.Group();
 
     const shieldShape = new THREE.Mesh(
@@ -1635,12 +1513,7 @@ function createScene() {
 
     sceneObjects.push(shield);
 
-    /*
-    Decorative particles.
-    */
-
     const particleGeometry = new THREE.BufferGeometry();
-
     const particlePositions = [];
 
     for (let i = 0; i < 80; i++) {
@@ -1654,10 +1527,7 @@ function createScene() {
 
     particleGeometry.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(
-            particlePositions,
-            3
-        )
+        new THREE.Float32BufferAttribute(particlePositions, 3)
     );
 
     const particles = new THREE.Points(
@@ -1676,26 +1546,27 @@ function createScene() {
 
     const animate = () => {
 
-        if (!sceneRenderer || !scene) {
-            return;
-        }
+        if (!sceneRenderer || !scene) return;
 
         sceneAnimation = requestAnimationFrame(animate);
 
         const elapsed = performance.now() * .001;
 
-        message.position.y = 2.8 + Math.sin(elapsed * 1.6) * .17;
-        message.rotation.y = Math.sin(elapsed * .7) * .18;
+        message.position.y =
+            2.8 + Math.sin(elapsed * 1.6) * .17;
 
-        shield.position.y = 2.7 + Math.sin(elapsed * 1.3 + 1) * .17;
-        shield.rotation.y = Math.sin(elapsed * .6) * .2;
+        message.rotation.y =
+            Math.sin(elapsed * .7) * .18;
+
+        shield.position.y =
+            2.7 + Math.sin(elapsed * 1.3 + 1) * .17;
+
+        shield.rotation.y =
+            Math.sin(elapsed * .6) * .2;
 
         particles.rotation.y = elapsed * .025;
 
-        sceneRenderer.render(
-            scene,
-            sceneCamera
-        );
+        sceneRenderer.render(scene, sceneCamera);
     };
 
     animate();
@@ -1706,7 +1577,7 @@ function createScene() {
    12. SCENE CONTROLS
 ===================================================== */
 
-function showScene(title, description, duration = 5500) {
+function showScene(title, description, duration = 4500) {
 
     const overlay = document.getElementById("scene-overlay");
 
@@ -1715,9 +1586,7 @@ function showScene(title, description, duration = 5500) {
     document.getElementById("scene-description").textContent =
         description;
 
-    const progress = document.getElementById(
-        "scene-progress-fill"
-    );
+    const progress = document.getElementById("scene-progress-fill");
 
     progress.style.transition = "none";
     progress.style.width = "0%";
@@ -1725,9 +1594,6 @@ function showScene(title, description, duration = 5500) {
     overlay.classList.remove("hidden");
 
     createScene();
-
-    sceneDuration = duration;
-    sceneStart = performance.now();
 
     requestAnimationFrame(() => {
 
@@ -1738,35 +1604,25 @@ function showScene(title, description, duration = 5500) {
     });
 
     sceneTimer = setTimeout(() => {
-
         skipScene();
-
     }, duration);
 }
 
 
 function skipScene() {
 
-    const overlay = document.getElementById("scene-overlay");
-
     if (sceneTimer) {
         clearTimeout(sceneTimer);
         sceneTimer = null;
     }
 
-    overlay.classList.add("hidden");
+    document.getElementById("scene-overlay").classList.add("hidden");
 
     stopSceneAnimation();
 }
 
 
 function showIntroScene() {
-
-    const question = QUESTIONS[currentIndex];
-
-    if (!question) {
-        return;
-    }
 
     showScene(
         `Investigation ${String(currentIndex + 1).padStart(2, "0")}`,
@@ -1780,7 +1636,7 @@ function showOutcomeScene() {
 
     showScene(
         "Decision Recorded",
-        "Your response has been saved. Continue reviewing the assessment carefully.",
+        "Your response has been saved. Moving to the next investigation...",
         3000
     );
 }
@@ -1806,7 +1662,6 @@ function startQuiz() {
     }
 
     renderQuestion();
-
     showIntroScene();
 }
 
@@ -1816,9 +1671,7 @@ function startQuiz() {
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-
     startQuiz();
-
 });
 
 
@@ -1837,22 +1690,20 @@ document.addEventListener("keydown", event => {
 
     if (event.key === "ArrowRight") {
 
-        if (currentIndex < TOTAL_QUESTIONS - 1) {
+        if (!isTransitioning && currentIndex < TOTAL_QUESTIONS - 1) {
             nextQuestion();
         }
 
     } else if (event.key === "ArrowLeft") {
 
-        if (currentIndex > 0) {
+        if (!isTransitioning && currentIndex > 0) {
             previousQuestion();
         }
 
     } else if (event.key === "Escape") {
 
         skipScene();
-
     }
-
 });
 
 </script>
