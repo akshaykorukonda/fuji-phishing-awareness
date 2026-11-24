@@ -28,6 +28,7 @@
             color: var(--text);
             font-family: "Segoe UI", Arial, sans-serif;
             margin: 0;
+            min-height: 100vh;
         }
 
         header {
@@ -44,7 +45,7 @@
         }
 
         main.card {
-            width: min(850px, 94%);
+            width: min(760px, 94%);
             margin: 55px auto;
             padding: 35px;
             background: #fff;
@@ -84,11 +85,18 @@
             font-size: clamp(55px, 10vw, 82px);
             font-weight: 800;
             letter-spacing: -3px;
-            margin: 22px 0;
+            margin: 22px 0 5px;
             background: linear-gradient(100deg, #2589ce, #0ba99b);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+
+        .percentage {
+            color: var(--muted);
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
 
         .status {
@@ -113,13 +121,42 @@
             border: 1px solid #f5c8cc;
         }
 
+        .progress-section {
+            margin: 30px auto;
+            max-width: 550px;
+            text-align: left;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .progress-track {
+            height: 13px;
+            background: #eaf1f5;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: {{ [0, [r.score|float, 100]|min]|max }}%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #2785c7, #0c9f9a);
+        }
+
         .result-summary {
             background: linear-gradient(110deg, #eef8ff, #edfbf8);
             border: 1px solid #d9edf2;
             border-radius: 17px;
             padding: 30px 24px;
             text-align: center;
-            margin: 25px 0;
+            margin: 30px 0 25px;
         }
 
         .result-summary h3 {
@@ -203,6 +240,10 @@
             .result-summary {
                 padding: 22px 16px;
             }
+
+            .result-actions a {
+                width: 100%;
+            }
         }
 
         @media(prefers-reduced-motion: reduce) {
@@ -230,7 +271,13 @@
 
         <h1>Your Assessment Results</h1>
 
-        <div class="score">{{ "%.0f"|format(r.score|float) }} / 100</div>
+        <div class="score">
+            {{ "%.0f"|format(r.score|float) }} / 100
+        </div>
+
+        <div class="percentage">
+            {{ "%.0f"|format(r.score|float) }}% Score
+        </div>
 
         {% if r.score|float >= 80 %}
 
@@ -256,6 +303,19 @@
 
         {% endif %}
 
+        <div class="progress-section">
+
+            <div class="progress-label">
+                <span>Your Score</span>
+                <span>Passing Score: 80%</span>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill"></div>
+            </div>
+
+        </div>
+
     </div>
 
     <div class="result-summary">
@@ -268,8 +328,8 @@
 
             <p>
                 Your assessment has been submitted successfully.
-                You have demonstrated the required level of phishing
-                awareness. Thank you for participating.
+                Thank you for participating in the Fuji Silvertech
+                Phishing Awareness Assessment.
             </p>
 
         {% else %}
