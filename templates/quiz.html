@@ -705,7 +705,6 @@ QUESTIONS.forEach((_, index) => {
 
 let isSubmitting = false;
 let isTransitioning = false;
-let transitionTimer = null;
 let sceneTimer = null;
 let sceneAnimation = null;
 let sceneRenderer = null;
@@ -893,6 +892,19 @@ function renderEmailArea(question) {
         return;
     }
 
+    // Supports the new single-email question structure
+    if (question.email && typeof question.email === "object") {
+
+        area.innerHTML = `
+            <div class="email-grid">
+                ${renderEmail(question.email, 0)}
+            </div>
+        `;
+
+        return;
+    }
+
+    // Supports the existing single-email question structure
     if (
         question.sender ||
         question.sender_email ||
@@ -983,7 +995,7 @@ function renderOptions(question) {
 
 
 /* =====================================================
-   7. SELECT ANSWER AND AUTO-NEXT
+   7. SELECT ANSWER - INSTANT AUTO ADVANCE
 ===================================================== */
 
 function selectAnswer(index) {
@@ -996,44 +1008,30 @@ function selectAnswer(index) {
         return;
     }
 
-    // Save answer
+    // Save the answer
     selectedAnswers[currentIndex] = index;
 
-    // Lock selection
+    // Lock the selected answer
     isTransitioning = true;
 
-    // Update question tracker
     renderQuestionNavigation();
-
-    // Disable options
     renderOptions(QUESTIONS[currentIndex]);
 
-    // Neutral transition animation
-    showOutcomeScene();
+    // No delay or outcome animation
+    isTransitioning = false;
 
-    // Automatically go to next question
-    transitionTimer = setTimeout(() => {
+    if (currentIndex < TOTAL_QUESTIONS - 1) {
 
-        isTransitioning = false;
-        transitionTimer = null;
+        // Immediately move to the next question
+        currentIndex++;
 
-        if (currentIndex < TOTAL_QUESTIONS - 1) {
+        renderQuestion();
 
-            currentIndex++;
+    } else {
 
-            renderQuestion();
-
-            showIntroScene();
-
-        } else {
-
-            // Last question completed
-            skipScene();
-
-            openSubmitConfirmation();
-        }
-
-    }, 3000);
+        // Last question: show submission confirmation
+        openSubmitConfirmation();
+    }
 }
 
 
@@ -1628,16 +1626,6 @@ function showIntroScene() {
         `Investigation ${String(currentIndex + 1).padStart(2, "0")}`,
         "A new message has arrived. Examine the details carefully and choose the safest response.",
         4500
-    );
-}
-
-
-function showOutcomeScene() {
-
-    showScene(
-        "Decision Recorded",
-        "Your response has been saved. Moving to the next investigation...",
-        3000
     );
 }
 
