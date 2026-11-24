@@ -12,14 +12,16 @@
             --blue: #2785c7;
             --teal: #0c9f9a;
             --navy: #174b68;
-            --light-blue: #eef8ff;
-            --light-teal: #e9f9f6;
+            --green: #16865b;
+            --red: #d94b58;
             --text: #263f50;
             --muted: #718797;
             --border: #e0edf3;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             background: linear-gradient(135deg, #f4faff, #eefaf9);
@@ -73,7 +75,7 @@
             margin: 20px 0 8px;
         }
 
-        .result-header > p:last-child {
+        .result-header > p {
             color: var(--muted);
             line-height: 1.7;
         }
@@ -87,6 +89,28 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 5px 0 15px;
+        }
+
+        .passed {
+            color: #16865b;
+            background: #e5f8ed;
+            border: 1px solid #bce9cf;
+        }
+
+        .failed {
+            color: #d94b58;
+            background: #fff0f1;
+            border: 1px solid #f5c8cc;
         }
 
         .result-summary {
@@ -122,6 +146,13 @@
             color: #0c9f9a;
             font-size: 32px;
             font-weight: 800;
+        }
+
+        .passing-info {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            margin: 20px 0;
         }
 
         .result-actions {
@@ -160,8 +191,13 @@
                 border-radius: 15px;
             }
 
-            .result-header { padding: 25px 5px; }
-            .result-summary { padding: 22px 16px; }
+            .result-header {
+                padding: 25px 5px;
+            }
+
+            .result-summary {
+                padding: 22px 16px;
+            }
         }
 
         @media(prefers-reduced-motion: reduce) {
@@ -189,9 +225,29 @@
 
         <div class="score">{{ r.score }} / 100</div>
 
-        <p>
-            You have successfully completed the phishing awareness assessment.
-        </p>
+        {% if r.score|float >= 80 %}
+
+            <div class="status passed">
+                ✓ PASSED
+            </div>
+
+            <p>
+                Congratulations! You have successfully passed
+                the phishing awareness assessment.
+            </p>
+
+        {% else %}
+
+            <div class="status failed">
+                ✗ NOT PASSED
+            </div>
+
+            <p>
+                You did not reach the required passing score.
+                The minimum passing mark is 80 out of 100.
+            </p>
+
+        {% endif %}
 
     </div>
 
@@ -199,14 +255,18 @@
 
         <div class="completion-icon">✓</div>
 
-        <h3>Thank You for Participating!</h3>
+        <h3>Assessment Submission</h3>
 
         <p>
             Your assessment has been submitted successfully.
-            Thank you for taking the time to strengthen your awareness
-            of phishing and workplace security threats.
+            Thank you for participating in the Fuji Silvertech
+            Phishing Awareness Assessment.
         </p>
 
+    </div>
+
+    <div class="passing-info">
+        Minimum passing score: <strong>80 / 100</strong>
     </div>
 
     <div class="result-actions">
