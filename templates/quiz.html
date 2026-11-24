@@ -8,7 +8,7 @@ import csv
 import random
 import logging
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from functools import wraps
 
 from flask import (
@@ -33,13 +33,14 @@ app.secret_key = os.environ.get("SECRET_KEY")
 
 if not app.secret_key:
     app.secret_key = "development-only-change-this-secret-key"
+    logging.warning("Using development SECRET_KEY. Set SECRET_KEY in Render.")
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = (
     os.environ.get("RENDER", "").lower() == "true"
 )
-app.config["PERMANENT_SESSION_LIFETIME"] = 86400
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 
 logging.basicConfig(level=logging.INFO)
@@ -73,14 +74,32 @@ ADMINS.update(
 )
 
 ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
-
 QUESTION_FILE = os.path.join(BASE_DIR, "questions.json")
 
 REQUIRED_SETS = ("A", "B", "C")
 
 # =========================================================
-# 3. LOAD QUESTION SETS
+# 3. QUESTION VALIDATION AND LOADING
 # =========================================================
+
+def is_multi_select_question(question):
+    return question.get("mode") in ("find_mistakes", "click_errors")
+
+
+def get_correct_ids(question):
+    correct = question.get("correct_ids")
+
+    if correct is None:
+        correct = question.get("correct", [])
+
+    if isinstance(correct, (str, int)):
+        correct = [correct]
+
+    if not isinstance(correct, list):
+        return set()
+
+    return {str(item) for item in correct}
+
 
 def load_questions():
 
@@ -92,17 +111,12 @@ def load_questions():
     with open(QUESTION_FILE, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    if not isinstance(data, dict) or "sets" not in data:
+    if not isinstance(data, dict) or not isinstance(data.get("sets"), dict):
         raise ValueError(
-            "questions.json must contain a sets object."
+            'questions.json must contain a "sets" object.'
         )
 
     sets = data["sets"]
-
-    if not isinstance(sets, dict):
-        raise ValueError(
-            "The sets value must be an object."
-        )
 
     for set_name in REQUIRED_SETS:
 
@@ -115,33 +129,45 @@ def load_questions():
 
         for index, question in enumerate(questions):
 
+            label = f"Set {set_name}, Q{index + 1}"
+
             if not isinstance(question, dict):
-                raise ValueError(
-                    f"Invalid question in Set {set_name}, Q{index + 1}."
-                )
+                raise ValueError(f"{label} must be a JSON object.")
 
             options = question.get("options")
-            correct = question.get("correct")
 
             if not isinstance(options, list) or len(options) < 2:
                 raise ValueError(
-                    f"Set {set_name}, Q{index + 1} needs at least two options."
+                    f"{label} needs at least two options."
                 )
 
             if not all(isinstance(option, str) for option in options):
                 raise ValueError(
-                    f"Set {set_name}, Q{index + 1} has invalid options."
+                    f"{label} has invalid options. All options must be text."
                 )
 
-            if (
-                isinstance(correct, bool)
-                or not isinstance(correct, int)
-                or correct < 0
-                or correct >= len(options)
-            ):
-                raise ValueError(
-                    f"Invalid correct answer in Set {set_name}, Q{index + 1}."
-                )
+            if is_multi_select_question(question):
+
+                correct_ids = get_correct_ids(question)
+
+                if not correct_ids:
+                    raise ValueError(
+                        f"{label} needs a non-empty correct_ids list."
+                    )
+
+            else:
+
+                correct = question.get("correct")
+
+                if (
+                    isinstance(correct, bool)
+                    or not isinstance(correct, int)
+                    or correct < 0
+                    or correct >= len(options)
+                ):
+                    raise ValueError(
+                        f"{label} has an invalid correct answer index."
+                    )
 
     return {
         name: sets[name]
@@ -237,12 +263,12 @@ def current_time():
 
 def corp(email):
 
+    if not isinstance(email, str):
+        return False
+
     email = email.strip().lower()
 
-    return (
-        "@" in email
-        and email.endswith("@" + CORP)
-    )
+    return email.endswith("@" + CORP)
 
 
 def signed():
@@ -330,7 +356,6 @@ ANSWER_FIELDS = {
 def sanitize_question(question):
 
     if isinstance(question, list):
-
         return [
             sanitize_question(item)
             for item in question
@@ -350,30 +375,6 @@ def sanitize_question(question):
         return clean
 
     return question
-
-
-def is_multi_select_question(question):
-
-    return question.get("mode") in (
-        "find_mistakes",
-        "click_errors"
-    )
-
-
-def get_correct_ids(question):
-
-    correct = question.get("correct_ids")
-
-    if correct is None:
-        correct = question.get("correct", [])
-
-    if isinstance(correct, str):
-        correct = [correct]
-
-    return {
-        str(item)
-        for item in (correct or [])
-    }
 
 
 # =========================================================
@@ -416,9 +417,7 @@ def validate_and_score(questions, answers):
 
             is_correct = selected_ids == correct_ids
 
-            reviewed_answers.append(
-                sorted(selected_ids)
-            )
+            reviewed_answers.append(sorted(selected_ids))
 
         else:
 
@@ -492,10 +491,7 @@ def home():
                     "Please configure ADMIN_ACCESS_KEY in Render."
                 )
 
-            elif secrets.compare_digest(
-                password,
-                ADMIN_ACCESS_KEY
-            ):
+            elif secrets.compare_digest(password, ADMIN_ACCESS_KEY):
 
                 session.clear()
                 session["email"] = email
@@ -586,14 +582,9 @@ def quiz():
 
     else:
 
-        set_number = random.choice(
-            list(REQUIRED_SETS)
-        )
-
+        set_number = random.choice(list(REQUIRED_SETS))
         attempt_id = secrets.token_urlsafe(24)
-
         questions = make_attempt_questions(set_number)
-
         started = current_time()
 
         connection.execute("""
@@ -623,7 +614,7 @@ def quiz():
             SELECT id
             FROM attempts
             WHERE id = ?
-            AND email = ?
+            AND LOWER(email) = ?
         """, (
             attempt_id,
             email
@@ -680,7 +671,14 @@ def submit():
             "error": "Administrators cannot submit employee quizzes."
         }), 403
 
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+
+        return jsonify({
+            "success": False,
+            "error": "Invalid submission data."
+        }), 400
 
     answers = data.get("answers")
 
@@ -691,8 +689,7 @@ def submit():
     session_attempt_id = session.get("attempt_id")
     received_attempt_id = data.get("attempt_id")
 
-    # Prefer the session attempt ID, falling back to the page ID.
-
+    # Use the attempt ID from the quiz page, falling back to the session.
     attempt_id = received_attempt_id or session_attempt_id
 
     logger.info("========== QUIZ SUBMISSION ==========")
@@ -701,11 +698,9 @@ def submit():
     logger.info("Request attempt ID present: %s", bool(received_attempt_id))
     logger.info("Database: %s", DB)
 
-    if not attempt_id:
+    if not attempt_id or not isinstance(attempt_id, str):
 
-        logger.warning(
-            "Submission rejected: missing attempt ID"
-        )
+        logger.warning("Submission rejected: missing or invalid attempt ID")
 
         return jsonify({
             "success": False,
@@ -747,11 +742,7 @@ def submit():
             LIMIT 1
         """, (email,)).fetchone()
 
-        logger.error(
-            "Attempt ID exists in DB: %s",
-            bool(id_exists)
-        )
-
+        logger.error("Attempt ID exists in DB: %s", bool(id_exists))
         logger.error(
             "Employee has another incomplete attempt: %s",
             bool(employee_attempt)
@@ -768,10 +759,7 @@ def submit():
             )
         }), 404
 
-    logger.info(
-        "Attempt found successfully: %s",
-        attempt_id
-    )
+    logger.info("Attempt found successfully: %s", attempt_id)
 
     if attempt["completed"]:
 
@@ -780,10 +768,7 @@ def submit():
 
         return jsonify({
             "success": True,
-            "url": url_for(
-                "result",
-                attempt_id=attempt_id
-            )
+            "url": url_for("result", attempt_id=attempt_id)
         })
 
     questions = safe_json(
@@ -841,8 +826,7 @@ def submit():
             0,
             int(
                 (
-                    datetime.now(timezone.utc)
-                    - start_datetime
+                    datetime.now(timezone.utc) - start_datetime
                 ).total_seconds()
             )
         )
@@ -893,10 +877,7 @@ def submit():
 
             return jsonify({
                 "success": True,
-                "url": url_for(
-                    "result",
-                    attempt_id=attempt_id
-                )
+                "url": url_for("result", attempt_id=attempt_id)
             })
 
         return jsonify({
@@ -905,7 +886,6 @@ def submit():
         }), 409
 
     connection.close()
-
     session.pop("attempt_id", None)
 
     logger.info(
@@ -916,10 +896,7 @@ def submit():
 
     return jsonify({
         "success": True,
-        "url": url_for(
-            "result",
-            attempt_id=attempt_id
-        )
+        "url": url_for("result", attempt_id=attempt_id)
     })
 
 
@@ -992,7 +969,6 @@ def admin():
         )
 
         score = attempt["score"] or 0
-
         total_score += score
 
         set_number = attempt["set_number"] or "Legacy"
@@ -1051,7 +1027,6 @@ def export_csv():
     connection.close()
 
     output = io.StringIO()
-
     writer = csv.writer(output)
 
     writer.writerow([
