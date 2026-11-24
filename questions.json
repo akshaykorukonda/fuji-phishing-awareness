@@ -1,292 +1,592 @@
 
-[
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 01: Suspicious VPN Security Update",
-    "sender": "Corporate Network Security",
-    "sender_initial": "N",
-    "sender_email": "network-security@fujisilvertech-support.com",
-    "timestamp": "Today, 9:15 AM",
-    "subject": "Action Required: VPN Security Certificate Update",
-    "scenario": "Dear Employee,\n\nOur network monitoring system has detected that your VPN security certificate is outdated. All employees must renew their certificates today to avoid losing remote network access.\n\nDownload the attached certificate update and sign in using your company credentials to complete the installation.\n\nFailure to complete this process may result in your account being temporarily disabled.\n\nRegards,\nNetwork Security Team",
-    "display_link": "https://fujisilvertech-support.com/vpn-update",
-    "attachment": "VPN_Security_Certificate_Update.zip",
-    "email_note": "The sender uses a convincing company-related name and refers to a realistic IT security process.",
-    "options": [
-      "Report the email because the sender domain is not the verified company domain and the attachment is unexpected.",
-      "Download the ZIP file because VPN certificate updates are important.",
-      "Enter your company credentials to avoid losing remote access.",
-      "Forward the attachment to colleagues so they can update their VPN certificates."
-    ],
-    "correct": 0,
-    "explanation": "Attackers often imitate internal IT teams and use realistic technical language to make malicious messages convincing. The sender domain is not the official company domain, and an unexpected ZIP attachment requesting credentials is suspicious. Verify updates through the approved IT channel."
-  },
-  {
-    "category": "EMAIL COMPARISON",
-    "mode": "multiple_choice",
-    "title": "Investigation 02: Identify the Legitimate Fuji Silvertech Email",
-    "sender": "Fuji Silvertech IT Support",
-    "sender_initial": "I",
-    "sender_email": "Compare Email A and Email B",
-    "timestamp": "Today, 10:25 AM",
-    "subject": "Company Password Maintenance Notification",
-    "scenario": "You receive two emails that appear to come from Fuji Silvertech IT Support. Both discuss company password maintenance. One is legitimate, while the other is designed to steal employee credentials. Compare the messages carefully.",
-    "comparison": true,
-    "emails": [
+{
+  "sets": {
+    "A": [
       {
-        "label": "EMAIL A",
-        "sender": "IT Support",
-        "sender_email": "it-support@fujisilvertech.com",
-        "timestamp": "Today, 10:20 AM",
-        "subject": "Scheduled Password Maintenance",
-        "body": "Dear Employee,\n\nThe IT team will be conducting scheduled password maintenance this weekend.\n\nNo immediate action is required. If you need to update your password, please access the company portal using your usual bookmarked address.\n\nFor assistance, contact the IT Helpdesk through the approved internal support channel.\n\nRegards,\nIT Support Team",
-        "link": "",
-        "attachment": ""
+        "category": "AI THREATS",
+        "title": "Question 1: AI-Generated Messages",
+        "scenario": "An email from a colleague you work with daily matches their usual tone, mentions yesterday's project meeting correctly, and asks you to open a shared file. Attackers can now use AI to copy a person's writing style. What does this mean for how you judge such an email?",
+        "options": [
+          "Only messages with spelling mistakes need checking, because AI-written text is always perfect",
+          "Messages that sound exactly like a colleague can be trusted, because AI cannot copy personal writing styles",
+          "Only messages from outside the company need checking, because AI cannot be used on internal email",
+          "A message that sounds exactly like a colleague is not proof it is really them, so check the sender address and confirm unexpected file requests another way"
+        ],
+        "correct": 3,
+        "explanation": "AI can imitate a person's tone and mention real details gathered from public posts or old emails, so a familiar style is not proof of identity. Check the sender address and confirm unexpected requests through another channel. The option about internal email is wrong because a colleague's account can itself be compromised."
       },
       {
-        "label": "EMAIL B",
-        "sender": "IT Support",
-        "sender_email": "it-supp0rt@fujIsIlvertech.com",
-        "timestamp": "Today, 10:25 AM",
-        "subject": "URGENT: Your Company Account Requires Verification",
-        "body": "Dear Employee,\n\nOur IT team has identified an issue with your company account.\n\nPlease complete the security verification process immediately to prevent any interruption to your account access.\n\nUse the link below to confirm your company email, password and MFA code.\n\nYour account may be restricted if verification is not completed today.\n\nRegards,\nIT Support Team",
-        "link": "https://fujisilvertech-account-check.example/verify",
-        "attachment": ""
-      }
-    ],
-    "display_link": "",
-    "attachment": "",
-    "email_note": "Both addresses look similar at first glance. Pay attention to the characters in the sender address and the information being requested.",
-    "options": [
-      "Email A is legitimate and Email B is suspicious.",
-      "Email B is legitimate and Email A is suspicious.",
-      "Both emails are legitimate.",
-      "Both emails are phishing."
-    ],
-    "correct": 0,
-    "explanation": "Email B uses subtle character substitutions: the number zero replaces the letter o, and uppercase and lowercase characters are mixed to imitate the official company address. It also requests a password and MFA code. Email A uses the official company domain and does not ask for credentials."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 03: The Shared Document Trap",
-    "sender": "Document Collaboration Team",
-    "sender_initial": "D",
-    "sender_email": "documents@share-access.example",
-    "timestamp": "Today, 11:40 AM",
-    "subject": "A colleague has shared a confidential document with you",
-    "scenario": "Hello,\n\nA confidential document has been shared with you. You must open it within 30 minutes or your access will be permanently removed.\n\nTo view the document, sign in using your company email, password and MFA code.\n\nIf you have any questions, do not contact IT because this is an automated sharing process.\n\nRegards,\nDocument Collaboration Team",
-    "display_link": "https://share-access.example/document",
-    "attachment": "Confidential_Project_Document.pdf",
-    "email_note": "The message contains an unexpected document-sharing request.",
-    "options": [
-      "Open the document immediately because it mentions a colleague.",
-      "Enter your company credentials to prevent losing access.",
-      "Verify the document-sharing request through a trusted channel and report it if suspicious.",
-      "Forward the document to your personal email account."
-    ],
-    "correct": 2,
-    "explanation": "Unexpected document-sharing messages should be verified through a trusted channel. External domains, artificial deadlines, credential requests and instructions not to contact IT are strong warning signs."
-  },
-  {
-    "category": "EMAIL COMPARISON",
-    "mode": "multiple_choice",
-    "title": "Investigation 04: Identify the Legitimate HR Salary Email",
-    "sender": "Human Resources",
-    "sender_initial": "H",
-    "sender_email": "Compare Email A and Email B",
-    "timestamp": "Today, 12:05 PM",
-    "subject": "Annual Salary Revision Notification",
-    "scenario": "Two emails arrive announcing the annual salary revision. Both appear to come from Human Resources. One follows a normal company communication process, while the other attempts to collect sensitive employee information. Compare the sender details, spelling and requested action.",
-    "comparison": true,
-    "emails": [
-      {
-        "label": "EMAIL A",
-        "sender": "Human Resources",
-        "sender_email": "hr@fujisilvertech.com",
-        "timestamp": "Today, 12:00 PM",
-        "subject": "Annual Salary Revision Announcement",
-        "body": "Dear Employee,\n\nThe annual salary revision process has been completed.\n\nEmployees will receive their individual revision letters through the approved HR communication channel.\n\nNo password, banking credentials or additional personal information is required through email.\n\nFor questions, please contact the HR department using the official internal contact details.\n\nRegards,\nHuman Resources Team",
-        "link": "",
-        "attachment": ""
+        "category": "PHISHING BASICS",
+        "title": "Question 2: What Is Phishing?",
+        "scenario": "What is phishing?",
+        "options": [
+          "A cyberattack where criminals use a software flaw to get into a computer without any action from you",
+          "A cyberattack where criminals try thousands of password guesses until one works",
+          "A cyberattack where criminals pretend to be a trusted person or company to trick you into sharing information or clicking something harmful",
+          "A cyberattack where criminals flood a company's website with traffic until it stops working"
+        ],
+        "correct": 2,
+        "explanation": "Phishing works by tricking a person through impersonation. The denial-of-service option describes a different attack, the password-guessing option is brute force, and the software-flaw option is an exploit."
       },
       {
-        "label": "EMAIL B",
-        "sender": "Human Resources",
-        "sender_email": "hr@fujislvertech.com",
-        "timestamp": "Today, 12:05 PM",
-        "subject": "URGENT: Annual Salery Revesion - Action Requird",
-        "body": "Dear Employe,\n\nYour annual salery revesion has been aproved. Please compleate your employe information updation immediatly.\n\nClick the link below to confirm your revised salery and recieve your updated payroll details.\n\nYou must provide your bank account details and current company password to recieve your revised salary.\n\nFailure to submit the details today may delay your salary processing.\n\nRegards,\nHuman Resouces Team",
-        "link": "https://fujisilvertech-payroll.example/employee-update",
-        "attachment": ""
-      }
-    ],
-    "display_link": "",
-    "attachment": "",
-    "email_note": "Both messages appear to come from HR. Look closely at the sender address, spelling errors and information requested.",
-    "options": [
-      "Email A is legitimate and Email B is suspicious.",
-      "Email B is legitimate and Email A is suspicious.",
-      "Both emails are legitimate.",
-      "Both emails are phishing."
-    ],
-    "correct": 0,
-    "explanation": "Email B uses the misspelled domain fujislvertech.com, which omits the letter i. It also contains multiple spelling mistakes, creates urgency and requests banking information and a company password. Email A uses the official company domain and follows a normal HR communication process."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 05: Project Coordination Update",
-    "sender": "Project Coordination Team",
-    "sender_initial": "P",
-    "sender_email": "projects@fujisilvertech.com",
-    "timestamp": "Today, 1:15 PM",
-    "subject": "Updated Project Timeline and Meeting Notes",
-    "scenario": "Hello Team,\n\nPlease find the updated project timeline and meeting notes attached. The revised milestones are highlighted for your review.\n\nPlease share any feedback during our scheduled project meeting.\n\nRegards,\nProject Coordination Team",
-    "display_link": "",
-    "attachment": "Project_Timeline_Update.pdf",
-    "email_note": "This message was received from an internal company address.",
-    "options": [
-      "Report it as phishing because all attachments are unsafe.",
-      "Treat it as potentially legitimate, verify the sender and attachment context, and review it using normal company procedures.",
-      "Forward the attachment to your personal email for easier access.",
-      "Reply with your company password to confirm receipt."
-    ],
-    "correct": 1,
-    "explanation": "The email uses the company domain and describes a plausible work-related update. However, employees should still verify unexpected attachments and follow normal company security procedures rather than assuming every internal email is safe."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 06: Advanced Security Policy Update",
-    "sender": "Information Security Team",
-    "sender_initial": "S",
-    "sender_email": "security-notice@fujisilvertech.com",
-    "timestamp": "Today, 2:20 PM",
-    "subject": "Mandatory Security Policy Review",
-    "scenario": "Dear Employee,\n\nThe Information Security Team has published an updated security policy. Please review the document through the company portal.\n\nThe message includes a link to an external file-sharing service that requests your company credentials before displaying the policy.\n\nRegards,\nInformation Security Team",
-    "display_link": "https://external-policy-files.example/login",
-    "attachment": "",
-    "email_note": "The sender address appears internal, but the link points to an external website.",
-    "options": [
-      "Trust the email because the sender address belongs to the company.",
-      "Enter your credentials because the policy review is mandatory.",
-      "Do not enter credentials. Verify the external link with the Information Security Team through an approved channel.",
-      "Forward the link to your team and ask them to test it."
-    ],
-    "correct": 2,
-    "explanation": "A legitimate-looking sender address does not guarantee that every link in a message is safe. The external file-sharing page requests company credentials. Verify the destination using an approved company portal or contact the security team directly."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 07: IT Equipment Replacement Notice",
-    "sender": "IT Asset Management",
-    "sender_initial": "A",
-    "sender_email": "asset-management@fujisilvertech.com",
-    "timestamp": "Today, 3:05 PM",
-    "subject": "Action Required: Laptop Replacement Registration",
-    "scenario": "Dear Employee,\n\nThe IT department is preparing a laptop replacement cycle for selected employees. A message circulating among employees claims that everyone must register their existing laptop immediately through an external replacement portal.\n\nThe form requests your employee ID, current Windows password and laptop serial number to confirm eligibility.\n\nEmployees who do not register today may be excluded from the replacement program.\n\nRegards,\nIT Asset Management",
-    "display_link": "https://fujisilvertech-device-register.example/replace",
-    "attachment": "",
-    "email_note": "The message uses a realistic workplace process and an internal-looking sender name, but the registration link is external.",
-    "options": [
-      "Submit the requested information because laptop replacement is an official IT activity.",
-      "Enter your Windows password because the portal needs to verify your laptop.",
-      "Verify the replacement program directly with IT through an approved company channel and do not submit credentials.",
-      "Forward the registration link to other employees so they can register before the deadline."
-    ],
-    "correct": 2,
-    "explanation": "Attackers may impersonate IT asset management and use realistic equipment replacement announcements to collect employee information. An external registration page requesting a Windows password is suspicious. Verify the program directly with IT and never share your password."
-  },
-  {
-    "category": "EMAIL COMPARISON",
-    "mode": "multiple_choice",
-    "title": "Investigation 08: Identify the Legitimate Google Storage Email",
-    "sender": "Google Workspace Storage",
-    "sender_initial": "G",
-    "sender_email": "Compare Email A and Email B",
-    "timestamp": "Today, 3:45 PM",
-    "subject": "Google Storage Usage Notification",
-    "scenario": "You receive two storage notifications. Both claim that your cloud storage requires attention. Compare the sender, message and requested action to identify the legitimate notification.",
-    "comparison": true,
-    "emails": [
-      {
-        "label": "EMAIL A",
-        "sender": "Google Workspace",
-        "sender_email": "no-reply@google.com",
-        "timestamp": "Today, 3:40 PM",
-        "subject": "Google Account Storage Usage Update",
-        "body": "Hello,\n\nThis is a notification about the storage usage associated with your Google Account.\n\nYou can review your current storage usage by navigating directly to your Google Account or Google One settings.\n\nIf you need additional storage, review the available options through the official Google website.\n\nGoogle Workspace Support",
-        "link": "https://one.google.com/",
-        "attachment": ""
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 3: Identify the Legitimate Payroll Email",
+        "scenario": "The two emails below look almost identical. Your company's real domain is fujisilvertech.com. Which one is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Payroll",
+            "sender_email": "payroll@fujisilvertech.co",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your November payslip is ready",
+            "body": "Hello,\nYour payslip for November 2026 is now avaliable in the HR portal.\nRegards,\nPayroll Team",
+            "link": "https://hr.fujisilvertech.co/payslips"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Payroll",
+            "sender_email": "payroll@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your November payslip is ready",
+            "body": "Hello,\nYour payslip for November 2026 is now available in the HR portal.\nRegards,\nPayroll Team",
+            "link": "https://hr.fujisilvertech.com/payslips"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 1,
+        "explanation": "Email 2 uses fujisilvertech.com, your company's real domain. Email 1 uses fujisilvertech.co, with the final m missing, in both the sender address and the link, and also misspells available. Always read a domain to its last letter."
       },
       {
-        "label": "EMAIL B",
-        "sender": "Google Workspace Storage",
-        "sender_email": "n0-reply@Go0gle.com",
-        "timestamp": "Today, 3:45 PM",
-        "subject": "URGENT: Your Google Storage Is Almost Ful",
-        "body": "Dear User,\n\nYour cloud storage is almost ful. Immediate action is requird to prevent your files from being deleted.\n\nYou are recieving this notification because your storage limit has been exeeded.\n\nUpgrade or verify your storage immediatly using the link below.\n\nYour files will be removed immediatly unless you enter your account password and payment details.\n\nGoogle Workspace Support",
-        "link": "https://google-storage-alert.example/upgrade",
-        "attachment": ""
+        "category": "ACCOUNT SECURITY",
+        "title": "Question 4: Fake Microsoft Sign-In",
+        "scenario": "You typed your work password into a fake page, which then sent you on to the real Microsoft 365 sign-in, where you signed in normally. Nothing seems wrong. What is the best sequence of actions?",
+        "options": [
+          "Change your password from the official page, and report it only if you later notice unusual activity",
+          "Report the incident to IT security, then change your password only after they reply so their investigation is not disturbed",
+          "Report the incident to IT security, then sign out of all devices and wait for IT to say whether a password change is needed",
+          "Change your password from the official page, then report the incident to IT security so sessions and mailbox rules can be checked"
+        ],
+        "correct": 3,
+        "explanation": "Changing the password first cuts the attacker off, and reporting lets IT check active sessions, mailbox forwarding rules and other accounts that use the same password. The other options delay the fix or hide the incident. A normal-looking redirect is exactly how this attack covers its tracks."
+      },
+      {
+        "category": "FILE SHARING",
+        "title": "Question 5: The OneDrive Shared Folder",
+        "scenario": "A colleague in your department shares a OneDrive folder called Team Reviews 2026. The notice comes from Microsoft's real notification address, but the folder asks you to sign in again, and this colleague has never shared files with you before. What is the best next step?",
+        "options": [
+          "Forward the share notice to your manager and wait for them to say whether it is safe",
+          "Message your colleague on Teams to confirm, and open the link yourself while you wait for the reply",
+          "Sign in through the page, because the notice came from Microsoft's real notification address",
+          "Open OneDrive from your own bookmark to see whether the folder appears under Shared with me, and confirm with your colleague on Teams"
+        ],
+        "correct": 3,
+        "explanation": "A real share shows up inside your own OneDrive, so checking there avoids the link entirely, and confirming with the colleague catches a compromised account. A real Microsoft sender proves nothing if the colleague's account was taken over. Opening the link or relying on someone else to verify it does not provide the same protection."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 6: Identify the Legitimate OneDrive Email",
+        "scenario": "Microsoft sends OneDrive and Microsoft 365 emails from microsoft.com. Your work account receives the two emails below. Which one is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Microsoft OneDrive",
+            "sender_email": "no-reply@rnicrosoft.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your OneDrive storage is almost full",
+            "body": "Hi,\nYour OneDrive storage is almost full. Free up space or add storage to keep syncing your files immediatly.\nThe Microsoft OneDrive team",
+            "link": "https://www.rnicrosoft.com/microsoft-365/onedrive/plans"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Microsoft OneDrive",
+            "sender_email": "no-reply@microsoft.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your OneDrive storage is almost full",
+            "body": "Hi,\nYour OneDrive storage is almost full. Free up space or add storage to keep syncing your files immediately.\nThe Microsoft OneDrive team",
+            "link": "https://www.microsoft.com/microsoft-365/onedrive/plans"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 1,
+        "explanation": "Email 1 uses rnicrosoft.com: the letters r and n side by side can look like an m. It also misspells immediately. Email 2 uses the real microsoft.com domain. When in doubt, open OneDrive yourself and check your storage there."
+      },
+      {
+        "category": "PASSWORD SECURITY",
+        "title": "Question 7: Password Expiry Notice",
+        "scenario": "An email from IT Service Desk says your password expires in 3 hours and links to a sign-in page. The sender address and the link both show your company's real domain, and IT announced last week that expiry notices were coming. What is the strongest next step?",
+        "options": [
+          "Open the password page from your own bookmark, since a genuine expiry will show there, and report the email to IT if it does not",
+          "Check the sender address and the link in the email, and sign in through the link if both show your company's domain",
+          "Reply to the email asking the service desk to confirm, and sign in through the link once they say yes",
+          "Use the link, because the sender address, the domain and last week's announcement all match"
+        ],
+        "correct": 0,
+        "explanation": "Even when everything matches, the safest check is to reach the real site yourself: a genuine expiry will appear there. Sender names can be spoofed and accounts can be compromised. Replying to the email reaches the same person who sent it."
+      },
+      {
+        "category": "ACCOUNT SECURITY",
+        "title": "Question 8: Understanding MFA",
+        "scenario": "Your company is rolling out MFA for all staff. What does MFA stand for, and how does it protect your account?",
+        "options": [
+          "Managed File Access; it limits which folders in the company drive you can open",
+          "Multi-Function Antivirus; it scans each file you download for harmful software",
+          "Multi-Factor Authentication; it asks for a second proof of identity (such as a code or an approval on your phone) in addition to your password",
+          "Mandatory Firewall Activation; it blocks every email sent from unknown senders"
+        ],
+        "correct": 2,
+        "explanation": "MFA means Multi-Factor Authentication. If your password is stolen, the attacker still needs the second factor. Never approve a prompt or share a code that you did not trigger yourself."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 9: Identify the Legitimate Google Storage Email",
+        "scenario": "Your Google account is running low on storage. Google's real emails come from google.com. Which of these two emails is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Google One",
+            "sender_email": "no-reply@google.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your Google storage is 95% full",
+            "body": "Hi,\nYour Google storage is 95% full. Remove old files or get more storage to avoid any interruption.\nThe Google One team",
+            "link": "https://one.google.com/storage"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Google One",
+            "sender_email": "no-reply@googlle.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your Google storage is 95% full",
+            "body": "Hi,\nYour Google storage is 95% full. Remove old files or get more storage to avoid any interuption.\nThe Google One team",
+            "link": "https://one.googlle.com/storage"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 0,
+        "explanation": "Email 2 uses googlle.com, with an extra l, in both the sender address and the link, and misspells interruption. Email 1 uses Google's real domain, google.com. For any storage warning, you can also check your own Google account directly."
+      },
+      {
+        "category": "SOCIAL ENGINEERING",
+        "title": "Question 10: Managing Director Impersonation",
+        "scenario": "You get a WhatsApp message from an unknown number that uses the Managing Director's photo and name: I am in a client meeting and cannot take calls. Buy ₹50,000 of Amazon vouchers for a client gift and send me the codes here; Accounts will reimburse you today. It mentions a real client visit your team has been preparing for. What is the best action?",
+        "options": [
+          "Do not buy anything; contact the Managing Director or their office on their saved number or the company directory, and report the WhatsApp message to IT security",
+          "Reply on WhatsApp asking the sender to confirm the client's name, and buy the vouchers if the answer is correct",
+          "Buy the vouchers, since the message mentions a real client visit that only someone inside the company would know about",
+          "Do not buy anything; reply on WhatsApp that you need approval from Accounts first, and see how the sender responds"
+        ],
+        "correct": 0,
+        "explanation": "This is impersonation of a senior leader over a messaging app. A client visit is easy to learn from a leaked message, a social media post or an earlier compromise, so it proves nothing. Any reply, even a question or a stalling answer, keeps the attacker talking and lets them adapt. Verify through a number you already trust and report it."
       }
     ],
-    "display_link": "",
-    "attachment": "",
-    "email_note": "Both sender addresses look similar at first glance. Inspect the characters carefully and look for spelling mistakes and unusual requests.",
-    "options": [
-      "Email A is legitimate and Email B is suspicious.",
-      "Email B is legitimate and Email A is suspicious.",
-      "Both emails are legitimate.",
-      "Both emails are phishing."
+    "B": [
+      {
+        "category": "SMS PHISHING",
+        "title": "Question 1: Suspicious Courier SMS",
+        "scenario": "You ordered stationery for the plant. A text arrives in the same SMS thread as the courier's earlier genuine updates: Delivery on hold, pin code mismatch. Update within 12 hours: courier-update.in/FS4471. The order number in the text is correct. What is the best next action?",
+        "options": [
+          "Open the link on your phone, but only confirm the pin code and enter no name, phone number or payment details",
+          "Look up the order in the courier's official app or website using your tracking number, and report the text to IT security",
+          "Search for the courier's name, open the first result, and confirm the address there",
+          "Reply to the text with your correct pin code, since replying is safer than opening a link"
+        ],
+        "correct": 1,
+        "explanation": "Attackers can slip texts into an existing thread by faking the sender name, and a correct order number can come from an earlier leak, so neither proves the text is genuine. Look the order up yourself with your tracking number and report the text. Confirming the pin code or replying with it still gives details to the sender, and the first search result can be a paid fake advert."
+      },
+      {
+        "category": "PHISHING BASICS",
+        "title": "Question 2: Spear Phishing",
+        "scenario": "What is spear phishing, for example when you receive a message that names your manager and your current project?",
+        "options": [
+          "A phishing attack that spreads automatically from one infected computer to others on the same network",
+          "A phishing attack that is carried out through a phone call instead of an email",
+          "A phishing attack sent to thousands of random people with the same generic message",
+          "A phishing attack aimed at one specific person or a small group, using personal details such as their name, role or projects to look believable"
+        ],
+        "correct": 3,
+        "explanation": "Spear phishing is targeted and personalised. The mass-message option describes general phishing, the phone-call option is vishing, and the automatically spreading attack describes a computer worm."
+      },
+      {
+        "category": "SOFTWARE SECURITY",
+        "title": "Question 3: Fake Zoom Plug-In",
+        "scenario": "In a Zoom meeting with a real supplier you work with, the host posts a link in chat to download the updated meeting plug-in for screen sharing. The host's name matches your supplier contact, but they joined from a new Zoom account. What is the best response?",
+        "options": [
+          "Do not install it, ask the host to share the screen without it, and update only through the official Zoom app or your company's software portal",
+          "Download it but scan it with antivirus before you run it",
+          "Install it from the host's link, since the host is your known supplier contact",
+          "Install it only after the host confirms in the chat that it is safe"
+        ],
+        "correct": 0,
+        "explanation": "A supplier account can be compromised or imitated, and fake plug-in downloads are a common way to deliver harmful software. Update only through official sources. Confirmation in the same chat can come from the attacker, and a scan does not catch everything."
+      },
+      {
+        "category": "AI THREATS",
+        "title": "Question 4: AI-Gathered Personal Details",
+        "scenario": "Attackers use AI tools to collect details from LinkedIn, company websites and social media. You receive an email that mentions your manager's name, your current project and a conference you recently attended. What does this tell you?",
+        "options": [
+          "Accurate personal details do not prove the sender is genuine, since AI tools can gather them from public profiles, so judge the sender, the link and the request instead",
+          "The email is probably from a colleague, because attackers only guess generic details",
+          "The email is only suspicious if it also contains a link or an attachment",
+          "The email must be genuine, because outsiders cannot know these details"
+        ],
+        "correct": 0,
+        "explanation": "Names, projects and events are often public, and AI can gather and use them in seconds to make a message feel personal. Judge the sender address, the link and what is being asked. A request for money, data or a reply can be dangerous even without a link or attachment."
+      },
+      {
+        "category": "DOCUMENT FRAUD",
+        "title": "Question 5: Suspicious DocuSign Request",
+        "scenario": "A DocuSign email sent to your work address really comes from DocuSign and the envelope opens on docusign.com, but you do not know the sender, a person at Narmada Steel Procurement, and the document is titled Vendor Payment Update. What is the best next action?",
+        "options": [
+          "Sign it, since the email and the page both come from the genuine DocuSign service",
+          "Contact the named sender or Narmada Steel Procurement on a phone number you already have, and do not sign until they confirm",
+          "Open the document without signing, read it fully, and sign only if nothing in it looks wrong",
+          "Sign it only after checking that the company logo on the document matches the real Narmada Steel logo"
+        ],
+        "correct": 1,
+        "explanation": "Attackers can send real DocuSign envelopes from their own accounts, so the real service does not prove the sender is real. Confirm with Narmada Steel through a number you already hold. A logo is easy to copy, and reading the document cannot tell you whether the request is genuine."
+      },
+      {
+        "category": "PHISHING BASICS",
+        "title": "Question 6: Look-Alike Domains",
+        "scenario": "What is a look-alike (spoofed) domain, for example rnicrosoft.com pretending to be microsoft.com?",
+        "options": [
+          "An address made to look almost the same as a real company's address, by adding, swapping or changing a few characters, so people mistake it for the real one",
+          "A backup web address that a company registers so staff can still reach its site if the main one is down",
+          "An address that hides a person's identity by routing their emails through several servers",
+          "A temporary web address that IT creates to test new company applications before they go live"
+        ],
+        "correct": 0,
+        "explanation": "A look-alike domain copies a real name with small changes: an extra letter, a swapped letter, a missing letter, letters that merge (such as rn looking like m) or a different ending such as .co. Always read the whole domain, letter by letter."
+      },
+      {
+        "category": "MALICIOUS ATTACHMENTS",
+        "title": "Question 7: Suspicious Excel Attachment",
+        "scenario": "A colleague you know well replies on a thread you started yesterday and attaches Vendor_Rates_Q4.xlsm with Enable Content to see the pricing. The email passes every check, but your colleague never uses macros. What is the best next step?",
+        "options": [
+          "Open the file in Protected View first, and enable content only if the macros look standard",
+          "Do not open it; confirm with your colleague by phone or Teams, and report it to IT security as a possible compromised account",
+          "Reply on the same thread asking whether the macros are needed, and wait for the answer before opening",
+          "Open the file on a test machine that has no company access, and enable content there"
+        ],
+        "correct": 1,
+        "explanation": "The reply may come from a real but compromised account, which is why it passes every check. Contact your colleague outside email and report it. Macros cannot be judged by how they look, and a test machine skips reporting."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 8: Identify the Legitimate HR Insurance Email",
+        "scenario": "Both emails below come from hr@fujisilvertech.com and both link to the real HR portal. Look at every line, including Reply-To. Which one is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "HR",
+            "sender_email": "hr@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "reply_to": "hr@fujisilvertch.com",
+            "subject": "Insurance enrolment closes Friday",
+            "body": "Hello,\nGroup insurence enrolment for 2027 closes this Friday.\nPlease confirm your family details in the HR portal.\nQuestions? Just reply to this email.\nHR Team",
+            "link": "https://hr.fujisilvertech.com/insurance"
+          },
+          {
+            "label": "Email 2",
+            "sender": "HR",
+            "sender_email": "hr@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "reply_to": "hr@fujisilvertech.com",
+            "subject": "Insurance enrolment closes Friday",
+            "body": "Hello,\nGroup insurance enrolment for 2027 closes this Friday.\nPlease confirm your family details in the HR portal.\nQuestions? Just reply to this email.\nHR Team",
+            "link": "https://hr.fujisilvertech.com/insurance"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 1,
+        "explanation": "The sender and the link are the same in both. The real difference is the Reply-To: in Email 1 it is fujisilvertch.com, with the e missing, so a reply would go to an outside domain and you could end up sending family details to an attacker. Email 1 also misspells insurance. Check Reply-To before you reply."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 9: Identify the Legitimate GST Reminder",
+        "scenario": "Your company files GST returns. The GST portal's official domain is gst.gov.in. Which of these two reminder emails is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "GST Portal",
+            "sender_email": "noreply@gst.gov.in",
+            "to": "you@fujisilvertech.com",
+            "subject": "Reminder: GSTR-3B filing due on 20th",
+            "body": "Dear Taxpayer,\nThis is a reminder that your GSTR-3B return for November 2026 is due on 20th December. Please log in to the GST portal to file your return.\nGST Portal",
+            "link": "https://www.gst.gov.in/"
+          },
+          {
+            "label": "Email 2",
+            "sender": "GST Portal",
+            "sender_email": "noreply@gts.gov.in",
+            "to": "you@fujisilvertech.com",
+            "subject": "Reminder: GSTR-3B filing due on 20th",
+            "body": "Dear Taxpyer,\nThis is a reminder that your GSTR-3B return for November 2026 is due on 20th December. Please log in to the GST portal to file your return.\nGST Portal",
+            "link": "https://www.gts.gov.in/"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 0,
+        "explanation": "Email 2 uses gts.gov.in, where two letters of gst are swapped, in both the sender address and the link, and misspells Taxpayer. Email 1 uses the real gst.gov.in. For any return deadline, type the portal address yourself or use your bookmark."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 10: Identify the Legitimate Microsoft Teams Email",
+        "scenario": "Microsoft's Teams notices come from microsoft.com addresses. Which of these two emails is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Microsoft Teams",
+            "sender_email": "noreply@email.teams.microsoft.co",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your meeting recording is ready",
+            "body": "Hello,\nThe recoding of Plant Review is ready to view. It will be deleted after 7 days.\nMicrosoft Teams",
+            "link": "https://teams.microsoft.co/recordings/88412"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Microsoft Teams",
+            "sender_email": "noreply@email.teams.microsoft.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Your meeting recording is ready",
+            "body": "Hello,\nThe recording of Plant Review is ready to view. It will be deleted after 7 days.\nMicrosoft Teams",
+            "link": "https://teams.microsoft.com/recordings/88412"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 1,
+        "explanation": "Email 1 ends in .co instead of .com in both the sender address and the link, a one-letter difference that is easy to miss, and it says recoding instead of recording. Email 2 uses microsoft.com."
+      }
     ],
-    "correct": 0,
-    "explanation": "Email B uses character substitutions: the number zero replaces the letter o in both n0-reply and Go0gle. It also contains spelling mistakes, creates urgency and requests a password and payment details. Email A uses Google's official sender domain and directs the employee to its official website."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 09: Vendor Payment Confirmation",
-    "sender": "Accounts Payable",
-    "sender_initial": "A",
-    "sender_email": "accounts.payable@fujisilvertech.com",
-    "timestamp": "Today, 4:10 PM",
-    "subject": "Invoice Processing Confirmation - INV-2048",
-    "scenario": "Hello,\n\nThis is a confirmation that invoice INV-2048 has been received for processing. The payment details will be reviewed according to the standard approval workflow.\n\nNo additional credentials or payment information are required through email.\n\nRegards,\nAccounts Payable Team",
-    "display_link": "",
-    "attachment": "",
-    "email_note": "The message does not request credentials or ask the employee to change payment details.",
-    "options": [
-      "Treat it as potentially legitimate, and verify the invoice through the normal finance workflow if needed.",
-      "Send your banking password to Accounts Payable to speed up processing.",
-      "Click any payment link received in a follow-up message without checking it.",
-      "Forward the confirmation to an external personal email account."
-    ],
-    "correct": 0,
-    "explanation": "The message describes a routine invoice-processing confirmation and does not request credentials or unusual action. Continue to follow the normal finance approval process and verify any unexpected changes to payment instructions."
-  },
-  {
-    "category": "PHISHING INVESTIGATION",
-    "mode": "multiple_choice",
-    "title": "Investigation 10: Executive Impersonation",
-    "sender": "Chief Executive Officer",
-    "sender_initial": "C",
-    "sender_email": "ceo.office@fujisilvertech-management.example",
-    "timestamp": "Today, 4:55 PM",
-    "subject": "Confidential: Urgent Gift Card Purchase",
-    "scenario": "I am currently in an important meeting and cannot take calls. I need you to purchase gift cards immediately and send me the redemption codes. Keep this request confidential and do not discuss it with anyone else.\n\nI will explain everything later.\n\nRegards,\nCEO",
-    "display_link": "",
-    "attachment": "",
-    "email_note": "The sender claims to be a senior executive and requests an urgent confidential transaction.",
-    "options": [
-      "Purchase the gift cards immediately because the request comes from the CEO.",
-      "Reply with the gift card codes and wait for confirmation.",
-      "Verify the request using a known company contact method and report the suspicious message.",
-      "Ask a colleague to purchase the gift cards instead."
-    ],
-    "correct": 2,
-    "explanation": "This is a common business email compromise technique. Attackers impersonate executives, create urgency, request secrecy and ask employees to make unusual payments. Always verify financial requests through a separate trusted communication channel."
+    "C": [
+      {
+        "category": "AI THREATS",
+        "title": "Question 1: AI Chatbot Impersonation",
+        "scenario": "While searching for a software tool for work, a website opens a chat window where an AI assistant answers instantly and politely, then asks you to sign in with your work account to verify your licence. What is the key risk?",
+        "options": [
+          "The chat is safe as long as it asks you to sign in rather than to download a file",
+          "A polite, instant chat does not prove the site is genuine, since AI can run convincing chats on fake sites, so sign in only on the official address you reached yourself",
+          "A convincing, fast chat means the website is genuine, since fake sites cannot run live chats",
+          "The chat is safe as long as the website address begins with https"
+        ],
+        "correct": 1,
+        "explanation": "AI chatbots can now run natural, helpful conversations on fake sites, so a good chat proves nothing. Reach the vendor through your own bookmark or the company portal. HTTPS only means the connection is encrypted, not that the site is honest."
+      },
+      {
+        "category": "PHISHING BASICS",
+        "title": "Question 2: Whaling",
+        "scenario": "What is whaling, such as a fake email aimed at your company's Managing Director or CFO?",
+        "options": [
+          "A phishing attack that is carried out through voice calls",
+          "A phishing attack that sends the same message to many employees at the same time",
+          "A phishing attack aimed at senior leaders such as the CEO or CFO, because they can approve large payments or access sensitive data",
+          "A phishing attack that uses fake wireless networks in public places"
+        ],
+        "correct": 2,
+        "explanation": "Whaling targets the big fish in a company. The mass-message option describes general phishing, the voice-call option is vishing, and the fake wireless network option describes a different attack."
+      },
+      {
+        "category": "QR PHISHING",
+        "title": "Question 3: QR Phishing (Quishing)",
+        "scenario": "A poster in the canteen shows a QR code for free staff benefits. What is QR phishing (also called quishing)?",
+        "options": [
+          "Sending a harmful email attachment that contains a QR code inside it",
+          "Using a fake QR (Quick Response) code scanner app that steals your contacts",
+          "Hacking a company's QR code generator to change the prices it displays",
+          "Placing a malicious QR code in an email, poster or sticker so that scanning it takes you to a fake website or harmful download"
+        ],
+        "correct": 3,
+        "explanation": "In quishing the web address is hidden inside the QR image, so you cannot read it before scanning, and many email filters cannot read it either. Treat QR codes like links: only scan codes you trust."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 4: Identify the Legitimate Calendar Invitation",
+        "scenario": "Both emails come from your company's calendar address. Which meeting invitation is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Calendar",
+            "sender_email": "calendar@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Meeting invitation: Quarterly Production Review",
+            "body": "Hello,\nYou are invited to the Quarterly Production Review on Monday at 10:00 AM.\nCalendar Team",
+            "link": "https://teams.microsoft.com/l/meetup-join/19-meeting-ZjU4"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Calendar",
+            "sender_email": "calendar@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Meeting invitation: Quarterly Production Review",
+            "body": "Hello,\nYou are invited to the Quaterly Production Review on Monday at 10:00 AM.\nCalendar Team",
+            "link": "https://teams.micr0soft.com/l/meetup-join/19-meeting-ZjU4"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 0,
+        "explanation": "In Email 2 the link uses micr0soft.com with a zero instead of the letter o, and the text misspells Quarterly. Email 1 links to the genuine microsoft.com address."
+      },
+      {
+        "category": "MFA ATTACKS",
+        "title": "Question 5: MFA Fatigue Attack",
+        "scenario": "Late at night you receive six Multi-Factor Authentication approval prompts for your work account, then a call: This is the security team. We see repeated sign-in attempts on your account. Approve the next prompt to confirm it is you and we will lock the attacker out. What is the best action?",
+        "options": [
+          "Deny all prompts and ask the caller for their employee ID before deciding whether to approve",
+          "Approve the next prompt once, because the caller already knows about the attempts and will block the attacker",
+          "Deny all prompts, hang up, report it to IT security using the official number, and change your password",
+          "Deny all prompts, wait for them to stop, and change your password in the morning"
+        ],
+        "correct": 2,
+        "explanation": "The caller is part of the attack: approving a prompt gives the attacker your sign-in. Deny, hang up, and report through an official number, then change your password. An employee ID is easy to fake, and waiting until morning leaves the attacker with a working password."
+      },
+      {
+        "category": "SOCIAL ENGINEERING",
+        "title": "Question 6: Deepfake Finance Director",
+        "scenario": "In a video call, your company's finance director asks you to release an urgent payment to a new vendor and to keep it quiet until a deal is announced. The face and voice match, the calendar invite came from their real account, and they answered your question about last week's meeting correctly. What is the best action?",
+        "options": [
+          "Ask them to repeat the request in writing over the company chat system, then release the payment",
+          "Release the payment, because the invite, the voice and the answer to your question all check out",
+          "Pause the payment and confirm through the payment approval process and a directory phone number, since every check so far can be faked or compromised",
+          "Release half the payment now and the rest after confirming by email, to limit the risk"
+        ],
+        "correct": 2,
+        "explanation": "Faces, voices, invites and correct answers can all be faked or come from a compromised account, and secrecy with a new vendor is the real red flag. Use the approval process and a number from the directory. The same chat channel may be compromised, and paying half still loses money."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 7: Identify the Legitimate Expense Report Email",
+        "scenario": "Both emails below appear to be sent from the same company address, expenses@fujisilvertech.com. Read the links carefully. Which email is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Expenses",
+            "sender_email": "expenses@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Expense report #3391 needs your approval",
+            "body": "Hello,\nAn expense report submitted by a member of your team is waiting for your aproval.\nExpenses Team",
+            "link": "https://expenses.fujisilvertech.com-review.net/reports/3391"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Expenses",
+            "sender_email": "expenses@fujisilvertech.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Expense report #3391 needs your approval",
+            "body": "Hello,\nAn expense report submitted by a member of your team is waiting for your approval.\nExpenses Team",
+            "link": "https://expenses.fujisilvertech.com/reports/3391"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 1,
+        "explanation": "The real website name is the part just before the first single slash. In Email 1 that part ends in com-review.net, so fujisilvertech.com is only a decoy at the front. Email 1 also misspells approval. In Email 2 the link genuinely ends at fujisilvertech.com."
+      },
+      {
+        "category": "OAUTH CONSENT PHISHING",
+        "title": "Question 8: Suspicious App Permissions",
+        "scenario": "When you sign in to your work Microsoft 365 account, an app called Pipeline Insights asks to read and write all files, read mail and maintain access. The consent screen is on the real Microsoft sign-in page, shows a verified publisher badge, asks for no password, and the app was recommended in an email from a partner. What is the best action?",
+        "options": [
+          "Accept only the read permissions and decline the write permission, since this limits what the app can change",
+          "Accept, then review the app's permissions after a week and remove it if it is not useful",
+          "Accept, because the consent screen is on the real Microsoft page and the publisher is verified",
+          "Decline, and ask IT security to review the app before anyone approves it, since the permissions are broad and the recommendation came by email"
+        ],
+        "correct": 3,
+        "explanation": "Consent phishing can use real Microsoft screens, and a verified badge does not make broad access safe. Access to files and mail should be reviewed by IT security first. Partial approval or a later review still gives the app access in the meantime."
+      },
+      {
+        "category": "SPOT THE GENUINE EMAIL",
+        "title": "Question 9: Identify the Legitimate Google Drive Email",
+        "scenario": "Google Drive sends file-share notices from google.com. Which of these two emails, received at your work address, is legitimate?",
+        "comparison": true,
+        "emails": [
+          {
+            "label": "Email 1",
+            "sender": "Google Drive",
+            "sender_email": "drive-shares-noreply@google.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Production_Plan_Q4 was shared with you",
+            "body": "Hi,\nA teammate shared a file with you: Production_Plan_Q4.\nGoogle Drive",
+            "link": "https://drive.google.com/file/d/1Ab9xT/view"
+          },
+          {
+            "label": "Email 2",
+            "sender": "Google Drive",
+            "sender_email": "drive-shares-noreply@goolge.com",
+            "to": "you@fujisilvertech.com",
+            "subject": "Production_Plan_Q4 was shared with you",
+            "body": "Hi,\nA teamate shared a file with you: Production_Plan_Q4.\nGoogle Drive",
+            "link": "https://drive.goolge.com/file/d/1Ab9xT/view"
+          }
+        ],
+        "options": [
+          "Email 1 only",
+          "Email 2 only",
+          "Both emails are legitimate",
+          "Neither email is legitimate"
+        ],
+        "correct": 0,
+        "explanation": "Email 2 uses goolge.com, where two letters of google are swapped, in both the sender address and the link, and misspells teammate. Email 1 comes from and links to google.com."
+      },
+      {
+        "category": "PAYMENT FRAUD",
+        "title": "Question 10: Supplier Bank Detail Fraud",
+        "scenario": "A supplier emails new bank details to your accounts team's mailbox, from the same address as always. You call the phone number printed on the invoice and someone confirms the change. The new account is at a different bank, and the invoice is the one that carried the new number. What is the best action?",
+        "options": [
+          "Update the details after your manager approves them by email",
+          "Hold the change and verify using a phone number from your supplier records or an earlier contract, not from the invoice or the email",
+          "Update the details, since a phone call confirmed the change",
+          "Update the details but send a small test payment first and check that it arrives"
+        ],
+        "correct": 1,
+        "explanation": "The number on the invoice came from the same email the attacker may control, so the call proves nothing. Verify with a number from your own records or an earlier contract. A manager's email approval and a test payment do not check who is behind the request."
+      }
+    ]
   }
-]
+}
