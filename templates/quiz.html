@@ -693,7 +693,7 @@ def submit():
 
     # Prefer the session attempt ID, falling back to the page ID.
 
-    attempt_id = session_attempt_id or received_attempt_id
+    attempt_id = received_attempt_id or session_attempt_id
 
     logger.info("========== QUIZ SUBMISSION ==========")
     logger.info("Employee: %s", email)
@@ -924,7 +924,7 @@ def submit():
 
 
 # =========================================================
-# 11. RESULT PAGE - CORRECTED ROUTE
+# 11. RESULT PAGE
 # =========================================================
 
 @app.route("/result/<attempt_id>")
