@@ -28,22 +28,29 @@ from flask import (
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get(
-    "SECRET_KEY",
-    "change-this-secret-key-before-deployment"
-)
+app.secret_key = os.environ.get("SECRET_KEY")
+
+if not app.secret_key:
+    app.secret_key = "development-only-change-this-secret-key"
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = (
-    os.environ.get("RENDER", "") == "true"
+    os.environ.get("RENDER", "").lower() == "true"
 )
+
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 
 # =========================================================
 # 2. CONFIGURATION
 # =========================================================
 
-DB = os.environ.get("DATABASE_PATH", "responses.sqlite3")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB = os.environ.get(
+    "DATABASE_PATH",
+    os.path.join(BASE_DIR, "responses.sqlite3")
+)
 
 CORP = "fujisilvertech.com"
 
@@ -65,12 +72,14 @@ ADMINS.update(
 ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
 
 QUESTION_FILE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
+    BASE_DIR,
     "questions.json"
 )
 
+REQUIRED_SETS = ("A", "B", "C")
+
 # =========================================================
-# 3. LOAD QUESTION SETS
+# 3. LOAD AND VALIDATE QUESTION SETS
 # =========================================================
 
 def load_questions():
@@ -78,16 +87,19 @@ def load_questions():
     if not os.path.exists(QUESTION_FILE):
         raise FileNotFoundError(
             "questions.json was not found. "
-            "It must be in the same folder as app.py."
+            "Place it in the same folder as app.py."
         )
 
-    with open(QUESTION_FILE, "r", encoding="utf-8") as file:
+    with open(
+        QUESTION_FILE,
+        "r",
+        encoding="utf-8"
+    ) as file:
         data = json.load(file)
 
     if not isinstance(data, dict) or "sets" not in data:
         raise ValueError(
-            "questions.json must contain a 'sets' object "
-            "with sets A, B and C."
+            "questions.json must contain a 'sets' object."
         )
 
     sets = data["sets"]
@@ -95,9 +107,7 @@ def load_questions():
     if not isinstance(sets, dict):
         raise ValueError("'sets' must be a JSON object.")
 
-    required_sets = ("A", "B", "C")
-
-    for set_name in required_sets:
+    for set_name in REQUIRED_SETS:
 
         questions = sets.get(set_name)
 
@@ -133,9 +143,15 @@ def load_questions():
                     f"question {index + 1}."
                 )
 
+            if not all(isinstance(option, str) for option in options):
+                raise ValueError(
+                    f"All options must be text in Set {set_name}, "
+                    f"question {index + 1}."
+                )
+
     return {
         name: sets[name]
-        for name in required_sets
+        for name in REQUIRED_SETS
     }
 
 
@@ -147,7 +163,11 @@ QUESTION_SETS = load_questions()
 
 def get_db():
 
-    connection = sqlite3.connect(DB, timeout=30)
+    connection = sqlite3.connect(
+        DB,
+        timeout=30
+    )
+
     connection.row_factory = sqlite3.Row
 
     return connection
@@ -181,7 +201,9 @@ def init_db():
     migrations = {
         "questions_snapshot": "TEXT",
         "answers": "TEXT",
-        "set_number": "TEXT"
+        "set_number": "TEXT",
+        "duration": "INTEGER DEFAULT 0",
+        "score": "INTEGER DEFAULT 0"
     }
 
     for column, column_type in migrations.items():
@@ -190,6 +212,16 @@ def init_db():
             connection.execute(
                 f"ALTER TABLE attempts ADD COLUMN {column} {column_type}"
             )
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_attempts_email
+        ON attempts(email)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_attempts_completed
+        ON attempts(completed)
+    """)
 
     connection.commit()
     connection.close()
@@ -208,7 +240,12 @@ def current_time():
 
 def corp(email):
 
-    return email.lower().endswith("@" + CORP)
+    email = email.strip().lower()
+
+    return (
+        "@" in email
+        and email.endswith("@" + CORP)
+    )
 
 
 def signed():
@@ -271,6 +308,25 @@ def is_passed(score):
         return False
 
 
+def get_owned_attempt(attempt_id, email):
+
+    connection = get_db()
+
+    attempt = connection.execute("""
+        SELECT *
+        FROM attempts
+        WHERE id = ?
+        AND email = ?
+    """, (
+        attempt_id,
+        email
+    )).fetchone()
+
+    connection.close()
+
+    return attempt
+
+
 # =========================================================
 # 6. QUESTION HELPERS
 # =========================================================
@@ -289,11 +345,12 @@ ANSWER_FIELDS = {
 
 def sanitize_question(question):
     """
-    Remove answer keys and explanations before sending
-    question data to the participant's browser.
+    Remove correct answers and explanations before
+    sending questions to the employee's browser.
     """
 
     if isinstance(question, list):
+
         return [
             sanitize_question(item)
             for item in question
@@ -333,7 +390,10 @@ def get_correct_ids(question):
     if isinstance(correct, str):
         correct = [correct]
 
-    return set(correct or [])
+    return {
+        str(item)
+        for item in (correct or [])
+    }
 
 
 def make_attempt_questions(set_number):
@@ -342,8 +402,8 @@ def make_attempt_questions(set_number):
         json.dumps(QUESTION_SETS[set_number])
     )
 
-    # Preserve the PDF's original option order.
-    # The correct-answer indexes therefore remain unchanged.
+    # Keep question and option order unchanged.
+    # This preserves the original correct-answer indexes.
 
     return questions
 
@@ -380,31 +440,47 @@ def validate_and_score(questions, answers):
                 )
 
             correct_ids = get_correct_ids(question)
-            selected_ids = set(answer)
+
+            selected_ids = {
+                str(item)
+                for item in answer
+            }
 
             is_correct = selected_ids == correct_ids
 
-            reviewed_answers.append(list(selected_ids))
+            reviewed_answers.append(
+                sorted(selected_ids)
+            )
 
         else:
 
-            if isinstance(answer, bool) or not isinstance(answer, int):
-                raise ValueError(
-                    f"Invalid answer for question {index + 1}."
-                )
-
             options = question.get("options", [])
 
-            if answer < 0 or answer >= len(options):
-                raise ValueError(
-                    f"Answer out of range for question {index + 1}."
+            if answer is None:
+
+                is_correct = False
+                reviewed_answers.append(None)
+
+            else:
+
+                if (
+                    isinstance(answer, bool)
+                    or not isinstance(answer, int)
+                ):
+                    raise ValueError(
+                        f"Invalid answer for question {index + 1}."
+                    )
+
+                if answer < 0 or answer >= len(options):
+                    raise ValueError(
+                        f"Answer out of range for question {index + 1}."
+                    )
+
+                is_correct = (
+                    answer == question.get("correct")
                 )
 
-            correct = question.get("correct")
-
-            is_correct = answer == correct
-
-            reviewed_answers.append(answer)
+                reviewed_answers.append(answer)
 
         if is_correct:
             score += 1
@@ -428,11 +504,13 @@ def home():
     if request.method == "POST":
 
         email = request.form.get(
-            "email", ""
+            "email",
+            ""
         ).strip().lower()
 
         password = request.form.get(
-            "admin_key", ""
+            "admin_key",
+            ""
         )
 
         if not email:
@@ -458,7 +536,9 @@ def home():
                 session["email"] = email
                 session["is_admin"] = True
 
-                return redirect(url_for("admin"))
+                return redirect(
+                    url_for("admin")
+                )
 
             else:
 
@@ -471,7 +551,9 @@ def home():
             session["email"] = email
             session["is_admin"] = False
 
-            return redirect(url_for("quiz"))
+            return redirect(
+                url_for("quiz")
+            )
 
         else:
 
@@ -499,8 +581,7 @@ def quiz():
 
     connection = get_db()
 
-    # Resume an existing incomplete attempt if one exists.
-    # This prevents refreshes from creating a new set.
+    # Resume an existing incomplete attempt.
 
     attempt = connection.execute("""
         SELECT *
@@ -516,7 +597,10 @@ def quiz():
     if attempt:
 
         attempt_id = attempt["id"]
-        set_number = attempt["set_number"] or "A"
+
+        set_number = (
+            attempt["set_number"] or "A"
+        )
 
         questions = safe_json(
             attempt["questions_snapshot"],
@@ -535,13 +619,17 @@ def quiz():
 
     else:
 
-        # Randomly assign A, B or C to a new employee attempt.
+        # Assign one random set to a new attempt.
 
-        set_number = random.choice(["A", "B", "C"])
+        set_number = random.choice(
+            list(REQUIRED_SETS)
+        )
 
         attempt_id = secrets.token_urlsafe(16)
 
-        questions = make_attempt_questions(set_number)
+        questions = make_attempt_questions(
+            set_number
+        )
 
         started = current_time()
 
@@ -571,8 +659,6 @@ def quiz():
     connection.close()
 
     session["attempt_id"] = attempt_id
-
-    # Never send correct answers or explanations to the browser.
 
     participant_questions = [
         sanitize_question(question)
@@ -639,6 +725,8 @@ def submit():
             "error": "Quiz attempt not found."
         }), 404
 
+    # Prevent a second submission from changing the result.
+
     if attempt["completed"]:
 
         connection.close()
@@ -665,16 +753,17 @@ def submit():
             "error": "Question data is missing."
         }), 500
 
-    # Support either a list or dictionary from quiz JavaScript.
+    # Support a list or a dictionary from JavaScript.
 
     if isinstance(answers, dict):
 
         try:
 
             answers = [
-                answers[str(index)]
-                if str(index) in answers
-                else answers[index]
+                answers.get(
+                    str(index),
+                    answers.get(index)
+                )
                 for index in range(len(questions))
             ]
 
@@ -707,7 +796,9 @@ def submit():
 
     try:
 
-        start_datetime = datetime.fromisoformat(started)
+        start_datetime = datetime.fromisoformat(
+            started
+        )
 
         duration = max(
             0,
@@ -725,23 +816,37 @@ def submit():
 
     completed = current_time()
 
-    connection.execute("""
+    # Conditional update prevents duplicate submissions.
+
+    cursor = connection.execute("""
         UPDATE attempts
         SET completed = ?,
             duration = ?,
             score = ?,
             answers = ?
         WHERE id = ?
+        AND email = ?
         AND completed IS NULL
     """, (
         completed,
         duration,
         percentage,
         json.dumps(reviewed_answers),
-        attempt_id
+        attempt_id,
+        session["email"]
     ))
 
     connection.commit()
+
+    if cursor.rowcount == 0:
+
+        connection.close()
+
+        return jsonify({
+            "success": False,
+            "error": "This assessment has already been submitted."
+        }), 409
+
     connection.close()
 
     session.pop("attempt_id", None)
@@ -780,9 +885,6 @@ def result(attempt_id):
 
     if not attempt:
         abort(404)
-
-    # Only score/status metadata is passed to the participant
-    # template. No answer list or question snapshot is exposed.
 
     return render_template(
         "result.html",
@@ -831,7 +933,9 @@ def admin():
 
         total_score += score
 
-        set_number = attempt["set_number"] or "Legacy"
+        set_number = (
+            attempt["set_number"] or "Legacy"
+        )
 
         rows.append({
             "id": attempt["id"],
@@ -842,11 +946,17 @@ def admin():
             "score": score,
             "set_number": set_number,
             "passed": is_passed(score),
-            "status": "PASSED" if is_passed(score) else "NOT PASSED",
+            "status": (
+                "PASSED"
+                if is_passed(score)
+                else "NOT PASSED"
+            ),
+
             "answers": answers,
             "questions": questions,
 
-            # Aliases retained for templates that use these names.
+            # Template compatibility aliases.
+
             "question_list": questions,
             "answer_list": answers
         })
@@ -925,7 +1035,7 @@ def export_csv():
             json.dumps(answers)
         ])
 
-    csv_data = output.getvalue()
+    csv_data = "\ufeff" + output.getvalue()
 
     return Response(
         csv_data,
@@ -946,7 +1056,9 @@ def logout():
 
     session.clear()
 
-    return redirect(url_for("home"))
+    return redirect(
+        url_for("home")
+    )
 
 
 # =========================================================
@@ -958,7 +1070,9 @@ def health():
 
     return jsonify({
         "status": "ok",
-        "application": "Fuji Silvertech Phishing Awareness"
+        "application": "Fuji Silvertech Phishing Awareness",
+        "pass_mark": PASS_MARK,
+        "question_sets": list(REQUIRED_SETS)
     })
 
 
