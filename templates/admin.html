@@ -21,6 +21,18 @@ header{
     background:linear-gradient(115deg,#fff,#eaf7ff 65%,#d8f7f4);
     border-bottom:1px solid #cce9f5;
     box-shadow:0 4px 18px rgba(30,110,150,.08);
+    padding:15px 6%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+header img{
+    max-height:55px;
+    max-width:190px;
+    object-fit:contain;
 }
 
 header span{
@@ -53,8 +65,6 @@ main{
 }
 
 .stat{
-    position:relative;
-    overflow:hidden;
     background:linear-gradient(140deg,#fff,#eaf7ff);
     padding:24px;
     border-radius:18px;
@@ -104,6 +114,44 @@ main{
 
 main h2{color:#174d75;margin-top:30px}
 main h3,main h4{color:#245b7e}
+
+.set-filter{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:20px 0;
+}
+
+.set-filter button{
+    border:1px solid #b9dce9;
+    background:white;
+    color:#28617e;
+    padding:12px 23px;
+    border-radius:11px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:800;
+    transition:.2s;
+}
+
+.set-filter button:hover{
+    background:#eaf8fc;
+    transform:translateY(-2px);
+}
+
+.set-filter button.active{
+    background:linear-gradient(120deg,#087fbc,#08a9b2);
+    border-color:transparent;
+    color:white;
+    box-shadow:0 5px 15px rgba(8,145,175,.18);
+}
+
+.selected-set-label{
+    color:#087f91;
+    font-weight:800;
+    margin:18px 0;
+    font-size:15px;
+}
 
 .search{
     width:100%;
@@ -229,16 +277,6 @@ main h3,main h4{color:#245b7e}
 
 .explanation strong{color:#078b8b}
 
-.score-pill{
-    display:inline-block;
-    padding:6px 12px;
-    border-radius:20px;
-    background:#dff6f2;
-    color:#087f79;
-    font-size:12px;
-    font-weight:bold;
-}
-
 .status-pass,.status-fail{
     display:inline-block;
     padding:6px 12px;
@@ -311,6 +349,7 @@ footer{
     .stat strong{font-size:27px}
     .admin-actions a{flex:1 1 auto}
     .meta-grid{grid-template-columns:1fr}
+    .set-filter button{flex:1 1 40%}
 }
 </style>
 </head>
@@ -333,15 +372,15 @@ footer{
 <div class="stats">
 
     <div class="stat">
-        Total completed attempts
-        <strong class="count-up" data-value="{{ rows|length }}">0</strong>
+        <span id="total-label">Total completed attempts</span>
+        <strong id="total-count">{{ rows|length }}</strong>
         <small>Completed assessments</small>
     </div>
 
     <div class="stat">
-        Average score
-        <strong class="count-up" data-value="{{ avg }}">0</strong>
-        <small>Overall employee performance (%)</small>
+        <span>Average score</span>
+        <strong id="average-score">{{ "%.1f"|format(avg|float) }}%</strong>
+        <small>Employee performance</small>
     </div>
 
     <div class="stat">
@@ -353,8 +392,32 @@ footer{
 </div>
 
 <div class="admin-actions">
-    <a href="/admin/export">↓ Export CSV</a>
+    <a href="/admin/export">↓ Export CSV (All Sets)</a>
     <a class="secondary" href="/logout">Sign Out</a>
+</div>
+
+<h2>View assessments by question set</h2>
+
+<div class="set-filter">
+    <button type="button" class="active" data-filter="ALL">
+        All Sets
+    </button>
+
+    <button type="button" data-filter="A">
+        Set A
+    </button>
+
+    <button type="button" data-filter="B">
+        Set B
+    </button>
+
+    <button type="button" data-filter="C">
+        Set C
+    </button>
+</div>
+
+<div class="selected-set-label" id="selected-set-label">
+    Showing all completed assessments
 </div>
 
 <h2>Employee submissions</h2>
@@ -375,13 +438,17 @@ footer{
 
 {% set score = r.score|default(0)|float %}
 {% set passed = score >= 80 %}
+{% set set_value = r.set_number|default('N/A')|string|upper %}
+{% set set_key = 'A' if set_value in ['1','A','SET A'] else ('B' if set_value in ['2','B','SET B'] else ('C' if set_value in ['3','C','SET C'] else 'OTHER')) %}
 
-<details class="attempt">
+<details class="attempt"
+         data-set="{{ set_key }}"
+         data-score="{{ score }}">
 
 <summary>
     {{ r.email }}
     — Score: {{ "%.0f"|format(score) }}%
-    — Set {{ r.set_number|default('N/A') }}
+    — Set {{ set_key }}
     <br>
 
     <small>
@@ -401,7 +468,7 @@ footer{
 
         <div class="meta-item">
             <small>Assigned question set</small>
-            <strong>Set {{ r.set_number|default('N/A') }}</strong>
+            <strong>Set {{ set_key }}</strong>
         </div>
 
         <div class="meta-item">
@@ -551,7 +618,7 @@ footer{
 </div>
 
 <div class="empty-search" id="empty-search">
-    No employee submissions match your search.
+    No employee submissions match this filter or search.
 </div>
 
 {% else %}
@@ -569,29 +636,94 @@ footer{
 </footer>
 
 <script>
-document.querySelectorAll('.count-up').forEach(element => {
-    const target = Number(element.dataset.value) || 0;
-    const start = performance.now();
+const filterButtons = document.querySelectorAll('.set-filter button');
+const attempts = [...document.querySelectorAll('.attempt')];
+const search = document.getElementById('search');
+const emptySearch = document.getElementById('empty-search');
 
-    function animate(now) {
-        const progress = Math.min((now - start) / 1200, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const value = target * eased;
+const totalCount = document.getElementById('total-count');
+const averageScore = document.getElementById('average-score');
+const totalLabel = document.getElementById('total-label');
+const selectedSetLabel = document.getElementById('selected-set-label');
 
-        element.textContent = Number.isInteger(target)
-            ? Math.round(value)
-            : value.toFixed(1);
+let currentFilter = 'ALL';
 
-        if (progress < 1) requestAnimationFrame(animate);
+function updateDashboard() {
+    const searchValue = search ? search.value.trim().toLowerCase() : '';
+    let visibleAttempts = [];
+
+    attempts.forEach(attempt => {
+        const setMatches =
+            currentFilter === 'ALL' ||
+            attempt.dataset.set === currentFilter;
+
+        const searchMatches =
+            attempt.innerText.toLowerCase().includes(searchValue);
+
+        const visible = setMatches && searchMatches;
+
+        attempt.style.display = visible ? '' : 'none';
+
+        if (visible) {
+            visibleAttempts.push(attempt);
+        }
+    });
+
+    // Update statistics based on selected set and search
+    const scores = visibleAttempts.map(item =>
+        Number(item.dataset.score) || 0
+    );
+
+    const total = scores.length;
+
+    const average = total
+        ? scores.reduce((sum, value) => sum + value, 0) / total
+        : 0;
+
+    totalCount.textContent = total;
+    averageScore.textContent = average.toFixed(1) + '%';
+
+    totalLabel.textContent =
+        currentFilter === 'ALL'
+        ? 'Total completed attempts'
+        : 'Completed attempts in Set ' + currentFilter;
+
+    selectedSetLabel.textContent =
+        currentFilter === 'ALL'
+        ? 'Showing all completed assessments'
+        : 'Showing only Set ' + currentFilter + ' assessments';
+
+    if (emptySearch) {
+        emptySearch.style.display =
+            total === 0 && attempts.length > 0 ? 'block' : 'none';
     }
+}
 
-    requestAnimationFrame(animate);
+filterButtons.forEach(button => {
+    button.addEventListener('click', function() {
+
+        filterButtons.forEach(item =>
+            item.classList.remove('active')
+        );
+
+        this.classList.add('active');
+
+        currentFilter = this.dataset.filter;
+
+        updateDashboard();
+    });
 });
 
+if (search) {
+    search.addEventListener('input', updateDashboard);
+}
+
+// Animate individual employee score bars
 const scoreObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const bar = entry.target;
+
             const score = Math.max(
                 0,
                 Math.min(100, Number(bar.dataset.score) || 0)
@@ -607,26 +739,7 @@ document.querySelectorAll('.score-fill').forEach(bar => {
     scoreObserver.observe(bar);
 });
 
-const search = document.getElementById('search');
-const attempts = [...document.querySelectorAll('.attempt')];
-const emptySearch = document.getElementById('empty-search');
-
-if (search) {
-    search.addEventListener('input', function() {
-        const value = this.value.trim().toLowerCase();
-        let visible = 0;
-
-        attempts.forEach(item => {
-            const match = item.innerText.toLowerCase().includes(value);
-            item.style.display = match ? '' : 'none';
-            if (match) visible++;
-        });
-
-        if (emptySearch) {
-            emptySearch.style.display = visible === 0 ? 'block' : 'none';
-        }
-    });
-}
+updateDashboard();
 </script>
 
 </body>
