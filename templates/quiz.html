@@ -4,440 +4,596 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Phishing Awareness | Fuji Silvertech</title>
+
+<title>Phishing Awareness Assessment | Fuji Silvertech</title>
+
 <link rel="stylesheet" href="/static/style.css">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
-
-:root{
-    --blue:#328acb;
-    --blue-dark:#216da8;
-    --teal:#16a99b;
-    --teal-dark:#10877d;
-    --ink:#24445e;
-    --muted:#71869a;
-    --border:#dcebf3;
-    --pale:#edf7fc;
+* {
+    box-sizing: border-box;
 }
 
-body{
-    margin:0;
-    font-family:Inter,"Segoe UI",Arial,sans-serif;
-    background:linear-gradient(135deg,#f4fbff,#eaf6fc 55%,#f7fcff);
-    color:var(--ink);
+:root {
+    --blue: #1686c5;
+    --blue-dark: #12649a;
+    --teal: #08a8a5;
+    --text: #173b57;
+    --muted: #71899d;
+    --border: #d9eaf3;
+    --background: #f3faff;
 }
 
-header{
-    background:rgba(255,255,255,.96);
-    padding:13px 5%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    box-shadow:0 3px 18px rgba(35,100,140,.08);
-    border-bottom:1px solid #e3f0f6;
+body {
+    margin: 0;
+    background: linear-gradient(140deg, #f4faff, #eefafa);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
 }
 
-.logo{max-height:52px;max-width:190px;object-fit:contain}
-
-.header-label{
-    color:var(--teal-dark);
-    font-size:12px;
-    font-weight:850;
-    letter-spacing:1.2px;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 5%;
+    background: linear-gradient(110deg, #fff, #e9f7ff, #e5faf6);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 18px rgba(30,110,150,.07);
 }
 
-.container{
-    max-width:1050px;
-    margin:32px auto;
-    padding:0 18px 50px;
+header img {
+    width: 145px;
+    max-height: 48px;
+    object-fit: contain;
 }
 
-.progress-card,.question-card,.scenario-card{
-    background:#fff;
-    border-radius:18px;
-    box-shadow:0 8px 30px rgba(43,105,143,.08);
-    border:1px solid rgba(214,233,244,.9);
+.header-label {
+    color: #078e99;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-align: right;
 }
 
-.progress-card{padding:19px 23px;margin-bottom:21px}
-
-.progress-top{
-    display:flex;
-    justify-content:space-between;
-    font-size:13px;
-    font-weight:800;
-    color:#46657d;
-    margin-bottom:12px;
+main {
+    width: 100%;
+    max-width: 1050px;
+    margin: auto;
+    padding: 28px 20px 55px;
 }
 
-.progress-track{
-    height:10px;
-    background:#e8f2f7;
-    border-radius:30px;
-    overflow:hidden;
+.top-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.progress-fill{
-    height:100%;
-    width:0;
-    border-radius:30px;
-    background:linear-gradient(90deg,#4c9cdd,#22b9a7);
-    transition:width .5s ease;
+.set-label {
+    background: #e0f5f5;
+    color: #078c8e;
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .7px;
 }
 
-.question-card{
-    padding:30px;
-    display:none;
-    animation:fadeUp .45s ease;
+.question-number {
+    color: #6b8499;
+    font-size: 13px;
+    font-weight: 700;
 }
 
-.category{
-    display:inline-block;
-    background:#e5f6f6;
-    color:#13877e;
-    padding:8px 13px;
-    border-radius:30px;
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:1px;
-    margin-bottom:15px;
+.progress-container {
+    background: #dfeef5;
+    height: 9px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 26px;
 }
 
-.question-title{
-    font-size:25px;
-    color:#244b69;
-    margin:0 0 12px;
-    line-height:1.4;
+.progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #1686c5, #08b8a5);
+    border-radius: 20px;
+    transition: width .45s ease;
 }
 
-.question-description{
-    color:#71869a;
-    font-size:14px;
-    line-height:1.8;
-    white-space:pre-line;
-    margin-bottom:22px;
+.quiz-card {
+    background: white;
+    border: 1px solid #dcecf4;
+    border-radius: 21px;
+    padding: 28px;
+    box-shadow: 0 9px 32px rgba(35,100,140,.07);
+    animation: fadeIn .4s ease;
 }
 
-.email-grid{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:18px;
-    margin:20px 0;
+.category {
+    display: inline-block;
+    color: #078f91;
+    background: #e7f8f6;
+    padding: 7px 12px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    margin-bottom: 13px;
 }
 
-.email-card{
-    background:#fff;
-    border:1px solid #dceaf2;
-    border-radius:14px;
-    overflow:hidden;
-    min-width:0;
-    box-shadow:0 4px 14px rgba(45,100,135,.04);
-    transition:transform .2s,box-shadow .2s;
+.question-title {
+    font-size: 23px;
+    line-height: 1.45;
+    color: #174c72;
+    margin: 0 0 13px;
 }
 
-.email-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 8px 20px rgba(45,100,135,.09);
+.scenario {
+    background: linear-gradient(110deg, #f0f8ff, #effaf8);
+    border-left: 4px solid #12a7ac;
+    border-radius: 10px;
+    padding: 15px 17px;
+    line-height: 1.7;
+    color: #4e6c83;
+    margin: 18px 0;
 }
 
-.email-heading{
-    padding:14px 17px;
-    background:linear-gradient(110deg,#eaf5ff,#e7f8f6);
-    border-bottom:1px solid #dceaf2;
-    font-size:12px;
-    font-weight:900;
-    color:#287b9b;
-    letter-spacing:.5px;
+.email-note {
+    color: #71899d;
+    font-size: 13px;
+    margin: 12px 0;
 }
 
-.email-content{padding:19px}
-
-.email-field{margin-bottom:13px;overflow-wrap:anywhere}
-
-.email-field small{
-    display:block;
-    color:#8ba0b0;
-    font-size:10px;
-    font-weight:900;
-    margin-bottom:5px;
-    text-transform:uppercase;
-    letter-spacing:.7px;
+.email-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 17px;
+    margin: 20px 0;
 }
 
-.email-field strong{
-    font-size:13px;
-    color:#35556e;
-    overflow-wrap:anywhere;
+.email-card {
+    border: 1px solid #d9e9f2;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(30,100,140,.05);
+    min-width: 0;
 }
 
-.email-body{
-    border-top:1px solid #e7eff4;
-    margin-top:15px;
-    padding-top:15px;
-    font-size:13px;
-    line-height:1.85;
-    color:#5d7488;
-    white-space:pre-line;
-    overflow-wrap:anywhere;
+.email-card-header {
+    background: linear-gradient(110deg, #eef8ff, #eaf9f7);
+    padding: 14px 16px;
+    border-bottom: 1px solid #dcecf3;
 }
 
-.email-link{
-    margin-top:14px;
-    padding:12px;
-    border-radius:9px;
-    background:#fff7e9;
-    border:1px solid #f5e7c9;
-    color:#a66b22;
-    font-size:12px;
-    overflow-wrap:anywhere;
+.email-card-header h3 {
+    margin: 0;
+    color: #175477;
+    font-size: 15px;
 }
 
-.email-note{
-    background:#eff9fc;
-    border-left:4px solid var(--teal);
-    padding:14px 16px;
-    border-radius:9px;
-    color:#547487;
-    font-size:13px;
-    line-height:1.7;
-    margin:20px 0;
+.email-card-body {
+    padding: 15px 16px;
 }
 
-.options-title{
-    font-size:15px;
-    font-weight:850;
-    color:#31536e;
-    margin:25px 0 14px;
+.email-meta {
+    font-size: 12px;
+    color: #607b91;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
 }
 
-.option{
-    display:flex;
-    gap:13px;
-    align-items:flex-start;
-    border:1px solid #dceaf2;
-    border-radius:12px;
-    padding:16px;
-    margin-bottom:11px;
-    cursor:pointer;
-    transition:.2s;
-    background:#fff;
+.email-meta strong {
+    color: #355c76;
 }
 
-.option:hover{
-    border-color:#66b8ce;
-    background:#f2fbfd;
-    transform:translateX(3px);
+.email-subject {
+    color: #174c72;
+    font-weight: 800;
+    margin: 13px 0;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
-.option input{
-    margin-top:4px;
-    accent-color:var(--teal);
-    width:16px;
-    height:16px;
-    flex-shrink:0;
+.email-message {
+    color: #526e82;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
-.option span{
-    font-size:14px;
-    line-height:1.6;
-    color:#48657c;
+.email-link {
+    background: #f1f8fc;
+    border: 1px solid #e0edf4;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 12px;
+    color: #087db4;
+    font-size: 12px;
+    overflow-wrap: anywhere;
 }
 
-.option.locked{cursor:default;opacity:.95}
-
-.button-row{
-    display:flex;
-    justify-content:flex-end;
-    margin-top:25px;
-    gap:12px;
+.attachment {
+    margin-top: 10px;
+    padding: 9px 11px;
+    background: #fff8e9;
+    border: 1px solid #f3e6c8;
+    border-radius: 8px;
+    color: #89691f;
+    font-size: 12px;
+    overflow-wrap: anywhere;
 }
 
-.primary-btn,.secondary-btn{
-    border:0;
-    border-radius:10px;
-    padding:13px 24px;
-    font-size:13px;
-    font-weight:850;
-    cursor:pointer;
-    transition:.2s;
+.options-title {
+    color: #315c77;
+    font-size: 14px;
+    font-weight: 800;
+    margin: 23px 0 12px;
 }
 
-.primary-btn{
-    background:linear-gradient(110deg,#318bd0,#18aa9d);
-    color:#fff;
-    box-shadow:0 5px 13px rgba(35,145,170,.2);
+.options {
+    display: grid;
+    gap: 11px;
 }
 
-.primary-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 18px rgba(35,145,170,.25);
+.option {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    border: 1px solid #dceaf2;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: .2s;
+    background: #fff;
 }
 
-.primary-btn:disabled{
-    background:#b9cbd4;
-    box-shadow:none;
-    cursor:not-allowed;
-    transform:none;
+.option:hover {
+    border-color: #70c8d1;
+    background: #f5fcfc;
+    transform: translateY(-2px);
 }
 
-.secondary-btn{
-    background:#eaf5fa;
-    color:#34758f;
-    border:1px solid #d8eaf2;
+.option.selected {
+    border: 2px solid #159fc0;
+    background: #eef9ff;
+    padding: 14px;
+    box-shadow: 0 4px 13px rgba(20,145,180,.08);
 }
 
-.secondary-btn:hover{background:#dff1f5}
-
-/* LIGHT 3D SIMULATION */
-
-.scenario-card{
-    display:none;
-    margin-top:22px;
-    overflow:hidden;
-    animation:fadeUp .4s ease;
+.option input {
+    margin-top: 3px;
+    accent-color: #078fa9;
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
 }
 
-.scenario-top{
-    background:linear-gradient(105deg,#eaf6ff,#e6f8f5);
-    color:#285b78;
-    padding:17px 21px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    border-bottom:1px solid #dcebf3;
+.option-letter {
+    color: #0b8e9c;
+    font-weight: 800;
+    min-width: 22px;
 }
 
-.scenario-top strong{
-    font-size:12px;
-    letter-spacing:.7px;
+.option-text {
+    color: #3f6077;
+    font-size: 14px;
+    line-height: 1.65;
 }
 
-.scenario-timer{
-    color:#159a91;
-    font-weight:850;
-    font-size:12px;
+.selection-note {
+    display: none;
+    color: #078b8d;
+    background: #eaf9f6;
+    border: 1px solid #d0efea;
+    padding: 12px 14px;
+    border-radius: 9px;
+    margin-top: 14px;
+    font-size: 13px;
 }
 
-.scene-container{
-    position:relative;
-    width:100%;
-    height:460px;
-    background:linear-gradient(140deg,#e7f5fc,#d8edf5 55%,#e5f8f4);
-    overflow:hidden;
+.selection-note.visible {
+    display: block;
 }
 
-#threeCanvas{display:block;width:100%;height:100%}
-
-.scene-hud{
-    position:absolute;
-    top:16px;
-    left:16px;
-    z-index:3;
-    width:min(320px,calc(100% - 32px));
-    background:rgba(255,255,255,.92);
-    border:1px solid rgba(90,170,190,.3);
-    border-radius:12px;
-    padding:14px 16px;
-    color:#315b73;
-    box-shadow:0 5px 20px rgba(50,110,140,.1);
-    backdrop-filter:blur(10px);
-    pointer-events:none;
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 25px;
 }
 
-.scene-hud small{
-    display:block;
-    color:#159a91;
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:1.4px;
-    margin-bottom:7px;
+.nav-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 13px 23px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 13px;
+    transition: .2s;
 }
 
-.scene-hud strong{
-    display:block;
-    font-size:15px;
-    margin-bottom:6px;
-    color:#2c5873;
+.nav-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 
-.scene-hud p{
-    font-size:12px;
-    line-height:1.6;
-    color:#71899a;
-    margin:0;
+.previous-btn {
+    background: #edf5fa;
+    color: #47718c;
 }
 
-.scene-status{
-    position:absolute;
-    right:16px;
-    bottom:16px;
-    z-index:3;
-    background:rgba(255,255,255,.94);
-    border:1px solid #cde8e6;
-    border-radius:9px;
-    padding:10px 14px;
-    color:#168d83;
-    font-size:11px;
-    font-weight:900;
-    box-shadow:0 4px 14px rgba(40,100,120,.08);
-    pointer-events:none;
+.next-btn {
+    background: linear-gradient(120deg, #1686c5, #08a8a5);
+    color: white;
+    box-shadow: 0 5px 15px rgba(8,145,175,.16);
 }
 
-.scene-caption{
-    padding:17px 20px;
-    min-height:65px;
-    background:#f2f9fc;
-    color:#52748a;
-    text-align:center;
-    font-size:13px;
-    line-height:1.7;
-    border-top:1px solid #e1edf3;
+.nav-btn:not(:disabled):hover {
+    transform: translateY(-2px);
 }
 
-.scene-progress{height:5px;background:#e2eff4}
-
-.scene-progress-fill{
-    width:0;
-    height:100%;
-    background:linear-gradient(90deg,#399bd6,#22b8a5);
-    transition:width .4s;
+.submit-btn {
+    background: linear-gradient(120deg, #078f9d, #08b5a2);
+    color: white;
+    box-shadow: 0 5px 15px rgba(8,145,175,.18);
 }
 
-.scenario-controls{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 20px;
-    gap:12px;
-    flex-wrap:wrap;
+.question-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 23px;
+    padding-top: 20px;
+    border-top: 1px solid #e3eef4;
 }
 
-.scenario-controls small{color:#8ba0af;font-size:11px}
-
-@keyframes fadeUp{
-    from{opacity:0;transform:translateY(12px)}
-    to{opacity:1;transform:translateY(0)}
+.question-dot {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #d8e7ef;
+    border-radius: 9px;
+    background: white;
+    color: #71899d;
+    cursor: pointer;
+    font-weight: 700;
 }
 
-@media(max-width:700px){
-    .email-grid{grid-template-columns:1fr}
-    .question-card{padding:21px 16px}
-    .question-title{font-size:21px}
-    .scene-container{height:370px}
-    .scene-status{right:10px;bottom:10px}
-    .button-row{flex-direction:column}
-    .button-row button{width:100%}
-    header{padding:12px 4%}
-    .header-label{font-size:10px}
+.question-dot.active {
+    background: #e5f6ff;
+    border-color: #159bc1;
+    color: #087ca7;
 }
 
-@media(prefers-reduced-motion:reduce){
-    *,*::before,*::after{
-        animation-duration:.01ms!important;
-        transition-duration:.01ms!important;
+.question-dot.answered {
+    background: #e7f8f3;
+    border-color: #71cbb6;
+    color: #087e6d;
+}
+
+.question-dot.active.answered {
+    background: #dff5f2;
+    border: 2px solid #079e9d;
+}
+
+.footer-note {
+    text-align: center;
+    color: #91a5b5;
+    font-size: 12px;
+    margin-top: 24px;
+    line-height: 1.6;
+}
+
+/* 3D SCENE */
+
+.scene-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, rgba(226,246,255,.97), rgba(225,250,244,.97));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    transition: opacity .4s ease;
+}
+
+.scene-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.scene-box {
+    width: 100%;
+    max-width: 850px;
+    background: white;
+    border: 1px solid #d7eaf2;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(25,100,140,.15);
+}
+
+.scene-top {
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.scene-top span {
+    color: #0a9296;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.scene-top button {
+    border: none;
+    background: #edf7fa;
+    color: #4d758b;
+    padding: 9px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.scene-canvas {
+    height: 320px;
+    position: relative;
+    background: linear-gradient(180deg, #e7f7ff, #d9f3ee);
+}
+
+.scene-canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.scene-bottom {
+    text-align: center;
+    padding: 20px 24px 25px;
+}
+
+.scene-bottom h2 {
+    color: #155477;
+    margin: 0 0 9px;
+    font-size: 22px;
+}
+
+.scene-bottom p {
+    color: #668195;
+    margin: 0;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.scene-progress {
+    height: 5px;
+    background: #e7f0f4;
+}
+
+.scene-progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #1597cb, #0ab5a4);
+}
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(20,55,75,.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.confirm-overlay.visible {
+    display: flex;
+}
+
+.confirm-box {
+    width: 100%;
+    max-width: 430px;
+    background: white;
+    border-radius: 18px;
+    padding: 27px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.15);
+    text-align: center;
+}
+
+.confirm-box h2 {
+    color: #174d75;
+    margin-top: 0;
+}
+
+.confirm-box p {
+    color: #617c90;
+    line-height: 1.7;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+}
+
+.error-message {
+    display: none;
+    margin-top: 15px;
+    color: #b94350;
+    background: #fff0f1;
+    padding: 12px;
+    border-radius: 9px;
+    font-size: 13px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media(max-width:650px) {
+    header {
+        padding: 12px 15px;
+    }
+
+    header img {
+        width: 115px;
+    }
+
+    main {
+        padding: 20px 12px 40px;
+    }
+
+    .quiz-card {
+        padding: 19px 15px;
+    }
+
+    .question-title {
+        font-size: 19px;
+    }
+
+    .email-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navigation {
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        padding: 12px 15px;
+    }
+
+    .scene-canvas {
+        height: 240px;
+    }
+
+    .scene-bottom h2 {
+        font-size: 19px;
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
     }
 }
 </style>
@@ -446,879 +602,1259 @@ header{
 <body>
 
 <header>
-    <img src="/static/img/fuji-logo.png"
-         alt="Fuji Silvertech"
-         class="logo"
-         onerror="this.style.display='none'">
-    <div class="header-label">PHISHING AWARENESS ASSESSMENT</div>
+    <img
+        src="/static/img/fuji-logo.png"
+        alt="Fuji Silvertech"
+        onerror="this.style.display='none'"
+    >
+    <div class="header-label">
+        PHISHING AWARENESS ASSESSMENT
+    </div>
 </header>
 
-<main class="container">
+<main>
 
-    <section class="progress-card">
-        <div class="progress-top">
-            <span id="questionCounter">Question 1 of 10</span>
-            <span id="progressPercent">10%</span>
+    <div class="top-info">
+        <span class="set-label">
+            ASSESSMENT SET {{ set_number }}
+        </span>
+
+        <span class="question-number" id="question-counter">
+            Question 1 of 10
+        </span>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <section class="quiz-card" id="quiz-card">
+
+        <div class="category" id="category"></div>
+
+        <h1 class="question-title" id="question-title"></h1>
+
+        <div class="scenario" id="scenario" style="display:none"></div>
+
+        <p class="email-note" id="email-note" style="display:none"></p>
+
+        <div id="email-area"></div>
+
+        <div class="options-title">
+            Select the best response:
         </div>
-        <div class="progress-track">
-            <div class="progress-fill" id="progressFill"></div>
+
+        <div class="options" id="options"></div>
+
+        <div class="selection-note" id="selection-note">
+            Your selection has been recorded for this question.
         </div>
+
+        <div class="navigation">
+
+            <button
+                type="button"
+                class="nav-btn previous-btn"
+                id="previous-btn"
+                onclick="previousQuestion()"
+            >
+                ← Previous
+            </button>
+
+            <button
+                type="button"
+                class="nav-btn next-btn"
+                id="next-btn"
+                onclick="nextQuestion()"
+            >
+                Next Question →
+            </button>
+
+            <button
+                type="button"
+                class="nav-btn submit-btn"
+                id="submit-btn"
+                onclick="openSubmitConfirmation()"
+                style="display:none"
+            >
+                Submit Assessment
+            </button>
+
+        </div>
+
+        <div class="question-list" id="question-list"></div>
+
     </section>
 
-    <section class="question-card" id="questionCard">
-        <div class="category" id="questionCategory"></div>
-        <h1 class="question-title" id="questionTitle"></h1>
-        <div class="question-description" id="questionDescription"></div>
-        <div id="emailArea"></div>
-        <div class="email-note" id="emailNote"></div>
-        <div class="options-title">Select the best response:</div>
-        <div id="optionsArea"></div>
-        <div class="button-row">
-            <button class="primary-btn" id="continueButton" disabled>Continue</button>
-        </div>
-    </section>
-
-    <section class="scenario-card" id="scenarioCard">
-        <div class="scenario-top">
-            <strong>3D CYBERSECURITY INCIDENT SIMULATION</strong>
-            <span class="scenario-timer" id="scenarioTimer">Opening scene</span>
-        </div>
-
-        <div class="scene-container" id="sceneContainer">
-            <canvas id="threeCanvas"></canvas>
-
-            <div class="scene-hud">
-                <small id="sceneKicker">INCIDENT PREVIEW</small>
-                <strong id="sceneTitle">Incoming Email</strong>
-                <p id="sceneDescription"></p>
-            </div>
-
-            <div class="scene-status" id="sceneStatus3D">SYSTEM ACTIVE</div>
-        </div>
-
-        <div class="scene-caption" id="sceneCaption"></div>
-        <div class="scene-progress">
-            <div class="scene-progress-fill" id="sceneProgressFill"></div>
-        </div>
-
-        <div class="scenario-controls">
-            <button class="secondary-btn" id="replayButton">↻ Replay</button>
-            <small id="scenarioStatus">3D simulation playing...</small>
-            <button class="secondary-btn" id="skipButton">Skip</button>
-        </div>
-    </section>
+    <div class="footer-note">
+        Fuji Silvertech • Phishing Awareness Programme<br>
+        Choose carefully. Your responses will be evaluated after submission.
+    </div>
 
 </main>
 
+<!-- 3D SCENE -->
+
+<div class="scene-overlay" id="scene-overlay">
+
+    <div class="scene-box">
+
+        <div class="scene-top">
+            <span>CYBER SECURITY SIMULATION</span>
+            <button type="button" onclick="skipScene()">Skip Scene →</button>
+        </div>
+
+        <div class="scene-canvas" id="scene-canvas"></div>
+
+        <div class="scene-bottom">
+            <h2 id="scene-title">Welcome to the Security Desk</h2>
+            <p id="scene-description">
+                Review the situation carefully before making your decision.
+            </p>
+        </div>
+
+        <div class="scene-progress">
+            <div class="scene-progress-fill" id="scene-progress-fill"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SUBMISSION CONFIRMATION -->
+
+<div class="confirm-overlay" id="confirm-overlay">
+
+    <div class="confirm-box">
+
+        <h2>Submit your assessment?</h2>
+
+        <p id="submit-summary">
+            Please review your responses before submitting.
+        </p>
+
+        <div class="confirm-actions">
+
+            <button
+                type="button"
+                class="nav-btn previous-btn"
+                onclick="closeSubmitConfirmation()"
+            >
+                Go Back
+            </button>
+
+            <button
+                type="button"
+                class="nav-btn submit-btn"
+                id="confirm-submit-btn"
+                onclick="submitAssessment()"
+            >
+                Confirm Submission
+            </button>
+
+        </div>
+
+        <div class="error-message" id="submit-error"></div>
+
+    </div>
+
+</div>
+
 <script>
+"use strict";
+
+/* =====================================================
+   1. SERVER DATA
+===================================================== */
+
 const QUESTIONS = {{ questions | tojson }};
 const ATTEMPT_ID = {{ attempt_id | tojson }};
 
-let currentIndex=0;
-let selectedAnswers={};
+const TOTAL_QUESTIONS = QUESTIONS.length;
 
-let renderer=null,scene=null,camera=null,clock=null;
-let animationFrame=null;
-let character=null,monitorScreen=null,emailPanel=null;
-let alertObject=null,shieldObject=null;
-let particles=[],dynamicObjects=[];
-let introTimer=null;
-let currentPhase="intro";
-let introElapsed=0;
-let introRunning=false;
-let answerLocked=false,threeReady=false;
+let currentIndex = 0;
 
-const questionCard=document.getElementById("questionCard");
-const scenarioCard=document.getElementById("scenarioCard");
-const continueButton=document.getElementById("continueButton");
+/*
+ Answers are stored by question index.
+ Unanswered questions remain null.
+*/
 
-/* HELPERS */
+let selectedAnswers = {};
 
-function escapeHTML(value){
-    return String(value??"").replace(/[&<>"']/g,c=>({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
-    })[c]);
+QUESTIONS.forEach((_, index) => {
+    selectedAnswers[index] = null;
+});
+
+let isSubmitting = false;
+let sceneTimer = null;
+let sceneAnimation = null;
+let sceneRenderer = null;
+let sceneCamera = null;
+let scene = null;
+let sceneObjects = [];
+let sceneStart = 0;
+let sceneDuration = 5500;
+let sceneFrame = 0;
+
+
+/* =====================================================
+   2. SAFE TEXT HELPERS
+===================================================== */
+
+function escapeHTML(value) {
+
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[character]);
 }
 
-function updateProgress(){
-    const total=QUESTIONS.length;
-    const number=currentIndex+1;
 
-    document.getElementById("questionCounter").textContent=
-        `Question ${number} of ${total}`;
+function getQuestionTitle(question) {
 
-    document.getElementById("progressPercent").textContent=
-        `${Math.round(number/total*100)}%`;
-
-    document.getElementById("progressFill").style.width=
-        `${number/total*100}%`;
+    return question.title || "Security Awareness Scenario";
 }
 
-/* EMAIL RENDERING */
 
-function renderEmail(email){
+function getQuestionScenario(question) {
+
+    return question.scenario || "";
+}
+
+
+/* =====================================================
+   3. EMAIL DISPLAY
+===================================================== */
+
+function renderEmail(email, index) {
+
+    const label = email.label || `Email ${index + 1}`;
+
+    const sender = email.sender || "";
+    const senderEmail = email.sender_email || "";
+    const recipient = email.to || "";
+    const replyTo = email.reply_to || "";
+    const timestamp = email.timestamp || "";
+    const subject = email.subject || "";
+    const body = email.body || "";
+    const link = email.link || "";
+    const attachment = email.attachment || "";
+
     return `
-    <article class="email-card">
-        <div class="email-heading">${escapeHTML(email.label||"EMAIL")}</div>
-        <div class="email-content">
+        <div class="email-card">
 
-            <div class="email-field">
-                <small>From</small>
-                <strong>${escapeHTML(email.sender)}</strong>
+            <div class="email-card-header">
+                <h3>${escapeHTML(label)}</h3>
             </div>
 
-            <div class="email-field">
-                <small>Email address</small>
-                <strong>${escapeHTML(email.sender_email)}</strong>
+            <div class="email-card-body">
+
+                <div class="email-meta">
+
+                    <div>
+                        <strong>From:</strong>
+                        ${escapeHTML(sender)}
+                    </div>
+
+                    <div>
+                        <strong>Email:</strong>
+                        ${escapeHTML(senderEmail)}
+                    </div>
+
+                    ${recipient ? `
+                        <div>
+                            <strong>To:</strong>
+                            ${escapeHTML(recipient)}
+                        </div>
+                    ` : ""}
+
+                    ${replyTo ? `
+                        <div>
+                            <strong>Reply-To:</strong>
+                            ${escapeHTML(replyTo)}
+                        </div>
+                    ` : ""}
+
+                    ${timestamp ? `
+                        <div>
+                            <strong>Received:</strong>
+                            ${escapeHTML(timestamp)}
+                        </div>
+                    ` : ""}
+
+                </div>
+
+                <div class="email-subject">
+                    ${escapeHTML(subject)}
+                </div>
+
+                <div class="email-message">
+                    ${escapeHTML(body)}
+                </div>
+
+                ${link ? `
+                    <div class="email-link">
+                        <strong>Link:</strong><br>
+                        ${escapeHTML(link)}
+                    </div>
+                ` : ""}
+
+                ${attachment ? `
+                    <div class="attachment">
+                        <strong>Attachment:</strong>
+                        ${escapeHTML(attachment)}
+                    </div>
+                ` : ""}
+
             </div>
-
-            ${email.to?`
-            <div class="email-field">
-                <small>To</small>
-                <strong>${escapeHTML(email.to)}</strong>
-            </div>`:""}
-
-            ${email.reply_to?`
-            <div class="email-field">
-                <small>Reply-To</small>
-                <strong>${escapeHTML(email.reply_to)}</strong>
-            </div>`:""}
-
-            <div class="email-field">
-                <small>Received</small>
-                <strong>${escapeHTML(email.timestamp)}</strong>
-            </div>
-
-            <div class="email-field">
-                <small>Subject</small>
-                <strong>${escapeHTML(email.subject)}</strong>
-            </div>
-
-            <div class="email-body">${escapeHTML(email.body)}</div>
-
-            ${email.link?`
-            <div class="email-link">
-                <strong>Link:</strong><br>
-                ${escapeHTML(email.link)}
-            </div>`:""}
-
-            ${email.attachment?`
-            <div class="email-link">
-                <strong>Attachment:</strong><br>
-                ${escapeHTML(email.attachment)}
-            </div>`:""}
 
         </div>
-    </article>`;
+    `;
 }
 
-/* 3D OBJECT HELPERS */
 
-function addBox(w,h,d,color,x,y,z,options={}){
-    const mesh=new THREE.Mesh(
-        new THREE.BoxGeometry(w,h,d),
-        new THREE.MeshStandardMaterial({
-            color,
-            roughness:.75,
-            metalness:.03,
-            ...options
-        })
-    );
+/* =====================================================
+   4. RENDER QUESTION
+===================================================== */
 
-    mesh.position.set(x,y,z);
-    scene.add(mesh);
-    return mesh;
-}
+function renderQuestion() {
 
-function addSphere(radius,color,x,y,z){
-    const mesh=new THREE.Mesh(
-        new THREE.SphereGeometry(radius,24,16),
-        new THREE.MeshStandardMaterial({color,roughness:.55})
-    );
+    const question = QUESTIONS[currentIndex];
 
-    mesh.position.set(x,y,z);
-    scene.add(mesh);
-    return mesh;
-}
-
-function addCylinder(top,bottom,height,color,x,y,z){
-    const mesh=new THREE.Mesh(
-        new THREE.CylinderGeometry(top,bottom,height,20),
-        new THREE.MeshStandardMaterial({color})
-    );
-
-    mesh.position.set(x,y,z);
-    scene.add(mesh);
-    return mesh;
-}
-
-function addFloatingLabel(text,color,x,y,z){
-    const canvas=document.createElement("canvas");
-    canvas.width=512;
-    canvas.height=128;
-
-    const ctx=canvas.getContext("2d");
-
-    ctx.fillStyle="rgba(255,255,255,.96)";
-    ctx.fillRect(0,0,512,128);
-
-    ctx.strokeStyle=color;
-    ctx.lineWidth=5;
-    ctx.strokeRect(4,4,504,120);
-
-    ctx.fillStyle=color;
-    ctx.font="bold 30px Arial";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.fillText(String(text).slice(0,27),256,64);
-
-    const texture=new THREE.CanvasTexture(canvas);
-
-    const sprite=new THREE.Sprite(
-        new THREE.SpriteMaterial({map:texture,transparent:true})
-    );
-
-    sprite.position.set(x,y,z);
-    sprite.scale.set(3.2,.8,1);
-
-    scene.add(sprite);
-    dynamicObjects.push(sprite);
-
-    return sprite;
-}
-
-function clearSceneLabels(){
-    dynamicObjects.forEach(object=>{
-        scene.remove(object);
-
-        if(object.material?.map)object.material.map.dispose();
-
-        object.material?.dispose();
-    });
-
-    dynamicObjects=[];
-}
-
-function createShield(){
-    const group=new THREE.Group();
-
-    const shape=new THREE.Shape();
-
-    shape.moveTo(0,.55);
-    shape.lineTo(.42,.35);
-    shape.lineTo(.36,-.15);
-    shape.lineTo(0,-.55);
-    shape.lineTo(-.36,-.15);
-    shape.lineTo(-.42,.35);
-    shape.closePath();
-
-    const geometry=new THREE.ExtrudeGeometry(shape,{
-        depth:.12,
-        bevelEnabled:true,
-        bevelSegments:2,
-        steps:1,
-        bevelSize:.04,
-        bevelThickness:.04
-    });
-
-    const shield=new THREE.Mesh(
-        geometry,
-        new THREE.MeshStandardMaterial({
-            color:0x20b991,
-            emissive:0x087b62,
-            emissiveIntensity:.35,
-            metalness:.15,
-            roughness:.4
-        })
-    );
-
-    shield.rotation.y=Math.PI;
-    group.add(shield);
-
-    const check=new THREE.Group();
-
-    const first=new THREE.Mesh(
-        new THREE.BoxGeometry(.1,.32,.08),
-        new THREE.MeshStandardMaterial({color:0xffffff})
-    );
-
-    first.rotation.z=-.75;
-    first.position.set(-.1,-.02,.2);
-
-    const second=new THREE.Mesh(
-        new THREE.BoxGeometry(.1,.48,.08),
-        new THREE.MeshStandardMaterial({color:0xffffff})
-    );
-
-    second.rotation.z=.75;
-    second.position.set(.13,.04,.2);
-
-    check.add(first,second);
-    group.add(check);
-
-    group.position.set(2.5,3.6,-1);
-    scene.add(group);
-    group.visible=false;
-
-    return group;
-}
-
-/* BUILD LIGHT OFFICE */
-
-function buildOffice(){
-    particles=[];
-
-    scene.background=new THREE.Color(0xe5f3fa);
-    scene.fog=new THREE.Fog(0xe5f3fa,14,30);
-
-    addBox(20,.25,15,0xc7dce5,0,-.2,0);
-    addBox(20,7,.25,0xd5eaf2,0,3.3,-7);
-    addBox(.25,7,15,0xcce3ec,-10,3.3,0);
-    addBox(.25,7,15,0xcce3ec,10,3.3,0);
-
-    // Window
-    addBox(5,2.8,.12,0x9bd5e7,-5,3.7,-6.8);
-    addBox(.07,2.8,.08,0xffffff,-5,3.7,-6.7);
-    addBox(5,.07,.08,0xffffff,-5,3.7,-6.7);
-
-    // Desk
-    addBox(5,.25,2,0xb98b68,0,1.55,-1);
-    addBox(.22,1.5,.22,0x8da6b4,-2,.75,-1);
-    addBox(.22,1.5,.22,0x8da6b4,2,.75,-1);
-    addBox(.22,1.5,.22,0x8da6b4,-2,.75,.5);
-    addBox(.22,1.5,.22,0x8da6b4,2,.75,.5);
-
-    // Monitor
-    addBox(3,2,.18,0x416e85,0,3,-1.5);
-
-    monitorScreen=addBox(
-        2.78,1.78,.025,0x67b6c9,0,3,-1.39,
-        {emissive:0x267f93,emissiveIntensity:.25}
-    );
-
-    addBox(.18,.7,.18,0x91aab7,0,2,-1.4);
-    addBox(1.5,.08,.45,0x728e9d,0,1.75,-.15);
-    addSphere(.13,0xffffff,1.05,1.78,-.2);
-    addCylinder(.15,.12,.35,0xffffff,-1.8,1.83,-.1);
-
-    // Chair
-    addBox(1.4,.2,1.1,0x6e9db1,0,.85,1.6);
-    addBox(1.3,1.4,.18,0x6e9db1,0,1.6,2.1);
-
-    // Employee
-    character=new THREE.Group();
-
-    const shirt=new THREE.Mesh(
-        new THREE.BoxGeometry(1.15,1.35,.65),
-        new THREE.MeshStandardMaterial({color:0x299f9b})
-    );
-
-    shirt.position.set(0,2,0);
-    character.add(shirt);
-
-    const head=new THREE.Mesh(
-        new THREE.SphereGeometry(.42,24,24),
-        new THREE.MeshStandardMaterial({color:0xd6a47f})
-    );
-
-    head.position.set(0,3.05,-.05);
-    character.add(head);
-
-    const hair=new THREE.Mesh(
-        new THREE.SphereGeometry(.43,24,12,0,Math.PI*2,0,Math.PI/2),
-        new THREE.MeshStandardMaterial({color:0x50443f})
-    );
-
-    hair.position.set(0,3.14,-.05);
-    character.add(hair);
-
-    const leftArm=new THREE.Mesh(
-        new THREE.BoxGeometry(.27,.95,.3),
-        new THREE.MeshStandardMaterial({color:0x299f9b})
-    );
-
-    leftArm.position.set(-.7,1.95,-.4);
-    leftArm.rotation.z=-.35;
-    character.add(leftArm);
-
-    const rightArm=leftArm.clone();
-
-    rightArm.position.x=.7;
-    rightArm.rotation.z=.35;
-    character.add(rightArm);
-
-    character.position.set(0,0,1.15);
-    scene.add(character);
-
-    emailPanel=addBox(2.7,1.65,.06,0xffffff,0,3.3,-.8);
-    emailPanel.visible=false;
-
-    alertObject=addSphere(.32,0xe75d64,2.5,4,-1);
-    alertObject.visible=false;
-
-    shieldObject=createShield();
-
-    const light1=new THREE.PointLight(0xffffff,30,20);
-    light1.position.set(-4,6,1);
-    scene.add(light1);
-
-    const light2=new THREE.PointLight(0x7bd9d0,18,18);
-    light2.position.set(5,5,-3);
-    scene.add(light2);
-
-    scene.add(new THREE.AmbientLight(0xffffff,2));
-
-    for(let i=0;i<35;i++){
-        const particle=addSphere(
-            .025,
-            i%2?0x6dbbdc:0x73cbbd,
-            (Math.random()-.5)*15,
-            Math.random()*6,
-            (Math.random()-.5)*10
-        );
-
-        particles.push(particle);
-    }
-}
-
-/* INITIALIZE THREE.JS */
-
-function initialize3D(){
-    if(!window.THREE){
-        document.getElementById("sceneStatus3D").textContent=
-            "3D library unavailable";
-        return false;
-    }
-
-    const canvas=document.getElementById("threeCanvas");
-    const container=document.getElementById("sceneContainer");
-
-    scene=new THREE.Scene();
-
-    camera=new THREE.PerspectiveCamera(
-        48,
-        container.clientWidth/container.clientHeight,
-        .1,
-        100
-    );
-
-    camera.position.set(7,5.5,9);
-    camera.lookAt(0,2,0);
-
-    try{
-        renderer=new THREE.WebGLRenderer({
-            canvas,
-            antialias:true,
-            alpha:false
-        });
-    }catch(error){
-        document.getElementById("sceneStatus3D").textContent=
-            "WebGL unavailable";
-        return false;
-    }
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-    renderer.setSize(container.clientWidth,container.clientHeight);
-
-    renderer.shadowMap.enabled=true;
-
-    clock=new THREE.Clock();
-
-    buildOffice();
-
-    window.addEventListener("resize",resize3D);
-
-    threeReady=true;
-    animate3D();
-
-    return true;
-}
-
-function resize3D(){
-    if(!renderer||!camera)return;
-
-    const container=document.getElementById("sceneContainer");
-
-    camera.aspect=container.clientWidth/container.clientHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(
-        container.clientWidth,
-        container.clientHeight
-    );
-}
-
-function animate3D(){
-    animationFrame=requestAnimationFrame(animate3D);
-
-    const time=clock?clock.getElapsedTime():0;
-
-    if(character){
-        character.position.y=Math.sin(time*1.5)*.025;
-    }
-
-    particles.forEach((particle,i)=>{
-        particle.position.y+=Math.sin(time+i)*.001;
-        particle.rotation.y+=.005;
-    });
-
-    if(emailPanel?.visible){
-        emailPanel.position.y=3.3+Math.sin(time*2)*.06;
-    }
-
-    if(alertObject?.visible){
-        const pulse=1+Math.sin(time*5)*.13;
-
-        alertObject.scale.setScalar(pulse);
-        alertObject.rotation.y+=.025;
-    }
-
-    if(shieldObject?.visible){
-        shieldObject.rotation.y=Math.sin(time)*.18;
-        shieldObject.position.y=3.6+Math.sin(time*2)*.08;
-    }
-
-    if(renderer&&scene&&camera){
-        renderer.render(scene,camera);
-    }
-}
-
-function reset3DScene(){
-    if(!threeReady)return;
-
-    clearSceneLabels();
-
-    emailPanel.visible=true;
-    alertObject.visible=false;
-    shieldObject.visible=false;
-
-    monitorScreen.material.color.set(0x67b6c9);
-    monitorScreen.material.emissive.set(0x267f93);
-
-    camera.position.set(7,5.5,9);
-    camera.lookAt(0,2,0);
-}
-
-function setSceneText(kicker,title,description,caption){
-    document.getElementById("sceneKicker").textContent=kicker;
-    document.getElementById("sceneTitle").textContent=title;
-    document.getElementById("sceneDescription").textContent=description;
-    document.getElementById("sceneCaption").textContent=caption;
-}
-
-/* INTRO ANIMATION */
-
-function showIntroScene(){
-    clearInterval(introTimer);
-
-    currentPhase="intro";
-    introRunning=true;
-    introElapsed=0;
-
-    const q=QUESTIONS[currentIndex];
-
-    questionCard.style.display="none";
-    scenarioCard.style.display="block";
-
-    if(!threeReady&&!initialize3D()){
-        document.getElementById("sceneDescription").textContent=
-            "The 3D scene could not be loaded. Check your browser's WebGL support and internet connection.";
+    if (!question) {
         return;
     }
 
-    reset3DScene();
+    document.getElementById("category").textContent =
+        question.category || "PHISHING AWARENESS";
 
-    setSceneText(
-        "INCIDENT PREVIEW / QUESTION "+(currentIndex+1),
-        q.title||"Incoming Security Message",
-        q.scenario||"An employee receives a message that requires careful inspection.",
-        "Watch the incident carefully. The question will appear after this opening scene."
+    document.getElementById("question-title").textContent =
+        getQuestionTitle(question);
+
+    document.getElementById("question-counter").textContent =
+        `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+
+    document.getElementById("progress-bar").style.width =
+        ((currentIndex + 1) / TOTAL_QUESTIONS * 100) + "%";
+
+    const scenarioElement = document.getElementById("scenario");
+
+    const scenario = getQuestionScenario(question);
+
+    if (scenario) {
+
+        scenarioElement.style.display = "block";
+        scenarioElement.textContent = scenario;
+
+    } else {
+
+        scenarioElement.style.display = "none";
+        scenarioElement.textContent = "";
+    }
+
+    const emailNoteElement = document.getElementById("email-note");
+
+    if (question.email_note) {
+
+        emailNoteElement.style.display = "block";
+        emailNoteElement.textContent = question.email_note;
+
+    } else {
+
+        emailNoteElement.style.display = "none";
+        emailNoteElement.textContent = "";
+    }
+
+    renderEmailArea(question);
+    renderOptions(question);
+    renderQuestionNavigation();
+
+    document.getElementById("selection-note").classList.toggle(
+        "visible",
+        selectedAnswers[currentIndex] !== null
     );
 
-    document.getElementById("sceneStatus3D").textContent="NEW INCIDENT";
-    document.getElementById("scenarioTimer").textContent="Opening scene";
-    document.getElementById("scenarioStatus").textContent="3D simulation playing...";
-    document.getElementById("sceneProgressFill").style.width="0%";
+    const card = document.getElementById("quiz-card");
 
-    introTimer=setInterval(()=>{
-        introElapsed++;
-
-        document.getElementById("sceneProgressFill").style.width=
-            `${introElapsed/8*100}%`;
-
-        if(introElapsed===2){
-            clearSceneLabels();
-
-            addFloatingLabel(
-                "NEW EMAIL RECEIVED",
-                "#168baf",
-                0,4.35,-.65
-            );
-
-            document.getElementById("sceneStatus3D").textContent=
-                "NEW EMAIL";
-        }
-
-        if(introElapsed===5){
-            clearSceneLabels();
-
-            addFloatingLabel(
-                "EMPLOYEE INSPECTING",
-                "#168baf",
-                0,4.35,-.65
-            );
-
-            document.getElementById("sceneStatus3D").textContent=
-                "UNDER REVIEW";
-
-            camera.position.set(4,4.2,7);
-            camera.lookAt(0,2.8,-.5);
-        }
-
-        if(introElapsed>=8){
-            clearInterval(introTimer);
-
-            introRunning=false;
-
-            scenarioCard.style.display="none";
-            questionCard.style.display="block";
-
-            document.getElementById("scenarioStatus").textContent=
-                "Opening scene completed.";
-        }
-
-    },1000);
+    card.style.animation = "none";
+    void card.offsetWidth;
+    card.style.animation = "fadeIn .4s ease";
 }
 
-/* REPLAY AND SKIP */
 
-function replayScene(){
-    if(currentPhase==="intro"){
-        showIntroScene();
-    }
-}
+/* =====================================================
+   5. RENDER EMAIL AREA
+===================================================== */
 
-function skipScene(){
-    if(currentPhase==="intro"&&introRunning){
-        clearInterval(introTimer);
+function renderEmailArea(question) {
 
-        introRunning=false;
+    const area = document.getElementById("email-area");
 
-        scenarioCard.style.display="none";
-        questionCard.style.display="block";
+    area.innerHTML = "";
 
-        document.getElementById("scenarioStatus").textContent=
-            "Opening scene skipped.";
-    }
-}
+    if (question.comparison && Array.isArray(question.emails)) {
 
-/* RENDER QUESTION */
-
-function renderQuestion(){
-    clearInterval(introTimer);
-
-    answerLocked=false;
-
-    const q=QUESTIONS[currentIndex];
-
-    selectedAnswers[currentIndex]=undefined;
-
-    questionCard.style.display="none";
-    scenarioCard.style.display="none";
-
-    updateProgress();
-
-    document.getElementById("questionCategory").textContent=
-        q.category||"PHISHING INVESTIGATION";
-
-    document.getElementById("questionTitle").textContent=
-        q.title||`Question ${currentIndex+1}`;
-
-    document.getElementById("questionDescription").textContent=
-        q.scenario||"";
-
-    const emailNote=document.getElementById("emailNote");
-
-    emailNote.textContent=q.email_note||"";
-    emailNote.style.display=q.email_note?"block":"none";
-
-    const emailArea=document.getElementById("emailArea");
-
-    if(q.comparison&&Array.isArray(q.emails)){
-        emailArea.innerHTML=`
+        area.innerHTML = `
             <div class="email-grid">
-                ${q.emails.map(renderEmail).join("")}
-            </div>`;
-    }else{
-        const email={
-            label:"EMAIL DETAILS",
-            sender:q.sender,
-            sender_email:q.sender_email,
-            timestamp:q.timestamp,
-            subject:q.subject,
-            body:q.scenario,
-            link:q.display_link,
-            attachment:q.attachment
+                ${question.emails.map((email, index) =>
+                    renderEmail(email, index)
+                ).join("")}
+            </div>
+        `;
+
+        return;
+    }
+
+    /*
+    Single-email question support.
+    */
+
+    if (
+        question.sender ||
+        question.sender_email ||
+        question.subject ||
+        question.display_link
+    ) {
+
+        const email = {
+            label: "Message under review",
+            sender: question.sender,
+            sender_email: question.sender_email,
+            to: question.to,
+            reply_to: question.reply_to,
+            timestamp: question.timestamp,
+            subject: question.subject,
+            body: question.scenario,
+            link: question.display_link,
+            attachment: question.attachment
         };
 
-        if(q.sender||q.sender_email||q.subject||q.display_link||q.attachment){
-            emailArea.innerHTML=`
-                <div class="email-grid">
-                    ${renderEmail(email)}
-                </div>`;
-        }else{
-            emailArea.innerHTML="";
-        }
+        area.innerHTML = `
+            <div class="email-grid">
+                ${renderEmail(email, 0)}
+            </div>
+        `;
     }
+}
 
-    const optionsArea=document.getElementById("optionsArea");
 
-    optionsArea.innerHTML="";
+/* =====================================================
+   6. RENDER ANSWER OPTIONS
+===================================================== */
 
-    (q.options||[]).forEach((option,index)=>{
-        const label=document.createElement("label");
+function renderOptions(question) {
 
-        label.className="option";
+    const container = document.getElementById("options");
 
-        const input=document.createElement("input");
+    container.innerHTML = "";
 
-        input.type="radio";
-        input.name="answer";
-        input.value=index;
+    const options = Array.isArray(question.options)
+        ? question.options
+        : [];
 
-        const span=document.createElement("span");
+    const selected = selectedAnswers[currentIndex];
 
-        span.textContent=option;
+    options.forEach((option, index) => {
 
-        input.addEventListener("change",()=>{
-            if(answerLocked)return;
+        const label = document.createElement("label");
 
-            answerLocked=true;
+        label.className = "option";
 
-            selectedAnswers[currentIndex]=index;
+        if (selected === index) {
+            label.classList.add("selected");
+        }
 
-            document.querySelectorAll('input[name="answer"]').forEach(radio=>{
-                radio.disabled=true;
-            });
+        label.innerHTML = `
+            <input
+                type="radio"
+                name="answer"
+                value="${index}"
+                ${selected === index ? "checked" : ""}
+            >
 
-            document.querySelectorAll(".option").forEach(item=>{
-                item.classList.add("locked");
-            });
+            <span class="option-letter">
+                ${String.fromCharCode(65 + index)}.
+            </span>
 
-            continueButton.disabled=false;
+            <span class="option-text">
+                ${escapeHTML(option)}
+            </span>
+        `;
 
-            continueButton.textContent=
-                currentIndex===QUESTIONS.length-1
-                ?"Submit Assessment"
-                :"Continue";
+        label.addEventListener("click", function(event) {
+
+            if (event.target.tagName === "INPUT") {
+                // The change event below handles this.
+            }
+
         });
 
-        label.append(input,span);
+        const input = label.querySelector("input");
 
-        optionsArea.appendChild(label);
+        input.addEventListener("change", function() {
+
+            selectAnswer(index);
+
+        });
+
+        container.appendChild(label);
     });
+}
 
-    continueButton.disabled=true;
 
-    continueButton.textContent=
-        currentIndex===QUESTIONS.length-1
-        ?"Submit Assessment"
-        :"Continue";
+/* =====================================================
+   7. SELECT ANSWER
+===================================================== */
+
+function selectAnswer(index) {
+
+    selectedAnswers[currentIndex] = index;
+
+    renderOptions(QUESTIONS[currentIndex]);
+
+    document.getElementById("selection-note").classList.add(
+        "visible"
+    );
+
+    renderQuestionNavigation();
+
+    /*
+    Neutral acknowledgement only.
+    No correct or incorrect feedback is shown.
+    */
+
+    showOutcomeScene();
+}
+
+
+/* =====================================================
+   8. QUESTION NAVIGATION
+===================================================== */
+
+function renderQuestionNavigation() {
+
+    const previousButton = document.getElementById("previous-btn");
+    const nextButton = document.getElementById("next-btn");
+    const submitButton = document.getElementById("submit-btn");
+
+    previousButton.disabled = currentIndex === 0;
+
+    if (currentIndex === TOTAL_QUESTIONS - 1) {
+
+        nextButton.style.display = "none";
+        submitButton.style.display = "inline-block";
+
+    } else {
+
+        nextButton.style.display = "inline-block";
+        submitButton.style.display = "none";
+    }
+
+    const list = document.getElementById("question-list");
+
+    list.innerHTML = "";
+
+    QUESTIONS.forEach((_, index) => {
+
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "question-dot";
+        button.textContent = index + 1;
+
+        if (index === currentIndex) {
+            button.classList.add("active");
+        }
+
+        if (selectedAnswers[index] !== null) {
+            button.classList.add("answered");
+        }
+
+        button.addEventListener("click", () => {
+
+            currentIndex = index;
+
+            renderQuestion();
+
+            showIntroScene();
+        });
+
+        list.appendChild(button);
+    });
+}
+
+
+function previousQuestion() {
+
+    if (currentIndex <= 0) {
+        return;
+    }
+
+    currentIndex--;
+
+    renderQuestion();
 
     showIntroScene();
 }
 
-/* CONTINUE */
 
-function proceed(){
-    if(selectedAnswers[currentIndex]===undefined)return;
+function nextQuestion() {
 
-    if(currentIndex===QUESTIONS.length-1){
-        submitAssessment();
+    if (currentIndex >= TOTAL_QUESTIONS - 1) {
         return;
     }
 
     currentIndex++;
 
     renderQuestion();
+
+    showIntroScene();
 }
 
-/* SUBMIT TO FLASK */
 
-async function submitAssessment(){
-    clearInterval(introTimer);
+/* =====================================================
+   9. SUBMISSION CONFIRMATION
+===================================================== */
 
-    continueButton.disabled=true;
-    continueButton.textContent="Submitting...";
+function openSubmitConfirmation() {
 
-    const answers=QUESTIONS.map((question,index)=>{
-        return selectedAnswers[index]!==undefined
-            ?selectedAnswers[index]
-            :null;
+    const answered = Object.values(selectedAnswers).filter(
+        answer => answer !== null
+    ).length;
+
+    const unanswered = TOTAL_QUESTIONS - answered;
+
+    const summary = document.getElementById("submit-summary");
+
+    if (unanswered > 0) {
+
+        summary.textContent =
+            `You have answered ${answered} of ${TOTAL_QUESTIONS} questions. ` +
+            `${unanswered} question(s) are unanswered and will count as incorrect. ` +
+            `Do you want to submit?`;
+
+    } else {
+
+        summary.textContent =
+            `You have answered all ${TOTAL_QUESTIONS} questions. ` +
+            `Are you ready to submit your assessment?`;
+    }
+
+    document.getElementById("submit-error").style.display = "none";
+
+    document.getElementById("confirm-overlay").classList.add(
+        "visible"
+    );
+}
+
+
+function closeSubmitConfirmation() {
+
+    if (isSubmitting) {
+        return;
+    }
+
+    document.getElementById("confirm-overlay").classList.remove(
+        "visible"
+    );
+}
+
+
+/* =====================================================
+   10. SUBMIT ASSESSMENT
+===================================================== */
+
+async function submitAssessment() {
+
+    if (isSubmitting) {
+        return;
+    }
+
+    isSubmitting = true;
+
+    const submitButton = document.getElementById(
+        "confirm-submit-btn"
+    );
+
+    const errorElement = document.getElementById(
+        "submit-error"
+    );
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    errorElement.style.display = "none";
+
+    /*
+    Convert answers to an ordered array.
+
+    All questions are included.
+    Unanswered questions are null.
+    */
+
+    const answers = QUESTIONS.map((_, index) => {
+
+        const answer = selectedAnswers[index];
+
+        return answer === undefined ? null : answer;
+
     });
 
-    try{
-        const response=await fetch("/submit",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
+    try {
+
+        const response = await fetch("/submit", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
             },
-            body:JSON.stringify({
-                attempt_id:ATTEMPT_ID,
-                answers:answers
+
+            body: JSON.stringify({
+                attempt_id: ATTEMPT_ID,
+                answers: answers
             })
+
         });
 
-        const result=await response.json();
+        const data = await response.json();
 
-        if(!response.ok){
-            throw new Error(result.error||"Submission failed.");
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error || "Unable to submit assessment."
+            );
         }
 
-        if(result.url){
-            window.location.href=result.url;
-        }else{
-            throw new Error("Results URL was not returned.");
+        if (!data.url) {
+            throw new Error("Result page URL was not returned.");
         }
 
-    }catch(error){
-        alert(error.message||"Unable to submit assessment.");
+        window.location.href = data.url;
 
-        continueButton.disabled=false;
-        continueButton.textContent="Retry Submission";
+    } catch (error) {
+
+        isSubmitting = false;
+
+        submitButton.disabled = false;
+        submitButton.textContent = "Confirm Submission";
+
+        errorElement.textContent =
+            error.message || "Something went wrong. Please try again.";
+
+        errorElement.style.display = "block";
     }
 }
 
-/* BUTTON EVENTS */
 
-continueButton.addEventListener("click",proceed);
+/* =====================================================
+   11. THREE.JS SCENE
+===================================================== */
 
-document.getElementById("replayButton").addEventListener(
-    "click",
-    replayScene
-);
+function stopSceneAnimation() {
 
-document.getElementById("skipButton").addEventListener(
-    "click",
-    skipScene
-);
+    if (sceneTimer) {
+        clearTimeout(sceneTimer);
+        sceneTimer = null;
+    }
 
-/* START */
+    if (sceneAnimation) {
+        cancelAnimationFrame(sceneAnimation);
+        sceneAnimation = null;
+    }
 
-if(Array.isArray(QUESTIONS)&&QUESTIONS.length===10){
-    renderQuestion();
-}else{
-    questionCard.style.display="block";
+    if (sceneRenderer) {
 
-    questionCard.innerHTML=`
-        <h2>Unable to load the assessment.</h2>
-        <p>Please contact the administrator.</p>
-    `;
+        sceneRenderer.dispose();
+
+        if (sceneRenderer.domElement.parentNode) {
+            sceneRenderer.domElement.parentNode.removeChild(
+                sceneRenderer.domElement
+            );
+        }
+
+        sceneRenderer = null;
+    }
+
+    scene = null;
+    sceneCamera = null;
+    sceneObjects = [];
 }
+
+
+function createScene() {
+
+    stopSceneAnimation();
+
+    const container = document.getElementById("scene-canvas");
+
+    container.innerHTML = "";
+
+    if (typeof THREE === "undefined") {
+
+        container.innerHTML = `
+            <div style="
+                height:100%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                text-align:center;
+                padding:25px;
+                color:#52768c;
+            ">
+                Security simulation
+            </div>
+        `;
+
+        return;
+    }
+
+    const width = container.clientWidth || 800;
+    const height = container.clientHeight || 320;
+
+    scene = new THREE.Scene();
+
+    scene.background = new THREE.Color(0xdff3f7);
+
+    sceneCamera = new THREE.PerspectiveCamera(
+        45,
+        width / height,
+        0.1,
+        100
+    );
+
+    sceneCamera.position.set(0, 4.5, 9);
+    sceneCamera.lookAt(0, 1.2, 0);
+
+    sceneRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false
+    });
+
+    sceneRenderer.setSize(width, height);
+    sceneRenderer.setPixelRatio(
+        Math.min(window.devicePixelRatio || 1, 2)
+    );
+
+    sceneRenderer.shadowMap.enabled = true;
+
+    container.appendChild(sceneRenderer.domElement);
+
+    const ambient = new THREE.HemisphereLight(
+        0xffffff,
+        0x8aaab7,
+        2
+    );
+
+    scene.add(ambient);
+
+    const light = new THREE.DirectionalLight(
+        0xffffff,
+        2
+    );
+
+    light.position.set(4, 8, 5);
+    light.castShadow = true;
+
+    scene.add(light);
+
+    const floorGeometry = new THREE.BoxGeometry(
+        12,
+        0.25,
+        8
+    );
+
+    const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0xb9dce5,
+        roughness: .85
+    });
+
+    const floor = new THREE.Mesh(
+        floorGeometry,
+        floorMaterial
+    );
+
+    floor.position.y = -0.2;
+    floor.receiveShadow = true;
+
+    scene.add(floor);
+
+    const deskMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8bb6c9
+    });
+
+    const desk = new THREE.Mesh(
+        new THREE.BoxGeometry(3.3, .22, 1.6),
+        deskMaterial
+    );
+
+    desk.position.set(0, 1.1, 0);
+    desk.castShadow = true;
+
+    scene.add(desk);
+
+    const legMaterial = new THREE.MeshStandardMaterial({
+        color: 0x557d92
+    });
+
+    for (const x of [-1.35, 1.35]) {
+        for (const z of [-.55, .55]) {
+
+            const leg = new THREE.Mesh(
+                new THREE.BoxGeometry(.13, 1.1, .13),
+                legMaterial
+            );
+
+            leg.position.set(x, .45, z);
+
+            scene.add(leg);
+        }
+    }
+
+    const monitor = new THREE.Mesh(
+        new THREE.BoxGeometry(1.7, 1.05, .12),
+        new THREE.MeshStandardMaterial({
+            color: 0x244c65,
+            roughness: .4
+        })
+    );
+
+    monitor.position.set(0, 2, -.45);
+    scene.add(monitor);
+
+    const screen = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.48, .82),
+        new THREE.MeshStandardMaterial({
+            color: 0x8ee4df,
+            emissive: 0x1b777c,
+            emissiveIntensity: .35
+        })
+    );
+
+    screen.position.set(0, 2, -.375);
+    scene.add(screen);
+
+    const stand = new THREE.Mesh(
+        new THREE.BoxGeometry(.16, .65, .16),
+        legMaterial
+    );
+
+    stand.position.set(0, 1.58, -.45);
+    scene.add(stand);
+
+    const keyboard = new THREE.Mesh(
+        new THREE.BoxGeometry(1.15, .06, .4),
+        new THREE.MeshStandardMaterial({
+            color: 0x345f78
+        })
+    );
+
+    keyboard.position.set(0, 1.25, .55);
+    scene.add(keyboard);
+
+    const chair = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, .25, .9),
+        new THREE.MeshStandardMaterial({
+            color: 0x4c8e9b
+        })
+    );
+
+    chair.position.set(0, .55, 1.7);
+    scene.add(chair);
+
+    const chairBack = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, 1.2, .18),
+        new THREE.MeshStandardMaterial({
+            color: 0x3f8290
+        })
+    );
+
+    chairBack.position.set(0, 1.15, 2.05);
+    scene.add(chairBack);
+
+    /*
+    Floating message icon.
+    */
+
+    const message = new THREE.Group();
+
+    const messageBody = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, .72, .12),
+        new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            emissive: 0x77cdd4,
+            emissiveIntensity: .15
+        })
+    );
+
+    message.add(messageBody);
+
+    const envelopeLine = new THREE.Mesh(
+        new THREE.BoxGeometry(.75, .04, .04),
+        new THREE.MeshStandardMaterial({
+            color: 0x159ab4
+        })
+    );
+
+    envelopeLine.position.y = -.05;
+    envelopeLine.position.z = .08;
+
+    message.add(envelopeLine);
+
+    message.position.set(-2.6, 2.8, .5);
+
+    scene.add(message);
+
+    sceneObjects.push(message);
+
+    /*
+    Floating security shield.
+    */
+
+    const shield = new THREE.Group();
+
+    const shieldShape = new THREE.Mesh(
+        new THREE.CylinderGeometry(.65, .55, .14, 6),
+        new THREE.MeshStandardMaterial({
+            color: 0x1cabb0,
+            metalness: .25,
+            roughness: .35
+        })
+    );
+
+    shieldShape.rotation.x = Math.PI / 2;
+
+    shield.add(shieldShape);
+
+    shield.position.set(2.6, 2.7, .4);
+
+    scene.add(shield);
+
+    sceneObjects.push(shield);
+
+    /*
+    Decorative particles.
+    */
+
+    const particleGeometry = new THREE.BufferGeometry();
+
+    const particlePositions = [];
+
+    for (let i = 0; i < 80; i++) {
+
+        particlePositions.push(
+            (Math.random() - .5) * 9,
+            Math.random() * 5,
+            (Math.random() - .5) * 5
+        );
+    }
+
+    particleGeometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(
+            particlePositions,
+            3
+        )
+    );
+
+    const particles = new THREE.Points(
+        particleGeometry,
+        new THREE.PointsMaterial({
+            color: 0x3eabb5,
+            size: .045,
+            transparent: true,
+            opacity: .65
+        })
+    );
+
+    scene.add(particles);
+
+    sceneObjects.push(particles);
+
+    const animate = () => {
+
+        if (!sceneRenderer || !scene) {
+            return;
+        }
+
+        sceneAnimation = requestAnimationFrame(animate);
+
+        const elapsed = performance.now() * .001;
+
+        message.position.y = 2.8 + Math.sin(elapsed * 1.6) * .17;
+        message.rotation.y = Math.sin(elapsed * .7) * .18;
+
+        shield.position.y = 2.7 + Math.sin(elapsed * 1.3 + 1) * .17;
+        shield.rotation.y = Math.sin(elapsed * .6) * .2;
+
+        particles.rotation.y = elapsed * .025;
+
+        sceneRenderer.render(
+            scene,
+            sceneCamera
+        );
+    };
+
+    animate();
+}
+
+
+/* =====================================================
+   12. SCENE CONTROLS
+===================================================== */
+
+function showScene(title, description, duration = 5500) {
+
+    const overlay = document.getElementById("scene-overlay");
+
+    document.getElementById("scene-title").textContent = title;
+
+    document.getElementById("scene-description").textContent =
+        description;
+
+    const progress = document.getElementById(
+        "scene-progress-fill"
+    );
+
+    progress.style.transition = "none";
+    progress.style.width = "0%";
+
+    overlay.classList.remove("hidden");
+
+    createScene();
+
+    sceneDuration = duration;
+    sceneStart = performance.now();
+
+    requestAnimationFrame(() => {
+
+        progress.style.transition =
+            `width ${duration}ms linear`;
+
+        progress.style.width = "100%";
+    });
+
+    sceneTimer = setTimeout(() => {
+
+        skipScene();
+
+    }, duration);
+}
+
+
+function skipScene() {
+
+    const overlay = document.getElementById("scene-overlay");
+
+    if (sceneTimer) {
+        clearTimeout(sceneTimer);
+        sceneTimer = null;
+    }
+
+    overlay.classList.add("hidden");
+
+    stopSceneAnimation();
+}
+
+
+function showIntroScene() {
+
+    const question = QUESTIONS[currentIndex];
+
+    if (!question) {
+        return;
+    }
+
+    showScene(
+        `Investigation ${String(currentIndex + 1).padStart(2, "0")}`,
+        "A new message has arrived. Examine the details carefully and choose the safest response.",
+        4500
+    );
+}
+
+
+function showOutcomeScene() {
+
+    showScene(
+        "Decision Recorded",
+        "Your response has been saved. Continue reviewing the assessment carefully.",
+        3000
+    );
+}
+
+
+/* =====================================================
+   13. START QUIZ
+===================================================== */
+
+function startQuiz() {
+
+    if (!Array.isArray(QUESTIONS) || QUESTIONS.length !== 10) {
+
+        document.getElementById("quiz-card").innerHTML = `
+            <h2>Assessment unavailable</h2>
+            <p>The question data could not be loaded correctly.
+            Please contact the administrator.</p>
+        `;
+
+        skipScene();
+
+        return;
+    }
+
+    renderQuestion();
+
+    showIntroScene();
+}
+
+
+/* =====================================================
+   14. INITIALIZE
+===================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    startQuiz();
+
+});
+
+
+/* =====================================================
+   15. KEYBOARD ACCESSIBILITY
+===================================================== */
+
+document.addEventListener("keydown", event => {
+
+    if (
+        event.target &&
+        ["INPUT", "TEXTAREA"].includes(event.target.tagName)
+    ) {
+        return;
+    }
+
+    if (event.key === "ArrowRight") {
+
+        if (currentIndex < TOTAL_QUESTIONS - 1) {
+            nextQuestion();
+        }
+
+    } else if (event.key === "ArrowLeft") {
+
+        if (currentIndex > 0) {
+            previousQuestion();
+        }
+
+    } else if (event.key === "Escape") {
+
+        skipScene();
+
+    }
+
+});
+
 </script>
 
 </body>
