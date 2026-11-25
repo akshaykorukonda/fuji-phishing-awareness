@@ -7,6 +7,7 @@ import io
 import csv
 import random
 import logging
+import tempfile
 
 from datetime import datetime, timezone, timedelta
 from functools import wraps
@@ -20,7 +21,8 @@ from flask import (
     abort,
     Response,
     jsonify,
-    url_for
+    url_for,
+    send_file
 )
 
 # =========================================================
@@ -308,6 +310,11 @@ def login_required(function):
     def wrapper(*args, **kwargs):
 
         if not signed():
+            if request.path == "/submit" or request.is_json:
+                return jsonify({
+                    "success": False,
+                    "error": "Your login session has expired. Please log in again and restart the quiz."
+                }), 401
             return redirect(url_for("home"))
 
         return function(*args, **kwargs)
@@ -664,7 +671,7 @@ def quiz():
 
 
 # =========================================================
-# 10. SUBMIT QUIZ - UPDATED
+# 10. SUBMIT QUIZ
 # =========================================================
 
 @app.route("/submit", methods=["POST"])
@@ -705,7 +712,6 @@ def submit():
 
     try:
 
-        # Match the saved session ID first, then browser ID.
         attempt = None
         candidate_ids = []
 
@@ -730,7 +736,6 @@ def submit():
             if attempt:
                 break
 
-        # Recover the employee's unfinished assessment if needed.
         if not attempt:
 
             logger.warning(
@@ -767,7 +772,6 @@ def submit():
 
         logger.info("Matched assessment: %s", attempt_id)
 
-        # Already submitted?
         if attempt["completed"]:
 
             session.pop("attempt_id", None)
@@ -789,7 +793,6 @@ def submit():
                 "error": "Assessment question data is missing."
             }), 500
 
-        # Validate answers and calculate score.
         try:
 
             percentage, reviewed_answers = validate_and_score(
@@ -809,7 +812,6 @@ def submit():
                 "error": str(error)
             }), 400
 
-        # Calculate duration.
         try:
 
             start_datetime = datetime.fromisoformat(
@@ -837,7 +839,6 @@ def submit():
 
         completed = current_time()
 
-        # Save assessment.
         cursor = connection.execute("""
             UPDATE attempts
             SET completed = ?,
@@ -1115,6 +1116,74 @@ def export_csv():
 
 
 # =========================================================
+# 13A. ADMIN SQLITE BACKUP DOWNLOAD
+# =========================================================
+
+@app.route("/admin/backup")
+@admin_only
+def backup_database():
+
+    source_connection = None
+    backup_connection = None
+    backup_path = None
+
+    try:
+
+        fd, backup_path = tempfile.mkstemp(
+            prefix="phishing_assessment_backup_",
+            suffix=".sqlite3"
+        )
+        os.close(fd)
+
+        source_connection = get_db()
+        backup_connection = sqlite3.connect(backup_path)
+
+        source_connection.backup(backup_connection)
+        backup_connection.close()
+        backup_connection = None
+        source_connection.close()
+        source_connection = None
+
+        filename = (
+            "phishing_assessment_backup_"
+            + datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            + ".sqlite3"
+        )
+
+        response = send_file(
+            backup_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype="application/x-sqlite3"
+        )
+
+        def remove_temporary_backup():
+            try:
+                if backup_path and os.path.exists(backup_path):
+                    os.remove(backup_path)
+            except OSError:
+                logger.exception("Could not remove temporary backup file.")
+
+        response.call_on_close(remove_temporary_backup)
+        return response
+
+    except Exception:
+        logger.exception("Could not create SQLite backup.")
+
+        if backup_connection is not None:
+            backup_connection.close()
+        if source_connection is not None:
+            source_connection.close()
+        if backup_path and os.path.exists(backup_path):
+            try:
+                os.remove(backup_path)
+            except OSError:
+                logger.exception("Could not clean up failed backup file.")
+
+        return "Unable to create database backup. Check Render logs.", 500
+
+
+# =========================================================
 # 14. LOGOUT
 # =========================================================
 
@@ -1138,7 +1207,8 @@ def health():
         "application": "Fuji Silvertech Phishing Awareness",
         "pass_mark": PASS_MARK,
         "question_sets": list(REQUIRED_SETS),
-        "database_configured": bool(DB)
+        "database_configured": bool(DB),
+        "database_file": os.path.basename(DB)
     })
 
 
