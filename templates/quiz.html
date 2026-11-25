@@ -8,27 +8,30 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
+    background: linear-gradient(135deg, #eef8ff, #f4fbff, #eaf8f7);
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #edf8ff, #e8f8f7);
-    color: #19334a;
+    color: #24364b;
 }
 
-.page {
-    max-width: 900px;
-    margin: 35px auto;
+.quiz-wrapper {
+    max-width: 1050px;
+    margin: 30px auto;
     padding: 20px;
 }
 
-.header {
+.top-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     gap: 15px;
     margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
 .logo {
@@ -37,588 +40,792 @@ body {
     object-fit: contain;
 }
 
-.header-info {
-    text-align: right;
-    color: #527087;
-    font-size: 13px;
+.set-label {
+    background: #e0f2fe;
+    color: #0876b9;
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-weight: bold;
 }
 
-.card {
+.progress-section {
     background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 12px 35px rgba(39, 110, 150, .10);
-    border: 1px solid #dceef7;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(40, 100, 140, 0.07);
+    margin-bottom: 20px;
 }
 
-.topline {
+.progress-info {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
-    color: #4385a8;
+    margin-bottom: 12px;
     font-size: 14px;
     font-weight: bold;
-    margin-bottom: 15px;
 }
 
 .progress-track {
-    width: 100%;
     height: 9px;
+    background: #e7f0f7;
     border-radius: 20px;
-    background: #e7f0f5;
     overflow: hidden;
-    margin-bottom: 28px;
 }
 
 .progress-fill {
     height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #299bd0, #25b9a6);
-    transition: width .3s ease;
+    width: 10%;
+    background: linear-gradient(90deg, #28a8d8, #21b6a8);
+    border-radius: 20px;
+    transition: width 0.3s ease;
+}
+
+.question-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(40, 100, 140, 0.08);
+}
+
+.category {
+    display: inline-block;
+    background: #e5f7f5;
+    color: #078b83;
+    padding: 7px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
 }
 
 .question-title {
-    font-size: 23px;
-    line-height: 1.45;
-    margin: 10px 0 22px;
+    font-size: 25px;
+    line-height: 1.4;
+    margin: 0 0 18px;
+    color: #193b59;
 }
 
-.question-category {
-    color: #168d9a;
-    font-size: 12px;
-    letter-spacing: 1px;
+.scenario-box {
+    background: #f0f8ff;
+    border-left: 4px solid #269bd0;
+    padding: 18px;
+    border-radius: 10px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    color: #344b60;
+}
+
+.scenario-heading {
+    font-size: 13px;
     font-weight: bold;
+    color: #1685bd;
+    margin-bottom: 7px;
     text-transform: uppercase;
 }
 
-.question-description {
-    color: #668094;
-    font-size: 14px;
-    margin-bottom: 20px;
+.email-section {
+    margin: 22px 0;
 }
 
-.options {
+.email-heading {
+    font-size: 16px;
+    font-weight: bold;
+    color: #234d70;
+    margin-bottom: 12px;
+}
+
+.email-grid {
     display: grid;
-    gap: 13px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.email-card {
+    border: 1px solid #dce9f2;
+    border-radius: 13px;
+    overflow: hidden;
+    background: #fbfdff;
+    min-width: 0;
+}
+
+.email-card.single {
+    max-width: 100%;
+}
+
+.email-top {
+    padding: 13px 16px;
+    background: #eaf5fc;
+    border-bottom: 1px solid #dce9f2;
+    font-weight: bold;
+    color: #23658e;
+}
+
+.email-details {
+    padding: 16px;
+}
+
+.email-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 9px;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.email-row strong {
+    min-width: 75px;
+    color: #526a7d;
+}
+
+.email-subject {
+    font-size: 15px;
+    font-weight: bold;
+    color: #23445f;
+    margin: 13px 0;
+    overflow-wrap: anywhere;
+}
+
+.email-body {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    font-size: 14px;
+    color: #354b5e;
+    border-top: 1px solid #e5edf3;
+    padding-top: 13px;
+}
+
+.email-link {
+    margin-top: 14px;
+    padding: 11px;
+    background: #fff5e9;
+    border: 1px solid #f6dfc1;
+    color: #9a5a16;
+    border-radius: 7px;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.reply-to {
+    color: #a14d4d;
+}
+
+.options-heading {
+    margin: 28px 0 13px;
+    font-size: 17px;
+    color: #234d70;
+    font-weight: bold;
 }
 
 .option {
     display: flex;
     align-items: flex-start;
     gap: 13px;
-    padding: 17px;
-    border: 1.5px solid #dceaf2;
-    border-radius: 13px;
+    padding: 16px;
+    margin-bottom: 11px;
+    border: 1px solid #dce8f0;
+    border-radius: 12px;
     cursor: pointer;
-    transition: .2s;
-    background: #fbfdff;
+    background: #fff;
+    transition: 0.2s;
+    line-height: 1.55;
 }
 
 .option:hover {
-    border-color: #42a6ce;
-    background: #f0faff;
+    border-color: #54acd5;
+    background: #f3faff;
 }
 
 .option.selected {
-    border-color: #249fc0;
-    background: #eaf9fc;
-    box-shadow: 0 0 0 2px rgba(36,159,192,.08);
+    border-color: #1599cb;
+    background: #eaf7ff;
 }
 
 .option input {
     margin-top: 4px;
-    accent-color: #159eac;
-    width: 17px;
-    height: 17px;
+    accent-color: #138fc4;
+    transform: scale(1.15);
     flex-shrink: 0;
 }
 
-.option-text {
-    line-height: 1.5;
-    font-size: 15px;
+.option-letter {
+    font-weight: bold;
+    color: #1685bd;
+    min-width: 20px;
 }
 
 .navigation {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 12px;
-    margin-top: 30px;
+    margin-top: 25px;
 }
 
-button {
+.nav-button {
     border: none;
-    border-radius: 10px;
+    border-radius: 9px;
     padding: 13px 24px;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-}
-
-button:disabled {
-    opacity: .45;
-    cursor: not-allowed;
+    transition: 0.2s;
 }
 
 .previous {
-    background: #edf3f7;
-    color: #476477;
+    background: #e8f0f6;
+    color: #35536a;
 }
 
-.next, .submit {
+.next {
+    background: #138fc4;
     color: white;
-    background: linear-gradient(100deg, #268fca, #20aaad);
 }
 
 .submit {
-    background: linear-gradient(100deg, #159b8c, #24b69d);
+    background: #13a58e;
+    color: white;
 }
 
-.question-counter {
-    color: #71899b;
-    font-size: 13px;
-    text-align: center;
-    margin-top: 20px;
+.nav-button:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
 }
 
-.message {
+.nav-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.error-message {
     display: none;
-    padding: 14px;
-    border-radius: 10px;
-    margin-top: 18px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.message.error {
-    display: block;
-    color: #a32e37;
+    margin-top: 15px;
+    padding: 13px;
+    border-radius: 9px;
+    color: #a52d2d;
     background: #fff0f0;
-    border: 1px solid #ffd2d2;
+    border: 1px solid #ffd0d0;
 }
 
-.message.info {
-    display: block;
-    color: #176b7c;
-    background: #eafaff;
-    border: 1px solid #c8edf5;
+.question-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0;
 }
 
-.footer {
-    text-align: center;
-    color: #8196a5;
-    font-size: 12px;
-    margin: 22px 0;
+.question-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #d5e4ed;
+    background: white;
+    color: #587184;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-@media(max-width:600px) {
-    .page { margin: 12px auto; padding: 12px; }
-    .card { padding: 20px; }
-    .question-title { font-size: 19px; }
-    .header { align-items: flex-start; }
-    .logo { max-width: 130px; }
-    .navigation button { padding: 12px 15px; }
+.question-dot.active {
+    background: #138fc4;
+    color: white;
+    border-color: #138fc4;
+}
+
+.question-dot.answered {
+    background: #dff5ef;
+    color: #087c69;
+    border-color: #9edccc;
+}
+
+.question-dot.active.answered {
+    background: #138fc4;
+    color: white;
+}
+
+@media(max-width: 700px) {
+    .quiz-wrapper {
+        padding: 12px;
+        margin: 12px auto;
+    }
+
+    .question-card {
+        padding: 19px;
+    }
+
+    .question-title {
+        font-size: 21px;
+    }
+
+    .email-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navigation {
+        flex-wrap: wrap;
+    }
+
+    .nav-button {
+        padding: 12px 16px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="page">
+<div class="quiz-wrapper">
 
-    <header class="header">
+    <header class="top-header">
         <img
-            class="logo"
             src="{{ url_for('static', filename='img/fuji-logo.png') }}"
+            class="logo"
             alt="Fuji Silvertech"
         >
 
-        <div class="header-info">
-            <strong>Phishing Awareness Assessment</strong><br>
-            Set {{ set_number }}<br>
-            {{ session.get('email', '') }}
+        <div class="set-label">
+            Assessment Set {{ set_number }}
         </div>
     </header>
 
-    <main class="card">
-
-        <div class="topline">
-            <span>SECURITY AWARENESS</span>
-            <span id="progressText">Question 1 of {{ questions|length }}</span>
+    <section class="progress-section">
+        <div class="progress-info">
+            <span id="questionCounter">Question 1 of 10</span>
+            <span id="progressPercentage">10% Completed</span>
         </div>
 
         <div class="progress-track">
             <div class="progress-fill" id="progressFill"></div>
         </div>
+    </section>
 
-        <div id="questionContainer"></div>
+    <div class="question-dots" id="questionDots"></div>
 
-        <div id="message" class="message"></div>
+    <main class="question-card">
+
+        <div id="questionContent">
+            <p>Loading questions...</p>
+        </div>
 
         <div class="navigation">
-            <button class="previous" id="previousBtn" type="button">
-                Previous
+            <button
+                type="button"
+                class="nav-button previous"
+                id="previousButton"
+                onclick="previousQuestion()"
+            >
+                ← Previous
             </button>
 
-            <button class="next" id="nextBtn" type="button">
-                Next
+            <button
+                type="button"
+                class="nav-button next"
+                id="nextButton"
+                onclick="nextQuestion()"
+            >
+                Next →
             </button>
 
-            <button class="submit" id="submitBtn" type="button" hidden>
-                Submit Assessment
+            <button
+                type="button"
+                class="nav-button submit"
+                id="submitButton"
+                onclick="submitQuiz()"
+                style="display:none"
+            >
+                Submit Assessment ✓
             </button>
         </div>
 
-        <div class="question-counter" id="questionCounter"></div>
+        <div class="error-message" id="errorMessage"></div>
 
     </main>
-
-    <footer class="footer">
-        Fuji Silvertech | Information Security Awareness
-    </footer>
 
 </div>
 
 <script>
-"use strict";
-
-/* Data supplied by Flask */
 const QUESTIONS = {{ questions | tojson }};
 const ATTEMPT_ID = {{ attempt_id | tojson }};
-
-const TOTAL = QUESTIONS.length;
+const SUBMIT_URL = {{ url_for('submit') | tojson }};
 
 let currentQuestion = 0;
-let answers = Array(TOTAL).fill(null);
-let submitting = false;
+let answers = {};
 
-const container = document.getElementById("questionContainer");
-const previousBtn = document.getElementById("previousBtn");
-const nextBtn = document.getElementById("nextBtn");
-const submitBtn = document.getElementById("submitBtn");
-const message = document.getElementById("message");
-const progressFill = document.getElementById("progressFill");
-const progressText = document.getElementById("progressText");
+const questionContent = document.getElementById("questionContent");
 const questionCounter = document.getElementById("questionCounter");
+const progressPercentage = document.getElementById("progressPercentage");
+const progressFill = document.getElementById("progressFill");
+const questionDots = document.getElementById("questionDots");
+const previousButton = document.getElementById("previousButton");
+const nextButton = document.getElementById("nextButton");
+const submitButton = document.getElementById("submitButton");
+const errorMessage = document.getElementById("errorMessage");
 
+function createElement(tag, className, text) {
+    const element = document.createElement(tag);
 
-/* Escape text before inserting it into HTML */
-function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-    })[character]);
+    if (className) {
+        element.className = className;
+    }
+
+    if (text !== undefined && text !== null) {
+        element.textContent = String(text);
+    }
+
+    return element;
 }
 
+function addEmailCard(email, single = false) {
+    const card = createElement(
+        "div",
+        "email-card" + (single ? " single" : "")
+    );
 
-/* Determine whether a question is multi-select */
-function isMultiSelect(question) {
-    return ["find_mistakes", "click_errors"].includes(question.mode);
+    const top = createElement(
+        "div",
+        "email-top",
+        email.label || "Message"
+    );
+
+    card.appendChild(top);
+
+    const details = createElement("div", "email-details");
+
+    function addRow(label, value, extraClass = "") {
+        if (value === undefined || value === null || value === "") {
+            return;
+        }
+
+        const row = createElement("div", "email-row");
+        const heading = createElement("strong", "", label);
+        const content = createElement("span", extraClass, value);
+
+        row.appendChild(heading);
+        row.appendChild(content);
+        details.appendChild(row);
+    }
+
+    addRow("From:", email.sender);
+    addRow("Address:", email.sender_email);
+    addRow("To:", email.to);
+    addRow("Reply-To:", email.reply_to, "reply-to");
+
+    if (email.subject) {
+        details.appendChild(
+            createElement("div", "email-subject", email.subject)
+        );
+    }
+
+    if (email.body) {
+        details.appendChild(
+            createElement("div", "email-body", email.body)
+        );
+    }
+
+    if (email.link) {
+        details.appendChild(
+            createElement("div", "email-link", "Link / Attachment: " + email.link)
+        );
+    }
+
+    card.appendChild(details);
+    return card;
 }
 
+function renderEmails(question) {
+    const section = createElement("section", "email-section");
 
-/* Display an error or information message */
-function showMessage(text, type = "error") {
-    message.textContent = text;
-    message.className = "message " + type;
+    if (question.emails && Array.isArray(question.emails)) {
+        section.appendChild(
+            createElement("div", "email-heading", "Compare the two messages")
+        );
+
+        const grid = createElement("div", "email-grid");
+
+        question.emails.forEach(email => {
+            grid.appendChild(addEmailCard(email));
+        });
+
+        section.appendChild(grid);
+        return section;
+    }
+
+    if (question.email) {
+        section.appendChild(
+            createElement(
+                "div",
+                "email-heading",
+                question.email.label || "Message under review"
+            )
+        );
+
+        section.appendChild(addEmailCard(question.email, true));
+        return section;
+    }
+
+    return null;
 }
 
-
-/* Hide messages */
-function clearMessage() {
-    message.textContent = "";
-    message.className = "message";
-}
-
-
-/* Render the current question */
 function renderQuestion() {
-
     const question = QUESTIONS[currentQuestion];
 
     if (!question) {
-        showMessage("Question could not be loaded.");
+        questionContent.textContent = "Question could not be loaded.";
         return;
     }
 
-    clearMessage();
+    questionContent.replaceChildren();
 
-    const multi = isMultiSelect(question);
-    const selected = answers[currentQuestion];
+    const category = createElement(
+        "div",
+        "category",
+        question.category || "ASSESSMENT"
+    );
 
-    let html = `
-        <div class="question-category">
-            ${escapeHTML(question.category || "PHISHING AWARENESS")}
-        </div>
+    const title = createElement(
+        "h1",
+        "question-title",
+        question.title || ("Question " + (currentQuestion + 1))
+    );
 
-        <h2 class="question-title">
-            ${escapeHTML(question.title || question.question || "Assessment Question")}
-        </h2>
-    `;
+    questionContent.appendChild(category);
+    questionContent.appendChild(title);
 
-    if (question.description) {
-        html += `
-            <p class="question-description">
-                ${escapeHTML(question.description)}
-            </p>
-        `;
+    // Scenario is displayed whether or not the question has an email.
+    if (question.scenario) {
+        const scenarioBox = createElement("div", "scenario-box");
+
+        scenarioBox.appendChild(
+            createElement("div", "scenario-heading", "Scenario")
+        );
+
+        scenarioBox.appendChild(
+            createElement("div", "", question.scenario)
+        );
+
+        questionContent.appendChild(scenarioBox);
     }
 
-    if (multi) {
-        html += `
-            <p class="question-description">
-                Select all the options that apply.
-            </p>
-        `;
+    // Display email only when the question actually contains email data.
+    const emailSection = renderEmails(question);
+
+    if (emailSection) {
+        questionContent.appendChild(emailSection);
     }
 
-    html += `<div class="options">`;
+    questionContent.appendChild(
+        createElement("div", "options-heading", "Choose the correct answer")
+    );
 
-    const options = Array.isArray(question.options)
-        ? question.options
-        : [];
+    const optionsContainer = createElement("div", "options-container");
 
-    options.forEach((option, index) => {
+    if (!Array.isArray(question.options) || question.options.length === 0) {
+        optionsContainer.appendChild(
+            createElement("p", "", "No answer options are available.")
+        );
+    } else {
+        question.options.forEach((option, index) => {
+            const label = createElement("label", "option");
 
-        let value;
-        let label;
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = "question_" + currentQuestion;
+            radio.value = index;
 
-        if (typeof option === "string") {
-            value = String(index);
-            label = option;
-        } else {
-            value = String(option.id ?? option.value ?? index);
-            label = option.text ?? option.label ?? option.value ?? "";
-        }
-
-        const isSelected = multi
-            ? Array.isArray(selected) && selected.map(String).includes(value)
-            : selected !== null && String(selected) === String(index);
-
-        html += `
-            <label class="option ${isSelected ? "selected" : ""}">
-                <input
-                    type="${multi ? "checkbox" : "radio"}"
-                    name="question_${currentQuestion}"
-                    value="${escapeHTML(value)}"
-                    ${isSelected ? "checked" : ""}
-                >
-
-                <span class="option-text">
-                    ${escapeHTML(label)}
-                </span>
-            </label>
-        `;
-    });
-
-    html += `</div>`;
-
-    container.innerHTML = html;
-
-    /* Handle answer selection */
-    container.querySelectorAll("input").forEach(input => {
-
-        input.addEventListener("change", () => {
-
-            if (multi) {
-
-                const selectedValues = Array.from(
-                    container.querySelectorAll("input:checked")
-                ).map(item => item.value);
-
-                answers[currentQuestion] = selectedValues;
-
-            } else {
-
-                answers[currentQuestion] = Number(input.value);
+            if (answers[currentQuestion] === index) {
+                radio.checked = true;
+                label.classList.add("selected");
             }
 
-            container.querySelectorAll(".option").forEach(option => {
-                option.classList.toggle(
-                    "selected",
-                    option.querySelector("input").checked
-                );
+            radio.addEventListener("change", function() {
+                answers[currentQuestion] = index;
+                updateDots();
+                updateOptionSelection();
             });
 
-            clearMessage();
+            const letter = createElement(
+                "span",
+                "option-letter",
+                String.fromCharCode(65 + index) + "."
+            );
+
+            const optionText = createElement(
+                "span",
+                "option-text",
+                option
+            );
+
+            label.appendChild(radio);
+            label.appendChild(letter);
+            label.appendChild(optionText);
+
+            optionsContainer.appendChild(label);
         });
+    }
+
+    questionContent.appendChild(optionsContainer);
+
+    updateNavigation();
+    updateProgress();
+    updateDots();
+}
+
+function updateOptionSelection() {
+    document.querySelectorAll(".option").forEach(option => {
+        const radio = option.querySelector("input");
+
+        option.classList.toggle("selected", radio.checked);
     });
+}
 
-    previousBtn.disabled = currentQuestion === 0;
+function updateNavigation() {
+    previousButton.disabled = currentQuestion === 0;
 
-    const isLast = currentQuestion === TOTAL - 1;
+    const isLast = currentQuestion === QUESTIONS.length - 1;
 
-    nextBtn.hidden = isLast;
-    submitBtn.hidden = !isLast;
+    nextButton.style.display = isLast ? "none" : "inline-block";
+    submitButton.style.display = isLast ? "inline-block" : "none";
+}
 
-    progressText.textContent =
-        `Question ${currentQuestion + 1} of ${TOTAL}`;
-
-    progressFill.style.width =
-        `${((currentQuestion + 1) / TOTAL) * 100}%`;
+function updateProgress() {
+    const total = QUESTIONS.length;
+    const percentage = Math.round(((currentQuestion + 1) / total) * 100);
 
     questionCounter.textContent =
-        `${answers.filter(answer => answer !== null).length} of ${TOTAL} questions answered`;
+        "Question " + (currentQuestion + 1) + " of " + total;
+
+    progressPercentage.textContent = percentage + "% Completed";
+    progressFill.style.width = percentage + "%";
 }
 
+function updateDots() {
+    questionDots.replaceChildren();
 
-/* Move to the next question */
-nextBtn.addEventListener("click", () => {
+    QUESTIONS.forEach((question, index) => {
+        const dot = createElement("button", "question-dot", index + 1);
+        dot.type = "button";
 
-    if (currentQuestion < TOTAL - 1) {
-        currentQuestion++;
-        renderQuestion();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-});
-
-
-/* Move to the previous question */
-previousBtn.addEventListener("click", () => {
-
-    if (currentQuestion > 0) {
-        currentQuestion--;
-        renderQuestion();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-});
-
-
-/* Convert answers into the format expected by app.py */
-function prepareAnswers() {
-
-    return QUESTIONS.map((question, index) => {
-
-        const answer = answers[index];
-
-        if (isMultiSelect(question)) {
-            return Array.isArray(answer) ? answer : [];
+        if (index === currentQuestion) {
+            dot.classList.add("active");
         }
 
-        return answer === null ? null : Number(answer);
+        if (answers[index] !== undefined) {
+            dot.classList.add("answered");
+        }
+
+        dot.addEventListener("click", function() {
+            currentQuestion = index;
+            errorMessage.style.display = "none";
+            renderQuestion();
+        });
+
+        questionDots.appendChild(dot);
     });
 }
 
-
-/* Submit the completed assessment */
-async function submitAssessment() {
-
-    if (submitting) return;
-
-    const unanswered = answers
-        .map((answer, index) => ({ answer, index }))
-        .filter(item => {
-            if (item.answer === null) return true;
-
-            if (Array.isArray(item.answer)) {
-                return item.answer.length === 0;
-            }
-
-            return false;
-        });
-
-    if (unanswered.length > 0) {
-
-        const firstUnanswered = unanswered[0].index;
-
-        const proceed = confirm(
-            `${unanswered.length} question(s) are unanswered. ` +
-            "Unanswered questions will receive zero marks. Submit anyway?"
-        );
-
-        if (!proceed) {
-            currentQuestion = firstUnanswered;
-            renderQuestion();
-            return;
-        }
-    } else {
-
-        const proceed = confirm(
-            "Are you sure you want to submit your assessment?"
-        );
-
-        if (!proceed) return;
+function nextQuestion() {
+    if (answers[currentQuestion] === undefined) {
+        showError("Please select an answer before continuing.");
+        return;
     }
 
-    submitting = true;
+    if (currentQuestion < QUESTIONS.length - 1) {
+        currentQuestion++;
+        errorMessage.style.display = "none";
+        renderQuestion();
+    }
+}
 
-    submitBtn.disabled = true;
-    previousBtn.disabled = true;
-    nextBtn.disabled = true;
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        errorMessage.style.display = "none";
+        renderQuestion();
+    }
+}
 
-    submitBtn.textContent = "Submitting...";
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = "block";
+    errorMessage.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+    });
+}
 
-    showMessage("Saving your assessment. Please wait...", "info");
+async function submitQuiz() {
+    const unanswered = [];
+
+    QUESTIONS.forEach((question, index) => {
+        if (answers[index] === undefined) {
+            unanswered.push(index + 1);
+        }
+    });
+
+    if (unanswered.length > 0) {
+        currentQuestion = unanswered[0] - 1;
+        renderQuestion();
+
+        showError(
+            "Please answer all questions before submitting. Unanswered question: " +
+            unanswered.join(", ")
+        );
+
+        return;
+    }
+
+    const confirmed = window.confirm(
+        "Are you sure you want to submit your assessment? You cannot change your answers after submission."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    errorMessage.style.display = "none";
 
     try {
-
-        const response = await fetch(
-            "{{ url_for('submit') }}",
-            {
-                method: "POST",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    attempt_id: ATTEMPT_ID,
-                    answers: prepareAnswers()
-                })
-            }
-        );
+        const response = await fetch(SUBMIT_URL, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                attempt_id: ATTEMPT_ID,
+                answers: QUESTIONS.map((question, index) => answers[index])
+            })
+        });
 
         const data = await response.json();
 
-        if (!response.ok || !data.success) {
-
-            throw new Error(
-                data.error || "Unable to submit your assessment."
-            );
+        if (!response.ok) {
+            throw new Error(data.error || data.message || "Submission failed.");
         }
 
         if (!data.url) {
-            throw new Error("Submission succeeded, but the result link was not received.");
+            throw new Error("The server did not return a result page URL.");
         }
-
-        showMessage("Assessment submitted successfully. Opening your results...", "info");
 
         window.location.assign(data.url);
 
     } catch (error) {
+        showError(error.message || "Something went wrong. Please try again.");
 
-        console.error("Assessment submission error:", error);
-
-        submitting = false;
-
-        submitBtn.disabled = false;
-        previousBtn.disabled = false;
-        nextBtn.disabled = false;
-
-        submitBtn.textContent = "Submit Assessment";
-
-        showMessage(
-            error.message || "Something went wrong. Please try again."
-        );
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Assessment ✓";
     }
 }
 
-
-/* Submit button */
-submitBtn.addEventListener("click", submitAssessment);
-
-
-/* Initial page setup */
-if (!Array.isArray(QUESTIONS) || QUESTIONS.length === 0) {
-
-    showMessage("No questions were loaded. Please contact the administrator.");
-
-    nextBtn.disabled = true;
-    submitBtn.disabled = true;
-
+// Check that the question data has loaded.
+if (!Array.isArray(QUESTIONS) || QUESTIONS.length !== 10) {
+    questionContent.textContent =
+        "Unable to load the 10 assessment questions. Please contact support.";
 } else {
-
     renderQuestion();
 }
 </script>
