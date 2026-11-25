@@ -423,7 +423,6 @@ def validate_and_score(questions, answers):
                 )
 
             correct_ids = get_correct_ids(question)
-
             selected_ids = {str(item) for item in answer}
 
             is_correct = selected_ids == correct_ids
@@ -665,7 +664,7 @@ def quiz():
 
 
 # =========================================================
-# 10. SUBMIT QUIZ
+# 10. SUBMIT QUIZ - UPDATED
 # =========================================================
 
 @app.route("/submit", methods=["POST"])
@@ -673,87 +672,75 @@ def quiz():
 def submit():
 
     if admin_required():
-
         return jsonify({
             "success": False,
             "error": "Administrators cannot submit employee quizzes."
         }), 403
 
+    email = session.get("email", "").strip().lower()
+
+    if not corp(email):
+        return jsonify({
+            "success": False,
+            "error": "Invalid employee session. Please log in again."
+        }), 403
+
     data = request.get_json(silent=True)
 
     logger.info("========== QUIZ SUBMISSION ==========")
-    logger.info("Request method: %s", request.method)
-    logger.info("Content type: %s", request.content_type)
-    logger.info("Employee email: %s", session.get("email"))
-    logger.info("Session attempt ID: %s", session.get("attempt_id"))
+    logger.info("Employee: %s", email)
+    logger.info("Database: %s", DB)
 
     if not isinstance(data, dict):
-
-        logger.error("Submission rejected: invalid JSON body.")
-
         return jsonify({
             "success": False,
             "error": "Invalid submission data."
         }), 400
 
     answers = data.get("answers")
-
-    email = session.get("email", "").strip().lower()
-
-    session_attempt_id = session.get("attempt_id")
-    received_attempt_id = data.get("attempt_id")
-
-    logger.info("Browser attempt ID: %s", received_attempt_id)
-
-    logger.info(
-        "Session and browser attempt IDs match: %s",
-        session_attempt_id == received_attempt_id
-    )
-
-    logger.info("Database path: %s", DB)
-
-    attempt_id = received_attempt_id or session_attempt_id
-
-    if (
-        not attempt_id
-        or not isinstance(attempt_id, str)
-        or len(attempt_id) > 200
-    ):
-
-        logger.warning("Submission rejected: invalid attempt ID.")
-
-        return jsonify({
-            "success": False,
-            "error": "Quiz session expired. Please log in again."
-        }), 401
+    received_id = data.get("attempt_id")
+    session_id = session.get("attempt_id")
 
     connection = get_db()
 
     try:
 
-        attempt = connection.execute("""
-            SELECT *
-            FROM attempts
-            WHERE id = ?
-            AND LOWER(email) = ?
-        """, (attempt_id, email)).fetchone()
+        # Match the saved session ID first, then browser ID.
+        attempt = None
+        candidate_ids = []
 
+        for candidate in (session_id, received_id):
+
+            if (
+                isinstance(candidate, str)
+                and candidate
+                and candidate not in candidate_ids
+            ):
+                candidate_ids.append(candidate)
+
+        for candidate in candidate_ids:
+
+            attempt = connection.execute("""
+                SELECT *
+                FROM attempts
+                WHERE id = ?
+                AND LOWER(email) = ?
+            """, (candidate, email)).fetchone()
+
+            if attempt:
+                break
+
+        # Recover the employee's unfinished assessment if needed.
         if not attempt:
 
-            logger.error(
-                "ATTEMPT NOT FOUND. Attempt ID: %s, Email: %s",
-                attempt_id,
+            logger.warning(
+                "Attempt ID mismatch. Checking latest unfinished "
+                "assessment for %s",
                 email
             )
 
-            id_exists = connection.execute("""
-                SELECT email
-                FROM attempts
-                WHERE id = ?
-            """, (attempt_id,)).fetchone()
-
-            employee_attempt = connection.execute("""
-                SELECT id
+            attempt = connection.execute("""
+                SELECT *
                 FROM attempts
                 WHERE LOWER(email) = ?
                 AND completed IS NULL
@@ -761,40 +748,26 @@ def submit():
                 LIMIT 1
             """, (email,)).fetchone()
 
-            logger.error(
-                "Attempt ID exists in database: %s",
-                bool(id_exists)
-            )
-
-            if id_exists:
-                logger.error(
-                    "Email associated with submitted attempt: %s",
-                    id_exists["email"]
-                )
+        if not attempt:
 
             logger.error(
-                "Employee has another incomplete attempt: %s",
-                bool(employee_attempt)
+                "No unfinished assessment found for %s",
+                email
             )
-
-            if employee_attempt:
-                logger.error(
-                    "Other incomplete attempt ID: %s",
-                    employee_attempt["id"]
-                )
 
             return jsonify({
                 "success": False,
                 "error": (
-                    "Your quiz session could not be matched with "
-                    "the saved assessment. Please refresh the quiz "
-                    "page and try again. If the problem continues, "
-                    "contact the administrator."
+                    "No unfinished assessment was found. "
+                    "Please return to the quiz and try again."
                 )
             }), 404
 
-        logger.info("Attempt found successfully: %s", attempt_id)
+        attempt_id = attempt["id"]
 
+        logger.info("Matched assessment: %s", attempt_id)
+
+        # Already submitted?
         if attempt["completed"]:
 
             session.pop("attempt_id", None)
@@ -811,20 +784,12 @@ def submit():
 
         if not questions:
 
-            logger.error("Question snapshot missing for %s", attempt_id)
-
             return jsonify({
                 "success": False,
-                "error": "Question data is missing."
+                "error": "Assessment question data is missing."
             }), 500
 
-        if isinstance(answers, dict):
-
-            answers = [
-                answers.get(str(index), answers.get(index))
-                for index in range(len(questions))
-            ]
-
+        # Validate answers and calculate score.
         try:
 
             percentage, reviewed_answers = validate_and_score(
@@ -834,18 +799,22 @@ def submit():
 
         except ValueError as error:
 
-            logger.warning("Answer validation failed: %s", error)
+            logger.warning(
+                "Answer validation failed: %s",
+                error
+            )
 
             return jsonify({
                 "success": False,
                 "error": str(error)
             }), 400
 
-        started = attempt["started"]
-
+        # Calculate duration.
         try:
 
-            start_datetime = datetime.fromisoformat(started)
+            start_datetime = datetime.fromisoformat(
+                attempt["started"]
+            )
 
             if start_datetime.tzinfo is None:
                 start_datetime = start_datetime.replace(
@@ -856,7 +825,8 @@ def submit():
                 0,
                 int(
                     (
-                        datetime.now(timezone.utc) - start_datetime
+                        datetime.now(timezone.utc) -
+                        start_datetime
                     ).total_seconds()
                 )
             )
@@ -867,6 +837,7 @@ def submit():
 
         completed = current_time()
 
+        # Save assessment.
         cursor = connection.execute("""
             UPDATE attempts
             SET completed = ?,
@@ -905,11 +876,6 @@ def submit():
                     "url": url_for("result", attempt_id=attempt_id)
                 })
 
-            logger.error(
-                "Assessment update failed for attempt %s",
-                attempt_id
-            )
-
             return jsonify({
                 "success": False,
                 "error": (
@@ -921,9 +887,12 @@ def submit():
         session.pop("attempt_id", None)
 
         logger.info(
-            "Submission successful. Attempt: %s, Score: %s%%",
+            "SUBMISSION SUCCESSFUL | Employee: %s | "
+            "Attempt: %s | Score: %s%% | Result: %s",
+            email,
             attempt_id,
-            percentage
+            percentage,
+            "PASS" if percentage >= PASS_MARK else "FAIL"
         )
 
         return jsonify({
@@ -933,11 +902,34 @@ def submit():
 
     except sqlite3.Error:
 
-        logger.exception("Database error during quiz submission.")
+        connection.rollback()
+
+        logger.exception(
+            "Database error during quiz submission."
+        )
 
         return jsonify({
             "success": False,
-            "error": "A database error occurred while saving your assessment."
+            "error": (
+                "A database error occurred while saving your "
+                "assessment."
+            )
+        }), 500
+
+    except Exception:
+
+        connection.rollback()
+
+        logger.exception(
+            "Unexpected submission error."
+        )
+
+        return jsonify({
+            "success": False,
+            "error": (
+                "An unexpected error occurred. "
+                "Please contact the administrator."
+            )
         }), 500
 
     finally:
@@ -1161,5 +1153,3 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", 5000)),
         debug=False
     )
-
-    
