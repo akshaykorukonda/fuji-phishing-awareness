@@ -1,1165 +1,749 @@
 
-import os
-import sqlite3
-import secrets
-import json
-import io
-import csv
-import random
-import logging
-
-from datetime import datetime, timezone, timedelta
-from functools import wraps
-
-from flask import (
-    Flask,
-    request,
-    session,
-    redirect,
-    render_template,
-    abort,
-    Response,
-    jsonify,
-    url_for
-)
-
-# =========================================================
-# 1. FLASK INITIALIZATION
-# =========================================================
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("phishing_assessment")
-
-app = Flask(__name__)
-
-app.secret_key = os.environ.get("SECRET_KEY")
-
-if not app.secret_key:
-    app.secret_key = "development-only-change-this-secret-key"
-    logger.warning(
-        "WARNING: Using development SECRET_KEY. "
-        "Set a strong SECRET_KEY in Render."
-    )
-
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=(
-        os.environ.get("RENDER", "").lower() == "true"
-    ),
-    PERMANENT_SESSION_LIFETIME=timedelta(days=1),
-    MAX_CONTENT_LENGTH=2 * 1024 * 1024
-)
-
-# =========================================================
-# 2. CONFIGURATION
-# =========================================================
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-DB = os.environ.get(
-    "DATABASE_PATH",
-    os.path.join(BASE_DIR, "responses.sqlite3")
-)
-
-QUESTION_FILE = os.path.join(BASE_DIR, "questions.json")
-
-CORP = "fujisilvertech.com"
-PASS_MARK = 80
-REQUIRED_SETS = ("A", "B", "C")
-
-OWNER = os.environ.get(
-    "INITIAL_ADMIN_EMAIL",
-    "Akshay.Korukonda@smartims.com"
-).strip().lower()
-
-ADMINS = {OWNER}
-
-ADMINS.update(
-    email.strip().lower()
-    for email in os.environ.get("ADMIN_EMAILS", "").split(",")
-    if email.strip()
-)
-
-ADMIN_ACCESS_KEY = os.environ.get("ADMIN_ACCESS_KEY", "")
-
-# =========================================================
-# 3. QUESTION HELPERS
-# =========================================================
-
-def is_multi_select_question(question):
-    return question.get("mode") in (
-        "find_mistakes",
-        "click_errors"
-    )
-
-
-def get_correct_ids(question):
-
-    correct = question.get("correct_ids")
-
-    if correct is None:
-        correct = question.get("correct", [])
-
-    if isinstance(correct, (str, int)):
-        correct = [correct]
-
-    if not isinstance(correct, list):
-        return set()
-
-    return {str(item) for item in correct}
-
-
-def load_questions():
-
-    if not os.path.exists(QUESTION_FILE):
-        raise FileNotFoundError(
-            "questions.json was not found beside app.py."
-        )
-
-    with open(QUESTION_FILE, "r", encoding="utf-8") as file:
-        data = json.load(file)
-
-    if (
-        not isinstance(data, dict)
-        or not isinstance(data.get("sets"), dict)
-    ):
-        raise ValueError(
-            'questions.json must contain a "sets" object.'
-        )
-
-    sets = data["sets"]
-
-    for set_name in REQUIRED_SETS:
-
-        questions = sets.get(set_name)
-
-        if not isinstance(questions, list) or len(questions) != 10:
-            raise ValueError(
-                f"Set {set_name} must contain exactly 10 questions."
-            )
-
-        for index, question in enumerate(questions):
-
-            label = f"Set {set_name}, Q{index + 1}"
-
-            if not isinstance(question, dict):
-                raise ValueError(f"{label} must be a JSON object.")
-
-            options = question.get("options")
-
-            if not isinstance(options, list) or len(options) < 2:
-                raise ValueError(
-                    f"{label} needs at least two options."
-                )
-
-            if not all(isinstance(option, str) for option in options):
-                raise ValueError(
-                    f"{label} has invalid options. "
-                    "All options must be text."
-                )
-
-            if is_multi_select_question(question):
-
-                if not get_correct_ids(question):
-                    raise ValueError(
-                        f"{label} needs a non-empty correct_ids list."
-                    )
-
-            else:
-
-                correct = question.get("correct")
-
-                if (
-                    isinstance(correct, bool)
-                    or not isinstance(correct, int)
-                    or correct < 0
-                    or correct >= len(options)
-                ):
-                    raise ValueError(
-                        f"{label} has an invalid correct answer index."
-                    )
-
-    return {
-        name: sets[name]
-        for name in REQUIRED_SETS
-    }
-
-
-QUESTION_SETS = load_questions()
-
-# =========================================================
-# 4. DATABASE
-# =========================================================
-
-def get_db():
-
-    connection = sqlite3.connect(DB, timeout=30)
-    connection.row_factory = sqlite3.Row
-
-    connection.execute("PRAGMA busy_timeout = 30000")
-
-    return connection
-
-
-def init_db():
-
-    db_directory = os.path.dirname(DB)
-
-    if db_directory:
-        os.makedirs(db_directory, exist_ok=True)
-
-    connection = get_db()
-
-    try:
-
-        connection.execute("""
-            CREATE TABLE IF NOT EXISTS attempts (
-                id TEXT PRIMARY KEY,
-                email TEXT NOT NULL,
-                started TEXT,
-                completed TEXT,
-                duration INTEGER DEFAULT 0,
-                score INTEGER DEFAULT 0,
-                answers TEXT,
-                questions_snapshot TEXT,
-                set_number TEXT
-            )
-        """)
-
-        columns = {
-            row["name"]
-            for row in connection.execute(
-                "PRAGMA table_info(attempts)"
-            ).fetchall()
-        }
-
-        migrations = {
-            "questions_snapshot": "TEXT",
-            "answers": "TEXT",
-            "set_number": "TEXT",
-            "duration": "INTEGER DEFAULT 0",
-            "score": "INTEGER DEFAULT 0"
-        }
-
-        for column, column_type in migrations.items():
-
-            if column not in columns:
-                connection.execute(
-                    f"ALTER TABLE attempts ADD COLUMN "
-                    f"{column} {column_type}"
-                )
-
-        connection.execute("""
-            CREATE INDEX IF NOT EXISTS idx_attempts_email
-            ON attempts(email)
-        """)
-
-        connection.execute("""
-            CREATE INDEX IF NOT EXISTS idx_attempts_completed
-            ON attempts(completed)
-        """)
-
-        connection.commit()
-
-        logger.info("Database initialized: %s", DB)
-
-    finally:
-        connection.close()
-
-
-init_db()
-
-# =========================================================
-# 5. GENERAL HELPERS
-# =========================================================
-
-def current_time():
-    return datetime.now(timezone.utc).isoformat()
-
-
-def corp(email):
-
-    if not isinstance(email, str):
-        return False
-
-    email = email.strip().lower()
-
-    return email.endswith("@" + CORP)
-
-
-def signed():
-    return bool(session.get("email"))
-
-
-def admin_required():
-
-    email = session.get("email", "").strip().lower()
-
-    return (
-        email in ADMINS
-        and session.get("is_admin") is True
-    )
-
-
-def login_required(function):
-
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-
-        if not signed():
-            return redirect(url_for("home"))
-
-        return function(*args, **kwargs)
-
-    return wrapper
-
-
-def admin_only(function):
-
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-
-        if not signed():
-            return redirect(url_for("home"))
-
-        if not admin_required():
-            abort(403)
-
-        return function(*args, **kwargs)
-
-    return wrapper
-
-
-def safe_json(value, fallback):
-
-    try:
-        return json.loads(value) if value else fallback
-
-    except (TypeError, ValueError):
-        return fallback
-
-
-def is_passed(score):
-
-    try:
-        return float(score or 0) >= PASS_MARK
-
-    except (ValueError, TypeError):
-        return False
-
-
-def make_attempt_questions(set_number):
-
-    return json.loads(json.dumps(QUESTION_SETS[set_number]))
-
-
-# =========================================================
-# 6. QUESTION SANITIZATION
-# =========================================================
-
-ANSWER_FIELDS = {
-    "correct",
-    "correct_ids",
-    "correct_mistakes",
-    "correct_errors",
-    "explanation",
-    "answer_key",
-    "correct_answer",
-    "correct_answers"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phishing Awareness | Fuji Silvertech</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+* {
+    box-sizing: border-box;
 }
 
-
-def sanitize_question(question):
-
-    if isinstance(question, list):
-        return [sanitize_question(item) for item in question]
-
-    if isinstance(question, dict):
-
-        clean = {}
-
-        for key, value in question.items():
-
-            if key.lower() in ANSWER_FIELDS:
-                continue
-
-            clean[key] = sanitize_question(value)
-
-        return clean
-
-    return question
-
-
-# =========================================================
-# 7. ANSWER VALIDATION AND SCORING
-# =========================================================
-
-def validate_and_score(questions, answers):
-
-    if not isinstance(answers, list):
-        raise ValueError("Answers must be a list.")
-
-    if len(answers) != len(questions):
-        raise ValueError(
-            "The number of answers does not match the quiz."
-        )
-
-    score = 0
-    reviewed_answers = []
-
-    for index, question in enumerate(questions):
-
-        answer = answers[index]
-
-        if is_multi_select_question(question):
-
-            if answer is None:
-                answer = []
-
-            if not isinstance(answer, list):
-                raise ValueError(
-                    f"Invalid answer format for question {index + 1}."
-                )
-
-            correct_ids = get_correct_ids(question)
-
-            selected_ids = {str(item) for item in answer}
-
-            is_correct = selected_ids == correct_ids
-
-            reviewed_answers.append(sorted(selected_ids))
-
-        else:
-
-            options = question.get("options", [])
-
-            if answer is None:
-
-                is_correct = False
-                reviewed_answers.append(None)
-
-            else:
-
-                if (
-                    isinstance(answer, bool)
-                    or not isinstance(answer, int)
-                ):
-                    raise ValueError(
-                        f"Invalid answer for question {index + 1}."
-                    )
-
-                if answer < 0 or answer >= len(options):
-                    raise ValueError(
-                        f"Answer out of range for question {index + 1}."
-                    )
-
-                is_correct = answer == question.get("correct")
-
-                reviewed_answers.append(answer)
-
-        if is_correct:
-            score += 1
-
-    percentage = round(
-        (score / len(questions)) * 100
-    ) if questions else 0
-
-    return percentage, reviewed_answers
-
-
-# =========================================================
-# 8. HOME / LOGIN
-# =========================================================
-
-@app.route("/", methods=["GET", "POST"])
-def home():
-
-    error = None
-
-    if request.method == "POST":
-
-        email = request.form.get(
-            "email", ""
-        ).strip().lower()
-
-        password = request.form.get("admin_key", "")
-
-        if not email:
-
-            error = "Please enter your email address."
-
-        elif email in ADMINS:
-
-            if not ADMIN_ACCESS_KEY:
-
-                error = (
-                    "Admin access is not configured. "
-                    "Please configure ADMIN_ACCESS_KEY in Render."
-                )
-
-            elif secrets.compare_digest(password, ADMIN_ACCESS_KEY):
-
-                session.clear()
-                session["email"] = email
-                session["is_admin"] = True
-                session.permanent = True
-
-                return redirect(url_for("admin"))
-
-            else:
-
-                error = "Invalid administrator access key."
-
-        elif corp(email):
-
-            session.clear()
-            session["email"] = email
-            session["is_admin"] = False
-            session.permanent = True
-
-            return redirect(url_for("quiz"))
-
-        else:
-
-            error = (
-                "Access restricted. "
-                "Please use your authorized corporate email."
-            )
-
-    return render_template("home.html", error=error)
-
-
-# =========================================================
-# 9. QUIZ PAGE
-# =========================================================
-
-@app.route("/quiz")
-@login_required
-def quiz():
-
-    if admin_required():
-        return redirect(url_for("admin"))
-
-    email = session["email"].strip().lower()
-
-    connection = get_db()
-
-    try:
-
-        attempt = connection.execute("""
-            SELECT *
-            FROM attempts
-            WHERE LOWER(email) = ?
-            AND completed IS NULL
-            ORDER BY started DESC
-            LIMIT 1
-        """, (email,)).fetchone()
-
-        if attempt:
-
-            attempt_id = attempt["id"]
-            set_number = attempt["set_number"] or "A"
-
-            questions = safe_json(
-                attempt["questions_snapshot"],
-                []
-            )
-
-            if not questions:
-
-                logger.error(
-                    "Missing question snapshot for attempt %s",
-                    attempt_id
-                )
-
-                return (
-                    "Saved quiz data is missing. "
-                    "Please contact the administrator.",
-                    500
-                )
-
-            logger.info(
-                "Resuming attempt %s for %s",
-                attempt_id,
-                email
-            )
-
-        else:
-
-            set_number = random.choice(list(REQUIRED_SETS))
-            attempt_id = secrets.token_urlsafe(24)
-
-            questions = make_attempt_questions(set_number)
-            started = current_time()
-
-            connection.execute("""
-                INSERT INTO attempts (
-                    id,
-                    email,
-                    started,
-                    completed,
-                    duration,
-                    score,
-                    answers,
-                    questions_snapshot,
-                    set_number
-                )
-                VALUES (?, ?, ?, NULL, 0, 0, NULL, ?, ?)
-            """, (
-                attempt_id,
-                email,
-                started,
-                json.dumps(questions),
-                set_number
-            ))
-
-            connection.commit()
-
-            verified = connection.execute("""
-                SELECT id
-                FROM attempts
-                WHERE id = ?
-                AND LOWER(email) = ?
-            """, (attempt_id, email)).fetchone()
-
-            if not verified:
-
-                logger.error(
-                    "New attempt could not be verified: %s",
-                    attempt_id
-                )
-
-                return "Unable to create quiz attempt.", 500
-
-            logger.info(
-                "Created attempt %s for %s, Set %s",
-                attempt_id,
-                email,
-                set_number
-            )
-
-    finally:
-        connection.close()
-
-    session["attempt_id"] = attempt_id
-    session.permanent = True
-
-    logger.info(
-        "Quiz page prepared. Employee: %s, Attempt: %s",
-        email,
-        attempt_id
-    )
-
-    participant_questions = [
-        sanitize_question(question)
-        for question in questions
-    ]
-
-    return render_template(
-        "quiz.html",
-        questions=participant_questions,
-        attempt_id=attempt_id,
-        set_number=set_number
-    )
-
-
-# =========================================================
-# 10. SUBMIT QUIZ
-# =========================================================
-
-@app.route("/submit", methods=["POST"])
-@login_required
-def submit():
-
-    if admin_required():
-
-        return jsonify({
-            "success": False,
-            "error": "Administrators cannot submit employee quizzes."
-        }), 403
-
-    data = request.get_json(silent=True)
-
-    logger.info("========== QUIZ SUBMISSION ==========")
-    logger.info("Request method: %s", request.method)
-    logger.info("Content type: %s", request.content_type)
-    logger.info("Employee email: %s", session.get("email"))
-    logger.info("Session attempt ID: %s", session.get("attempt_id"))
-
-    if not isinstance(data, dict):
-
-        logger.error("Submission rejected: invalid JSON body.")
-
-        return jsonify({
-            "success": False,
-            "error": "Invalid submission data."
-        }), 400
-
-    answers = data.get("answers")
-
-    email = session.get("email", "").strip().lower()
-
-    session_attempt_id = session.get("attempt_id")
-    received_attempt_id = data.get("attempt_id")
-
-    logger.info("Browser attempt ID: %s", received_attempt_id)
-
-    logger.info(
-        "Session and browser attempt IDs match: %s",
-        session_attempt_id == received_attempt_id
-    )
-
-    logger.info("Database path: %s", DB)
-
-    attempt_id = received_attempt_id or session_attempt_id
-
-    if (
-        not attempt_id
-        or not isinstance(attempt_id, str)
-        or len(attempt_id) > 200
-    ):
-
-        logger.warning("Submission rejected: invalid attempt ID.")
-
-        return jsonify({
-            "success": False,
-            "error": "Quiz session expired. Please log in again."
-        }), 401
-
-    connection = get_db()
-
-    try:
-
-        attempt = connection.execute("""
-            SELECT *
-            FROM attempts
-            WHERE id = ?
-            AND LOWER(email) = ?
-        """, (attempt_id, email)).fetchone()
-
-        if not attempt:
-
-            logger.error(
-                "ATTEMPT NOT FOUND. Attempt ID: %s, Email: %s",
-                attempt_id,
-                email
-            )
-
-            id_exists = connection.execute("""
-                SELECT email
-                FROM attempts
-                WHERE id = ?
-            """, (attempt_id,)).fetchone()
-
-            employee_attempt = connection.execute("""
-                SELECT id
-                FROM attempts
-                WHERE LOWER(email) = ?
-                AND completed IS NULL
-                ORDER BY started DESC
-                LIMIT 1
-            """, (email,)).fetchone()
-
-            logger.error(
-                "Attempt ID exists in database: %s",
-                bool(id_exists)
-            )
-
-            if id_exists:
-                logger.error(
-                    "Email associated with submitted attempt: %s",
-                    id_exists["email"]
-                )
-
-            logger.error(
-                "Employee has another incomplete attempt: %s",
-                bool(employee_attempt)
-            )
-
-            if employee_attempt:
-                logger.error(
-                    "Other incomplete attempt ID: %s",
-                    employee_attempt["id"]
-                )
-
-            return jsonify({
-                "success": False,
-                "error": (
-                    "Your quiz session could not be matched with "
-                    "the saved assessment. Please refresh the quiz "
-                    "page and try again. If the problem continues, "
-                    "contact the administrator."
-                )
-            }), 404
-
-        logger.info("Attempt found successfully: %s", attempt_id)
-
-        if attempt["completed"]:
-
-            session.pop("attempt_id", None)
-
-            return jsonify({
-                "success": True,
-                "url": url_for("result", attempt_id=attempt_id)
-            })
-
-        questions = safe_json(
-            attempt["questions_snapshot"],
-            []
-        )
-
-        if not questions:
-
-            logger.error("Question snapshot missing for %s", attempt_id)
-
-            return jsonify({
-                "success": False,
-                "error": "Question data is missing."
-            }), 500
-
-        if isinstance(answers, dict):
-
-            answers = [
-                answers.get(str(index), answers.get(index))
-                for index in range(len(questions))
-            ]
-
-        try:
-
-            percentage, reviewed_answers = validate_and_score(
-                questions,
-                answers
-            )
-
-        except ValueError as error:
-
-            logger.warning("Answer validation failed: %s", error)
-
-            return jsonify({
-                "success": False,
-                "error": str(error)
-            }), 400
-
-        started = attempt["started"]
-
-        try:
-
-            start_datetime = datetime.fromisoformat(started)
-
-            if start_datetime.tzinfo is None:
-                start_datetime = start_datetime.replace(
-                    tzinfo=timezone.utc
-                )
-
-            duration = max(
-                0,
-                int(
-                    (
-                        datetime.now(timezone.utc) - start_datetime
-                    ).total_seconds()
-                )
-            )
-
-        except (ValueError, TypeError):
-
-            duration = 0
-
-        completed = current_time()
-
-        cursor = connection.execute("""
-            UPDATE attempts
-            SET completed = ?,
-                duration = ?,
-                score = ?,
-                answers = ?
-            WHERE id = ?
-            AND LOWER(email) = ?
-            AND completed IS NULL
-        """, (
-            completed,
-            duration,
-            percentage,
-            json.dumps(reviewed_answers),
-            attempt_id,
-            email
-        ))
-
-        connection.commit()
-
-        if cursor.rowcount == 0:
-
-            existing = connection.execute("""
-                SELECT completed
-                FROM attempts
-                WHERE id = ?
-                AND LOWER(email) = ?
-            """, (attempt_id, email)).fetchone()
-
-            if existing and existing["completed"]:
-
-                session.pop("attempt_id", None)
-
-                return jsonify({
-                    "success": True,
-                    "url": url_for("result", attempt_id=attempt_id)
-                })
-
-            logger.error(
-                "Assessment update failed for attempt %s",
-                attempt_id
-            )
-
-            return jsonify({
-                "success": False,
-                "error": (
-                    "Unable to save your assessment. "
-                    "Please try again."
-                )
-            }), 409
-
-        session.pop("attempt_id", None)
-
-        logger.info(
-            "Submission successful. Attempt: %s, Score: %s%%",
-            attempt_id,
-            percentage
-        )
-
-        return jsonify({
-            "success": True,
-            "url": url_for("result", attempt_id=attempt_id)
-        })
-
-    except sqlite3.Error:
-
-        logger.exception("Database error during quiz submission.")
-
-        return jsonify({
-            "success": False,
-            "error": "A database error occurred while saving your assessment."
-        }), 500
-
-    finally:
-        connection.close()
-
-
-# =========================================================
-# 11. RESULT PAGE
-# =========================================================
-
-@app.route("/result/<attempt_id>")
-@login_required
-def result(attempt_id):
-
-    connection = get_db()
-
-    try:
-
-        attempt = connection.execute("""
-            SELECT *
-            FROM attempts
-            WHERE id = ?
-            AND LOWER(email) = ?
-            AND completed IS NOT NULL
-        """, (
-            attempt_id,
-            session["email"].strip().lower()
-        )).fetchone()
-
-    finally:
-        connection.close()
-
-    if not attempt:
-        abort(404)
-
-    return render_template(
-        "result.html",
-        r=attempt,
-        passed=is_passed(attempt["score"]),
-        pass_mark=PASS_MARK
-    )
-
-
-# =========================================================
-# 12. ADMIN DASHBOARD
-# =========================================================
-
-@app.route("/admin")
-@admin_only
-def admin():
-
-    connection = get_db()
-
-    try:
-
-        attempts = connection.execute("""
-            SELECT *
-            FROM attempts
-            WHERE completed IS NOT NULL
-            ORDER BY completed DESC
-        """).fetchall()
-
-    finally:
-        connection.close()
-
-    rows = []
-    total_score = 0
-
-    for attempt in attempts:
-
-        questions = safe_json(
-            attempt["questions_snapshot"],
-            []
-        )
-
-        answers = safe_json(
-            attempt["answers"],
-            []
-        )
-
-        score = attempt["score"] or 0
-        total_score += score
-
-        set_number = attempt["set_number"] or "Legacy"
-        passed = is_passed(score)
-
-        rows.append({
-            "id": attempt["id"],
-            "email": attempt["email"],
-            "started": attempt["started"],
-            "completed": attempt["completed"],
-            "duration": attempt["duration"],
-            "score": score,
-            "set_number": set_number,
-            "passed": passed,
-            "status": "PASSED" if passed else "NOT PASSED",
-            "answers": answers,
-            "questions": questions,
-            "question_list": questions,
-            "answer_list": answers
-        })
-
-    avg = round(
-        total_score / len(rows),
-        1
-    ) if rows else 0
-
-    return render_template(
-        "admin.html",
-        rows=rows,
-        avg=avg,
-        questions=QUESTION_SETS,
-        pass_mark=PASS_MARK
-    )
-
-
-# =========================================================
-# 13. CSV EXPORT
-# =========================================================
-
-@app.route("/admin/export")
-@admin_only
-def export_csv():
-
-    connection = get_db()
-
-    try:
-
-        attempts = connection.execute("""
-            SELECT *
-            FROM attempts
-            WHERE completed IS NOT NULL
-            ORDER BY completed DESC
-        """).fetchall()
-
-    finally:
-        connection.close()
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-
-    writer.writerow([
-        "Employee Email",
-        "Assigned Set",
-        "Started",
-        "Completed",
-        "Duration (Seconds)",
-        "Score (%)",
-        "Pass/Fail",
-        "Answers"
-    ])
-
-    for attempt in attempts:
-
-        answers = safe_json(attempt["answers"], [])
-        score = attempt["score"] or 0
-
-        status = (
-            "PASSED" if is_passed(score) else "NOT PASSED"
-        )
-
-        writer.writerow([
-            attempt["email"],
-            attempt["set_number"] or "Legacy",
-            attempt["started"],
-            attempt["completed"],
-            attempt["duration"],
-            score,
-            status,
-            json.dumps(answers)
-        ])
-
-    csv_data = "\ufeff" + output.getvalue()
-
-    return Response(
-        csv_data,
-        mimetype="text/csv",
-        headers={
-            "Content-Disposition":
-                "attachment; filename=phishing_assessment_report.csv"
+:root {
+    --blue: #2785c7;
+    --dark-blue: #17669f;
+    --teal: #20b7ae;
+    --light-blue: #eaf6ff;
+    --text: #24364b;
+    --muted: #718096;
+    --border: #dce9f3;
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #edf8ff, #f7fcff);
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+}
+
+.container {
+    width: min(950px, 94%);
+    margin: 30px auto;
+}
+
+.header {
+    background: white;
+    border-radius: 18px;
+    padding: 18px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 5px 25px rgba(35, 105, 150, .08);
+    margin-bottom: 22px;
+}
+
+.logo {
+    width: 175px;
+    max-height: 65px;
+    object-fit: contain;
+}
+
+.header-right {
+    text-align: right;
+}
+
+.header-right strong {
+    display: block;
+    color: var(--dark-blue);
+}
+
+.header-right span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.quiz-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 35px rgba(35, 105, 150, .09);
+}
+
+.top-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.set-label {
+    background: #e5f5ff;
+    color: #17669f;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.question-count {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 9px;
+    background: #eaf1f6;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #2785c7, #20b7ae);
+    border-radius: 20px;
+    transition: width .3s ease;
+}
+
+.category {
+    color: #159e9a;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.question-title {
+    font-size: 24px;
+    line-height: 1.4;
+    margin: 0 0 18px;
+}
+
+.scenario {
+    background: #f0f9ff;
+    border-left: 4px solid var(--blue);
+    border-radius: 10px;
+    padding: 17px;
+    margin: 18px 0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.email-card {
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    overflow: hidden;
+    margin: 18px 0;
+    background: #fff;
+}
+
+.email-heading {
+    padding: 13px 17px;
+    background: #f1f8fd;
+    font-weight: bold;
+    color: var(--dark-blue);
+    border-bottom: 1px solid var(--border);
+}
+
+.email-content {
+    padding: 17px;
+}
+
+.email-row {
+    margin-bottom: 10px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.email-row strong {
+    display: inline-block;
+    min-width: 75px;
+    color: #526579;
+}
+
+.email-message {
+    margin-top: 15px;
+    padding-top: 14px;
+    border-top: 1px solid #e8eef3;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+    margin: 18px 0;
+}
+
+.comparison-label {
+    font-size: 13px;
+    color: var(--dark-blue);
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.options {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.option {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: .2s;
+    line-height: 1.5;
+}
+
+.option:hover {
+    border-color: var(--blue);
+    background: #f5fbff;
+    transform: translateY(-1px);
+}
+
+.option.selected {
+    border-color: var(--blue);
+    background: #eaf6ff;
+}
+
+.option input {
+    margin-top: 4px;
+    accent-color: var(--blue);
+    flex-shrink: 0;
+}
+
+.option-letter {
+    font-weight: bold;
+    color: var(--blue);
+    min-width: 22px;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.nav-button {
+    border: 0;
+    border-radius: 10px;
+    padding: 13px 23px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.previous {
+    background: #edf3f8;
+    color: #526579;
+}
+
+.next {
+    background: var(--blue);
+    color: white;
+}
+
+.submit {
+    background: var(--teal);
+    color: white;
+}
+
+.nav-button:hover {
+    filter: brightness(.96);
+    transform: translateY(-1px);
+}
+
+.nav-button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.question-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 25px;
+    justify-content: center;
+}
+
+.dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #d8e6f0;
+    background: white;
+    color: #62758a;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.dot.current {
+    background: var(--blue);
+    color: white;
+    border-color: var(--blue);
+}
+
+.dot.answered {
+    background: #d9f6ee;
+    color: #12866d;
+    border-color: #b5e8d9;
+}
+
+.footer {
+    text-align: center;
+    color: #8494a5;
+    font-size: 12px;
+    padding: 20px;
+}
+
+.error-message {
+    display: none;
+    background: #fff0f0;
+    border: 1px solid #ffd1d1;
+    color: #b42318;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 15px;
+}
+
+@media(max-width: 650px) {
+    .container {
+        width: 96%;
+        margin: 12px auto;
+    }
+
+    .header {
+        padding: 14px;
+    }
+
+    .logo {
+        width: 130px;
+    }
+
+    .quiz-card {
+        padding: 19px;
+    }
+
+    .question-title {
+        font-size: 20px;
+    }
+
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-button {
+        padding: 12px 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <img
+            src="/static/img/fuji-logo.png"
+            class="logo"
+            alt="Fuji Silvertech"
+        >
+
+        <div class="header-right">
+            <strong>Security Awareness</strong>
+            <span>Phishing Assessment</span>
+        </div>
+    </header>
+
+    <main class="quiz-card">
+
+        <div class="top-line">
+            <div class="set-label">
+                ASSESSMENT SET {{ set_number }}
+            </div>
+
+            <div class="question-count" id="questionCount">
+                Question 1 of 10
+            </div>
+        </div>
+
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div id="questionArea"></div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="navigation">
+            <button
+                class="nav-button previous"
+                id="previousButton"
+                type="button"
+                onclick="previousQuestion()"
+            >
+                ← Previous
+            </button>
+
+            <button
+                class="nav-button next"
+                id="nextButton"
+                type="button"
+                onclick="nextQuestion()"
+            >
+                Next →
+            </button>
+
+            <button
+                class="nav-button submit"
+                id="submitButton"
+                type="button"
+                onclick="submitQuiz()"
+                style="display:none"
+            >
+                Submit Assessment
+            </button>
+        </div>
+
+        <div class="question-dots" id="questionDots"></div>
+
+    </main>
+
+    <footer class="footer">
+        Fuji Silvertech | Information Security Awareness Program
+    </footer>
+
+</div>
+
+<script>
+"use strict";
+
+const QUESTIONS = {{ questions | tojson }};
+const ATTEMPT_ID = {{ attempt_id | tojson }};
+const SUBMIT_URL = {{ url_for('submit') | tojson }};
+
+let currentQuestion = 0;
+const answers = new Array(QUESTIONS.length).fill(null);
+
+const questionArea = document.getElementById("questionArea");
+const questionCount = document.getElementById("questionCount");
+const progressFill = document.getElementById("progressFill");
+const previousButton = document.getElementById("previousButton");
+const nextButton = document.getElementById("nextButton");
+const submitButton = document.getElementById("submitButton");
+const questionDots = document.getElementById("questionDots");
+const errorMessage = document.getElementById("errorMessage");
+
+function addText(parent, tag, className, value) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    element.textContent = value ?? "";
+    parent.appendChild(element);
+    return element;
+}
+
+function getValue(object, keys, fallback = "") {
+    for (const key of keys) {
+        if (object && object[key] !== undefined && object[key] !== null) {
+            return object[key];
         }
-    )
+    }
+    return fallback;
+}
 
+function renderEmail(email, heading) {
+    const card = document.createElement("div");
+    card.className = "email-card";
 
-# =========================================================
-# 14. LOGOUT
-# =========================================================
+    addText(card, "div", "email-heading", heading);
 
-@app.route("/logout")
-def logout():
+    const content = document.createElement("div");
+    content.className = "email-content";
 
-    session.clear()
+    const rows = [
+        ["From", getValue(email, ["sender", "from"])],
+        ["Address", getValue(email, ["sender_email", "from_email", "email"])],
+        ["To", getValue(email, ["recipient", "to"])],
+        ["Subject", getValue(email, ["subject", "title"])],
+        ["Time", getValue(email, ["timestamp", "time"])]
+    ];
 
-    return redirect(url_for("home"))
+    rows.forEach(([label, value]) => {
+        if (!value) return;
 
+        const row = document.createElement("div");
+        row.className = "email-row";
 
-# =========================================================
-# 15. HEALTH CHECK
-# =========================================================
+        const strong = document.createElement("strong");
+        strong.textContent = label + ":";
 
-@app.route("/health")
-def health():
+        const span = document.createElement("span");
+        span.textContent = value;
 
-    return jsonify({
-        "status": "ok",
-        "application": "Fuji Silvertech Phishing Awareness",
-        "pass_mark": PASS_MARK,
-        "question_sets": list(REQUIRED_SETS),
-        "database_configured": bool(DB)
-    })
+        row.append(strong, span);
+        content.appendChild(row);
+    });
 
+    const message = getValue(email, ["body", "message", "content", "email_body"]);
 
-# =========================================================
-# 16. LOCAL DEVELOPMENT
-# =========================================================
+    if (message) {
+        addText(content, "div", "email-message", message);
+    }
 
-if __name__ == "__main__":
+    card.appendChild(content);
+    return card;
+}
 
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
-        debug=False
-    )
+function renderQuestion(index) {
+    const question = QUESTIONS[index];
 
-    
+    questionArea.replaceChildren();
+    errorMessage.style.display = "none";
+
+    questionCount.textContent =
+        `Question ${index + 1} of ${QUESTIONS.length}`;
+
+    progressFill.style.width =
+        `${((index + 1) / QUESTIONS.length) * 100}%`;
+
+    const category = getValue(question, ["category"], "PHISHING AWARENESS");
+    addText(questionArea, "div", "category", category);
+
+    const title = getValue(
+        question,
+        ["title", "question", "text"],
+        `Question ${index + 1}`
+    );
+
+    addText(questionArea, "h2", "question-title", title);
+
+    const scenario = getValue(question, ["scenario", "description"]);
+
+    if (scenario) {
+        addText(questionArea, "div", "scenario", scenario);
+    }
+
+    if (Array.isArray(question.emails) && question.emails.length) {
+        const comparison = document.createElement("div");
+        comparison.className = "comparison-grid";
+
+        question.emails.forEach((email, emailIndex) => {
+            const wrapper = document.createElement("div");
+
+            addText(
+                wrapper,
+                "div",
+                "comparison-label",
+                email.label || `Email ${emailIndex + 1}`
+            );
+
+            wrapper.appendChild(
+                renderEmail(email, `Email ${emailIndex + 1}`)
+            );
+
+            comparison.appendChild(wrapper);
+        });
+
+        questionArea.appendChild(comparison);
+
+    } else if (question.email && typeof question.email === "object") {
+        questionArea.appendChild(
+            renderEmail(question.email, "MESSAGE DETAILS")
+        );
+
+    } else if (question.sender_email || question.sender) {
+        questionArea.appendChild(
+            renderEmail(question, "MESSAGE DETAILS")
+        );
+    }
+
+    const options = question.options || [];
+    const optionsContainer = document.createElement("div");
+    optionsContainer.className = "options";
+
+    options.forEach((option, optionIndex) => {
+        const label = document.createElement("label");
+        label.className = "option";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = `question-${index}`;
+        radio.value = optionIndex;
+        radio.checked = answers[index] === optionIndex;
+
+        const letter = document.createElement("span");
+        letter.className = "option-letter";
+        letter.textContent = String.fromCharCode(65 + optionIndex) + ".";
+
+        const text = document.createElement("span");
+        text.textContent = typeof option === "string"
+            ? option
+            : getValue(option, ["label", "text", "value"], "");
+
+        if (radio.checked) {
+            label.classList.add("selected");
+        }
+
+        radio.addEventListener("change", () => {
+            answers[index] = optionIndex;
+
+            optionsContainer.querySelectorAll(".option").forEach(item => {
+                item.classList.remove("selected");
+            });
+
+            label.classList.add("selected");
+            updateDots();
+        });
+
+        label.append(radio, letter, text);
+        optionsContainer.appendChild(label);
+    });
+
+    questionArea.appendChild(optionsContainer);
+
+    previousButton.disabled = index === 0;
+
+    const lastQuestion = index === QUESTIONS.length - 1;
+
+    nextButton.style.display = lastQuestion ? "none" : "inline-block";
+    submitButton.style.display = lastQuestion ? "inline-block" : "none";
+
+    updateDots();
+}
+
+function updateDots() {
+    questionDots.replaceChildren();
+
+    QUESTIONS.forEach((question, index) => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "dot";
+
+        if (index === currentQuestion) {
+            dot.classList.add("current");
+        }
+
+        if (answers[index] !== null) {
+            dot.classList.add("answered");
+        }
+
+        dot.textContent = index + 1;
+
+        dot.addEventListener("click", () => {
+            currentQuestion = index;
+            renderQuestion(currentQuestion);
+        });
+
+        questionDots.appendChild(dot);
+    });
+}
+
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion(currentQuestion);
+    }
+}
+
+function nextQuestion() {
+    if (currentQuestion < QUESTIONS.length - 1) {
+        currentQuestion++;
+        renderQuestion(currentQuestion);
+    }
+}
+
+async function submitQuiz() {
+    const unanswered = answers.findIndex(answer => answer === null);
+
+    if (unanswered !== -1) {
+        errorMessage.textContent =
+            `Please answer Question ${unanswered + 1} before submitting.`;
+
+        errorMessage.style.display = "block";
+
+        currentQuestion = unanswered;
+        renderQuestion(currentQuestion);
+        errorMessage.textContent =
+            `Please answer Question ${unanswered + 1} before submitting.`;
+        errorMessage.style.display = "block";
+
+        return;
+    }
+
+    const confirmed = confirm(
+        "Are you sure you want to submit your assessment?"
+    );
+
+    if (!confirmed) return;
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    try {
+        const response = await fetch(SUBMIT_URL, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                attempt_id: ATTEMPT_ID,
+                answers: answers
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error || "Unable to submit your assessment."
+            );
+        }
+
+        if (data.url) {
+            window.location.href = data.url;
+        } else {
+            window.location.href = "/result";
+        }
+
+    } catch (error) {
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = "block";
+
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Assessment";
+    }
+}
+
+if (!Array.isArray(QUESTIONS) || QUESTIONS.length === 0) {
+    questionArea.textContent =
+        "No questions are available. Please contact the administrator.";
+    previousButton.disabled = true;
+    nextButton.disabled = true;
+    submitButton.disabled = true;
+} else {
+    renderQuestion(0);
+}
+</script>
+
+</body>
+</html>
