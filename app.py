@@ -107,10 +107,7 @@ def get_correct_ids(question):
     if not isinstance(correct, list):
         return set()
 
-    return {
-        str(item)
-        for item in correct
-    }
+    return {str(item) for item in correct}
 
 
 def load_questions():
@@ -147,24 +144,16 @@ def load_questions():
             label = f"Set {set_name}, Q{index + 1}"
 
             if not isinstance(question, dict):
-                raise ValueError(
-                    f"{label} must be a JSON object."
-                )
+                raise ValueError(f"{label} must be a JSON object.")
 
             options = question.get("options")
 
-            if (
-                not isinstance(options, list)
-                or len(options) < 2
-            ):
+            if not isinstance(options, list) or len(options) < 2:
                 raise ValueError(
                     f"{label} needs at least two options."
                 )
 
-            if not all(
-                isinstance(option, str)
-                for option in options
-            ):
+            if not all(isinstance(option, str) for option in options):
                 raise ValueError(
                     f"{label} has invalid options. "
                     "All options must be text."
@@ -205,16 +194,10 @@ QUESTION_SETS = load_questions()
 
 def get_db():
 
-    connection = sqlite3.connect(
-        DB,
-        timeout=30
-    )
-
+    connection = sqlite3.connect(DB, timeout=30)
     connection.row_factory = sqlite3.Row
 
-    connection.execute(
-        "PRAGMA busy_timeout = 30000"
-    )
+    connection.execute("PRAGMA busy_timeout = 30000")
 
     return connection
 
@@ -368,9 +351,7 @@ def is_passed(score):
 
 def make_attempt_questions(set_number):
 
-    return json.loads(
-        json.dumps(QUESTION_SETS[set_number])
-    )
+    return json.loads(json.dumps(QUESTION_SETS[set_number]))
 
 
 # =========================================================
@@ -392,11 +373,7 @@ ANSWER_FIELDS = {
 def sanitize_question(question):
 
     if isinstance(question, list):
-
-        return [
-            sanitize_question(item)
-            for item in question
-        ]
+        return [sanitize_question(item) for item in question]
 
     if isinstance(question, dict):
 
@@ -447,16 +424,11 @@ def validate_and_score(questions, answers):
 
             correct_ids = get_correct_ids(question)
 
-            selected_ids = {
-                str(item)
-                for item in answer
-            }
+            selected_ids = {str(item) for item in answer}
 
             is_correct = selected_ids == correct_ids
 
-            reviewed_answers.append(
-                sorted(selected_ids)
-            )
+            reviewed_answers.append(sorted(selected_ids))
 
         else:
 
@@ -482,9 +454,7 @@ def validate_and_score(questions, answers):
                         f"Answer out of range for question {index + 1}."
                     )
 
-                is_correct = (
-                    answer == question.get("correct")
-                )
+                is_correct = answer == question.get("correct")
 
                 reviewed_answers.append(answer)
 
@@ -513,9 +483,7 @@ def home():
             "email", ""
         ).strip().lower()
 
-        password = request.form.get(
-            "admin_key", ""
-        )
+        password = request.form.get("admin_key", "")
 
         if not email:
 
@@ -530,10 +498,7 @@ def home():
                     "Please configure ADMIN_ACCESS_KEY in Render."
                 )
 
-            elif secrets.compare_digest(
-                password,
-                ADMIN_ACCESS_KEY
-            ):
+            elif secrets.compare_digest(password, ADMIN_ACCESS_KEY):
 
                 session.clear()
                 session["email"] = email
@@ -562,10 +527,7 @@ def home():
                 "Please use your authorized corporate email."
             )
 
-    return render_template(
-        "home.html",
-        error=error
-    )
+    return render_template("home.html", error=error)
 
 
 # =========================================================
@@ -625,14 +587,10 @@ def quiz():
 
         else:
 
-            set_number = random.choice(
-                list(REQUIRED_SETS)
-            )
-
+            set_number = random.choice(list(REQUIRED_SETS))
             attempt_id = secrets.token_urlsafe(24)
 
             questions = make_attempt_questions(set_number)
-
             started = current_time()
 
             connection.execute("""
@@ -663,10 +621,7 @@ def quiz():
                 FROM attempts
                 WHERE id = ?
                 AND LOWER(email) = ?
-            """, (
-                attempt_id,
-                email
-            )).fetchone()
+            """, (attempt_id, email)).fetchone()
 
             if not verified:
 
@@ -689,6 +644,12 @@ def quiz():
 
     session["attempt_id"] = attempt_id
     session.permanent = True
+
+    logger.info(
+        "Quiz page prepared. Employee: %s, Attempt: %s",
+        email,
+        attempt_id
+    )
 
     participant_questions = [
         sanitize_question(question)
@@ -720,7 +681,15 @@ def submit():
 
     data = request.get_json(silent=True)
 
+    logger.info("========== QUIZ SUBMISSION ==========")
+    logger.info("Request method: %s", request.method)
+    logger.info("Content type: %s", request.content_type)
+    logger.info("Employee email: %s", session.get("email"))
+    logger.info("Session attempt ID: %s", session.get("attempt_id"))
+
     if not isinstance(data, dict):
+
+        logger.error("Submission rejected: invalid JSON body.")
 
         return jsonify({
             "success": False,
@@ -729,28 +698,21 @@ def submit():
 
     answers = data.get("answers")
 
-    email = session.get(
-        "email", ""
-    ).strip().lower()
+    email = session.get("email", "").strip().lower()
 
     session_attempt_id = session.get("attempt_id")
     received_attempt_id = data.get("attempt_id")
 
-    # Use the attempt ID sent by quiz.html.
-    # If it is missing, use the ID stored in the session.
-    attempt_id = received_attempt_id or session_attempt_id
+    logger.info("Browser attempt ID: %s", received_attempt_id)
 
-    logger.info("========== QUIZ SUBMISSION ==========")
-    logger.info("Employee: %s", email)
     logger.info(
-        "Session attempt ID present: %s",
-        bool(session_attempt_id)
+        "Session and browser attempt IDs match: %s",
+        session_attempt_id == received_attempt_id
     )
-    logger.info(
-        "Request attempt ID present: %s",
-        bool(received_attempt_id)
-    )
-    logger.info("Database: %s", DB)
+
+    logger.info("Database path: %s", DB)
+
+    attempt_id = received_attempt_id or session_attempt_id
 
     if (
         not attempt_id
@@ -758,9 +720,7 @@ def submit():
         or len(attempt_id) > 200
     ):
 
-        logger.warning(
-            "Submission rejected: missing or invalid attempt ID"
-        )
+        logger.warning("Submission rejected: invalid attempt ID.")
 
         return jsonify({
             "success": False,
@@ -776,10 +736,7 @@ def submit():
             FROM attempts
             WHERE id = ?
             AND LOWER(email) = ?
-        """, (
-            attempt_id,
-            email
-        )).fetchone()
+        """, (attempt_id, email)).fetchone()
 
         if not attempt:
 
@@ -805,14 +762,26 @@ def submit():
             """, (email,)).fetchone()
 
             logger.error(
-                "Attempt ID exists in DB: %s",
+                "Attempt ID exists in database: %s",
                 bool(id_exists)
             )
+
+            if id_exists:
+                logger.error(
+                    "Email associated with submitted attempt: %s",
+                    id_exists["email"]
+                )
 
             logger.error(
                 "Employee has another incomplete attempt: %s",
                 bool(employee_attempt)
             )
+
+            if employee_attempt:
+                logger.error(
+                    "Other incomplete attempt ID: %s",
+                    employee_attempt["id"]
+                )
 
             return jsonify({
                 "success": False,
@@ -824,10 +793,7 @@ def submit():
                 )
             }), 404
 
-        logger.info(
-            "Attempt found successfully: %s",
-            attempt_id
-        )
+        logger.info("Attempt found successfully: %s", attempt_id)
 
         if attempt["completed"]:
 
@@ -835,10 +801,7 @@ def submit():
 
             return jsonify({
                 "success": True,
-                "url": url_for(
-                    "result",
-                    attempt_id=attempt_id
-                )
+                "url": url_for("result", attempt_id=attempt_id)
             })
 
         questions = safe_json(
@@ -848,6 +811,8 @@ def submit():
 
         if not questions:
 
+            logger.error("Question snapshot missing for %s", attempt_id)
+
             return jsonify({
                 "success": False,
                 "error": "Question data is missing."
@@ -856,10 +821,7 @@ def submit():
         if isinstance(answers, dict):
 
             answers = [
-                answers.get(
-                    str(index),
-                    answers.get(index)
-                )
+                answers.get(str(index), answers.get(index))
                 for index in range(len(questions))
             ]
 
@@ -871,6 +833,8 @@ def submit():
             )
 
         except ValueError as error:
+
+            logger.warning("Answer validation failed: %s", error)
 
             return jsonify({
                 "success": False,
@@ -884,7 +848,6 @@ def submit():
             start_datetime = datetime.fromisoformat(started)
 
             if start_datetime.tzinfo is None:
-
                 start_datetime = start_datetime.replace(
                     tzinfo=timezone.utc
                 )
@@ -893,8 +856,7 @@ def submit():
                 0,
                 int(
                     (
-                        datetime.now(timezone.utc)
-                        - start_datetime
+                        datetime.now(timezone.utc) - start_datetime
                     ).total_seconds()
                 )
             )
@@ -932,10 +894,7 @@ def submit():
                 FROM attempts
                 WHERE id = ?
                 AND LOWER(email) = ?
-            """, (
-                attempt_id,
-                email
-            )).fetchone()
+            """, (attempt_id, email)).fetchone()
 
             if existing and existing["completed"]:
 
@@ -943,11 +902,13 @@ def submit():
 
                 return jsonify({
                     "success": True,
-                    "url": url_for(
-                        "result",
-                        attempt_id=attempt_id
-                    )
+                    "url": url_for("result", attempt_id=attempt_id)
                 })
+
+            logger.error(
+                "Assessment update failed for attempt %s",
+                attempt_id
+            )
 
             return jsonify({
                 "success": False,
@@ -967,11 +928,17 @@ def submit():
 
         return jsonify({
             "success": True,
-            "url": url_for(
-                "result",
-                attempt_id=attempt_id
-            )
+            "url": url_for("result", attempt_id=attempt_id)
         })
+
+    except sqlite3.Error:
+
+        logger.exception("Database error during quiz submission.")
+
+        return jsonify({
+            "success": False,
+            "error": "A database error occurred while saving your assessment."
+        }), 500
 
     finally:
         connection.close()
@@ -1052,11 +1019,9 @@ def admin():
         )
 
         score = attempt["score"] or 0
-
         total_score += score
 
         set_number = attempt["set_number"] or "Legacy"
-
         passed = is_passed(score)
 
         rows.append({
@@ -1068,11 +1033,7 @@ def admin():
             "score": score,
             "set_number": set_number,
             "passed": passed,
-            "status": (
-                "PASSED"
-                if passed
-                else "NOT PASSED"
-            ),
+            "status": "PASSED" if passed else "NOT PASSED",
             "answers": answers,
             "questions": questions,
             "question_list": questions,
@@ -1131,17 +1092,11 @@ def export_csv():
 
     for attempt in attempts:
 
-        answers = safe_json(
-            attempt["answers"],
-            []
-        )
-
+        answers = safe_json(attempt["answers"], [])
         score = attempt["score"] or 0
 
         status = (
-            "PASSED"
-            if is_passed(score)
-            else "NOT PASSED"
+            "PASSED" if is_passed(score) else "NOT PASSED"
         )
 
         writer.writerow([
@@ -1206,3 +1161,5 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", 5000)),
         debug=False
     )
+
+    
